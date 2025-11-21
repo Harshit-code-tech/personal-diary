@@ -98,21 +98,21 @@ A beautiful, private digital diary with rich text editing, smart organization, a
 ---
 
 ## 📋 Phase 4: People & Relationships
-**Status:** 📋 Planned
+**Status:** 🚧 In Progress
 
 ### People Management:
-- [ ] **People List Page**
+- [x] **People List Page**
   - Grid/List view of all people
   - Profile cards with avatars
-  - Quick filters (family, friends, colleagues)
-  - Search functionality
+  - Quick stats (entry count, memory count)
+  - Search functionality (planned)
 
-- [ ] **Add/Edit Person**
+- [x] **Add/Edit Person**
   - Name, relationship type
   - Avatar upload
-  - Birthday (with age calculation)
+  - Birthday (with age calculation planned)
   - Notes about the person
-  - Tags/categories
+  - Categories/relationships dropdown
 
 - [ ] **Person Detail Page**
   - Full profile view
@@ -120,6 +120,11 @@ A beautiful, private digital diary with rich text editing, smart organization, a
   - Memories about them
   - Timeline of interactions
   - Birthday countdown
+
+- [ ] **Link People to Entries**
+  - Add "People" field to entry form
+  - Multi-select dropdown
+  - Shows as tags on entries
 
 ### Memories Feature:
 - [ ] **Memory Creation**
@@ -457,4 +462,4 @@ supabase/
 
 **Last Updated:** November 21, 2025  
 **Version:** 1.0  
-**Status:** Phase 2 Complete, Phase 3 Ready to Start
+**Status:** Phase 3 Complete, Phase 4 In Progress (People List & Add Person Complete)

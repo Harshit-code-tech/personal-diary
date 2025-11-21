@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import FolderNavigation from '@/components/folders/FolderNavigation'
-import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X } from 'lucide-react'
+import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users } from 'lucide-react'
 
 type Entry = {
   id: string
@@ -115,6 +115,13 @@ export default function AppPage() {
               className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
             >
               Entries
+            </Link>
+            <Link
+              href="/app/people"
+              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors flex items-center gap-1"
+            >
+              <Users className="w-4 h-4" />
+              People
             </Link>
             <Link
               href="/app/calendar"
