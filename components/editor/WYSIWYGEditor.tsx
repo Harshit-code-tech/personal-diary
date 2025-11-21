@@ -19,6 +19,7 @@ interface WYSIWYGEditorProps {
 
 export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeholder }: WYSIWYGEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
