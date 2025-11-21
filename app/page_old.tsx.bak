@@ -1,0 +1,124 @@
+'use client'
+
+import Link from 'next/link'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-paper dark:bg-midnight transition-colors duration-300">
+      {/* Header */}
+      <nav className="container mx-auto px-4 py-6 flex items-center justify-between">
+        <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
+          📔 My Diary
+        </h1>
+        <div className="flex items-center gap-4">
+          <ThemeSwitcher />
+          <Link 
+            href="/login"
+            className="text-sm text-charcoal/70 dark:text-white/70 hover:text-charcoal dark:hover:text-white transition-colors"
+          >
+            Sign In
+          </Link>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto text-center">\n          {/* Hero Section */}
+          <h1 className="font-serif text-6xl md:text-7xl font-bold text-charcoal dark:text-teal mb-6">
+            Your Private<br />Journaling Space
+          </h1>
+          
+          <p className="text-xl text-charcoal/70 dark:text-white/70 mb-12 font-body">
+            Write, reflect, and grow. A secure personal diary that's 100% yours.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Link 
+              href="/signup" 
+              className="px-8 py-4 bg-gold text-white rounded-lg font-semibold hover:bg-gold/90 transition-colors"
+            >
+              Start Writing Today
+            </Link>
+            <Link 
+              href="/login" 
+              className="px-8 py-4 border-2 border-charcoal dark:border-teal text-charcoal dark:text-teal rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-teal/5 transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid md:grid-cols-3 gap-8 mt-20">
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">🔒</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                100% Private
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                Your entries are encrypted and completely isolated. Nobody can read them but you.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">📅</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                Calendar View
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                Visualize your journaling journey with a GitHub-style activity heatmap.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">📋</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                Templates
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                Choose from pre-built templates or create your own for different journal types.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">📧</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                Email Reminders
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                Get gentle daily or weekly reminders to keep your journaling habit strong.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">📱</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                Works Everywhere
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                Install as an app on your phone, tablet, or desktop. Write anywhere, anytime.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-graphite rounded-lg shadow-sm">
+              <div className="text-4xl mb-4">💰</div>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-charcoal dark:text-teal">
+                100% FREE
+              </h3>
+              <p className="text-charcoal/70 dark:text-white/70">
+                No hidden costs, no premium tiers. Completely free forever for personal use.
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-20 pt-8 border-t border-charcoal/10 dark:border-white/10">
+            <p className="text-charcoal/50 dark:text-white/50">
+              Built with 💙 for mindful journaling
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}

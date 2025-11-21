@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #F7F2E8;
+  --charcoal: #1C1C1C;
+  --gold: #D4A44F;
+  --midnight: #121212;
+  --graphite: #1A1A1A;
+  --teal: #5EEAD4;
+}
+
+body {
+  @apply bg-paper dark:bg-midnight text-charcoal dark:text-white transition-colors;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-paper dark:bg-midnight;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gold/30 dark:bg-teal/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gold/50 dark:bg-teal/50;
+}
+
+/* Grey mode (tired mode) - improved contrast */
+.theme-grey {
+  --paper: #D3D3D3;
+  --charcoal: #2E2E2E;
+  --gold: #6B6B6B;
+  --midnight: #3A3A3A;
+  --graphite: #4A4A4A;
+  --teal: #8B8B8B;
+}
+
+.theme-grey body {
+  @apply bg-[#D3D3D3] text-[#2E2E2E];
+}
+
+.theme-grey .bg-white {
+  @apply bg-[#E8E8E8];
+}
+
+.theme-grey .bg-paper {
+  @apply bg-[#D3D3D3];
+}
+
+.theme-grey .dark\\:bg-midnight,
+.theme-grey .dark\\:bg-graphite {
+  @apply bg-[#4A4A4A];
+}
+
+.theme-grey .text-charcoal {
+  @apply text-[#2E2E2E];
+}
+
+/* Calendar Heatmap Styling */
+.react-calendar-heatmap .color-empty {
+  fill: var(--paper);
+  stroke: rgba(28, 28, 28, 0.1);
+  stroke-width: 1px;
+}
+
+.theme-grey .react-calendar-heatmap .color-empty {
+  fill: #D3D3D3;
+  stroke: rgba(46, 46, 46, 0.2);
+}
+
+.react-calendar-heatmap .color-scale-1 {
+  fill: rgba(212, 164, 79, 0.3);
+}
+
+.react-calendar-heatmap .color-scale-2 {
+  fill: rgba(212, 164, 79, 0.5);
+}
+
+.react-calendar-heatmap .color-scale-3 {
+  fill: rgba(212, 164, 79, 0.7);
+}
+
+.react-calendar-heatmap .color-scale-4 {
+  fill: rgba(212, 164, 79, 1);
+}
+
+.dark .react-calendar-heatmap .color-empty {
+  fill: var(--midnight);
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.dark .react-calendar-heatmap .color-scale-1 {
+  fill: rgba(94, 234, 212, 0.3);
+}
+
+.dark .react-calendar-heatmap .color-scale-2 {
+  fill: rgba(94, 234, 212, 0.5);
+}
+
+.dark .react-calendar-heatmap .color-scale-3 {
+  fill: rgba(94, 234, 212, 0.7);
+}
+
+.dark .react-calendar-heatmap .color-scale-4 {
+  fill: rgba(94, 234, 212, 1);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-1 {
+  fill: rgba(107, 107, 107, 0.4);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-2 {
+  fill: rgba(107, 107, 107, 0.6);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-3 {
+  fill: rgba(107, 107, 107, 0.8);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-4 {
+  fill: rgba(107, 107, 107, 1);
+}
+
+.react-calendar-heatmap text {
+  fill: var(--charcoal);
+  font-size: 10px;
+}
+
+.dark .react-calendar-heatmap text {
+  fill: rgba(255, 255, 255, 0.7);
+}
+
+.theme-grey .react-calendar-heatmap text {
+  fill: #2E2E2E;
+}
+
+/* Markdown content styling */
+.prose {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply font-serif text-4xl font-bold mb-4 text-charcoal dark:text-teal;
+}
+
+.prose h2 {
+  @apply font-serif text-3xl font-semibold mb-3 text-charcoal dark:text-teal;
+}
+
+.prose h3 {
+  @apply font-serif text-2xl font-semibold mb-2 text-charcoal dark:text-teal;
+}
+
+.prose p {
+  @apply font-body text-lg leading-relaxed mb-4 text-charcoal/90 dark:text-white/90;
+}
+
+.prose ul, .prose ol {
+  @apply ml-6 mb-4;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose code {
+  @apply bg-charcoal/10 dark:bg-white/10 px-2 py-1 rounded text-sm;
+}
+
+.prose pre {
+  @apply bg-charcoal/10 dark:bg-white/10 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-gold dark:border-teal pl-4 italic my-4;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md my-4;
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Focus styles */
+input:focus, textarea:focus, button:focus {
+  @apply outline-none ring-2 ring-gold dark:ring-teal ring-offset-2 ring-offset-paper dark:ring-offset-midnight;
+}

@@ -1,0 +1,34 @@
+/* Calendar Heatmap Custom Styles */
+.react-calendar-heatmap {
+  font-family: inherit;
+}
+
+.react-calendar-heatmap .color-empty {
+  @apply fill-paper dark:fill-midnight stroke-charcoal/10 dark:stroke-white/10;
+}
+
+.react-calendar-heatmap .color-scale-1 {
+  @apply fill-gold/30 dark:fill-teal/30;
+}
+
+.react-calendar-heatmap .color-scale-2 {
+  @apply fill-gold/50 dark:fill-teal/50;
+}
+
+.react-calendar-heatmap .color-scale-3 {
+  @apply fill-gold/70 dark:fill-teal/70;
+}
+
+.react-calendar-heatmap .color-scale-4 {
+  @apply fill-gold dark:fill-teal;
+}
+
+.react-calendar-heatmap text {
+  @apply fill-charcoal/70 dark:fill-white/70;
+  font-size: 10px;
+}
+
+.react-calendar-heatmap rect:hover {
+  @apply stroke-charcoal dark:stroke-white;
+  stroke-width: 2px;
+}
