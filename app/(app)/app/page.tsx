@@ -190,60 +190,67 @@ export default function AppPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+        <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-5">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors lg:hidden"
+              className="p-2.5 hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 lg:hidden group hover:scale-110"
             >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {sidebarOpen ? 
+                <X className="w-5 h-5 group-hover:text-gold dark:group-hover:text-teal transition-colors" /> : 
+                <Menu className="w-5 h-5 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
+              }
             </button>
-            <Link href="/app" className="flex items-center gap-3">
-              <BookOpen className="w-7 h-7 text-gold dark:text-teal" />
-              <span className="font-serif text-2xl font-bold text-charcoal dark:text-teal">
+            <Link href="/app" className="group flex items-center gap-4">
+              <div className="p-2.5 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <BookOpen className="w-7 h-7 text-gold dark:text-teal" />
+              </div>
+              <span className="font-serif text-3xl font-black bg-gradient-to-r from-charcoal to-charcoal/70 dark:from-teal dark:to-teal/70 bg-clip-text text-transparent">
                 My Diary
               </span>
             </Link>
           </div>
           
-          <nav className="flex items-center gap-6">
+          <nav className="flex items-center gap-3">
             <ThemeSwitcher />
             <Link
               href="/app"
-              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
             >
               Entries
             </Link>
             <Link
               href="/app/people"
-              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors flex items-center gap-1"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-all duration-300 rounded-xl hover:bg-blue-500/10 dark:hover:bg-blue-400/10 flex items-center gap-2"
             >
               <Users className="w-4 h-4" />
               People
             </Link>
             <Link
               href="/app/stories"
-              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors flex items-center gap-1"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 rounded-xl hover:bg-orange-500/10 dark:hover:bg-orange-400/10 flex items-center gap-2"
             >
               <BookMarked className="w-4 h-4" />
               Stories
             </Link>
             <Link
               href="/app/calendar"
-              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-300 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-400/10 flex items-center gap-2"
             >
+              <Calendar className="w-4 h-4" />
               Calendar
             </Link>
             <Link
               href="/app/settings"
-              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
+              className="p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
+              title="Settings"
             >
-              Settings
+              <Settings className="w-5 h-5" />
             </Link>
             <button
               onClick={handleSignOut}
-              className="p-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
+              className="p-2.5 text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
               title="Sign Out"
             >
               <LogOut className="w-5 h-5" />
@@ -257,9 +264,9 @@ export default function AppPage() {
         <aside
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:sticky top-[73px] left-0 z-40 w-72 h-[calc(100vh-73px)] bg-white dark:bg-graphite border-r border-charcoal/10 dark:border-white/10 overflow-y-auto transition-transform duration-300 lg:translate-x-0`}
+          } fixed lg:sticky top-[85px] left-0 z-40 w-80 h-[calc(100vh-85px)] bg-gradient-to-b from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
         >
-          <div className="p-4">
+          <div className="p-6">
             <FolderNavigation
               onFolderSelect={(folderId) => {
                 setSelectedFolderId(folderId)
@@ -274,20 +281,20 @@ export default function AppPage() {
         <main className="flex-1 p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-10">
               <div>
-                <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-teal mb-2">
+                <h1 className="font-serif text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-3 leading-tight">
                   {folderName}
                 </h1>
-                <p className="text-charcoal/70 dark:text-white/70">
-                  Welcome back, {user?.email?.split('@')[0]}
+                <p className="text-lg text-charcoal/70 dark:text-white/70 font-medium">
+                  Welcome back, <span className="text-gold dark:text-teal font-bold">{user?.email?.split('@')[0]}</span> ✨
                 </p>
               </div>
               <Link
                 href="/app/new"
-                className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+                className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
                 New Entry
               </Link>
             </div>
@@ -379,22 +386,38 @@ export default function AppPage() {
 
             {/* Entries List */}
             {fetchingEntries ? (
-              <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8 text-center">
-                <div className="text-charcoal dark:text-white">Loading entries...</div>
+              <div className="space-y-6">
+                {/* Loading skeleton */}
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white dark:bg-graphite rounded-xl shadow-md p-6 animate-pulse">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="h-7 bg-gradient-to-r from-charcoal/10 to-charcoal/5 dark:from-white/10 dark:to-white/5 rounded w-3/4"></div>
+                        <div className="h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-1/4"></div>
+                      </div>
+                      <div className="h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-24"></div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded"></div>
+                      <div className="h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-5/6"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-12 text-center">
-                <div className="text-6xl mb-4">📝</div>
-                <h3 className="font-serif text-2xl font-semibold mb-2 text-charcoal dark:text-teal">
+              <div className="bg-gradient-to-br from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
+                <div className="text-8xl mb-6 animate-bounce">📝</div>
+                <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal bg-gradient-to-r from-gold to-gold/60 dark:from-teal dark:to-teal/60 bg-clip-text text-transparent">
                   Your Journal Awaits
                 </h3>
-                <p className="text-charcoal/70 dark:text-white/70 mb-6">
-                  Start writing your first entry to begin your journey
+                <p className="text-lg text-charcoal/70 dark:text-white/70 mb-8 max-w-md mx-auto">
+                  Start writing your first entry to begin your journey of self-discovery
                 </p>
                 <Link
                   href="/app/new"
-                  className="inline-block px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 >
+                  <Plus className="w-5 h-5" />
                   Create First Entry
                 </Link>
               </div>
@@ -404,58 +427,68 @@ export default function AppPage() {
                   <Link
                     key={entry.id}
                     href={`/app/entry/${entry.id}`}
-                    className="block bg-white dark:bg-graphite rounded-xl shadow-md hover:shadow-2xl p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/30 dark:hover:border-teal/30 group hover:scale-[1.02]"
+                    className="group block bg-white dark:bg-graphite rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.02] hover:-translate-y-1"
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="font-serif text-2xl font-semibold text-charcoal dark:text-teal group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors">
+                        <h3 className="font-serif text-2xl font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors duration-300">
                           {entry.title}
                         </h3>
                         {entry.mood && (
-                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-gold/10 to-gold/20 dark:from-teal/10 dark:to-teal/20 text-gold dark:text-teal rounded-full text-sm font-medium">
-                            {entry.mood}
+                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-gold/10 via-gold/15 to-gold/20 dark:from-teal/10 dark:via-teal/15 dark:to-teal/20 text-gold dark:text-teal rounded-full text-sm font-bold shadow-sm">
+                            <span className="text-base">{entry.mood}</span>
                           </span>
                         )}
                       </div>
-                      <span className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
-                        {new Date(entry.entry_date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </span>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-sm text-charcoal/70 dark:text-white/70 font-bold">
+                          {new Date(entry.entry_date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                        <span className="text-xs text-charcoal/50 dark:text-white/50">
+                          {new Date(entry.created_at).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
                     </div>
                     
                     <div
-                      className="text-charcoal/70 dark:text-white/70 line-clamp-2 mb-4"
-                      dangerouslySetInnerHTML={{ __html: extractTextPreview(entry.content) }}
+                      className="text-charcoal/80 dark:text-white/80 line-clamp-3 mb-5 leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: extractTextPreview(entry.content, 200) }}
                     />
                     
-                    <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60">
-                      <span>{entry.word_count} words</span>
+                    <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60 flex-wrap">
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
+                        <Type className="w-4 h-4" />
+                        {entry.word_count} words
+                      </span>
                       {entry.folder_id && (
-                        <span className="flex items-center gap-1">
-                          <span>📁</span>
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
+                          <span className="text-base">{(entry as any).folders?.icon || '📁'}</span>
                           {(entry as any).folders?.name || 'Folder'}
                         </span>
                       )}
                       {entry.entry_people && entry.entry_people.length > 0 && (
                         <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          <div className="flex gap-1 flex-wrap">
+                          <div className="flex gap-1.5 flex-wrap">
                             {entry.entry_people.map((ep) => (
                               <span
                                 key={ep.people.id}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-xs font-medium"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-500/20 dark:hover:bg-blue-400/20 transition-colors"
                               >
                                 {ep.people.avatar_url ? (
                                   <img
                                     src={ep.people.avatar_url}
                                     alt={ep.people.name}
-                                    className="w-4 h-4 rounded-full object-cover"
+                                    className="w-5 h-5 rounded-full object-cover ring-2 ring-blue-500/20"
                                   />
                                 ) : (
-                                  <div className="w-4 h-4 rounded-full bg-gold/20 dark:bg-teal/20 flex items-center justify-center text-[8px]">
+                                  <div className="w-5 h-5 rounded-full bg-blue-500/30 dark:bg-blue-400/30 flex items-center justify-center text-[10px] font-bold">
                                     {ep.people.name.charAt(0)}
                                   </div>
                                 )}
@@ -466,20 +499,23 @@ export default function AppPage() {
                         </div>
                       )}
                       {(entry as any).story_entries && (entry as any).story_entries.length > 0 && (
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <BookMarked className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           {(entry as any).story_entries.slice(0, 2).map((se: any) => (
                             <span
                               key={se.stories.id}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                              style={{ backgroundColor: `${se.stories.color}20`, color: se.stories.color }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:shadow-md transition-all"
+                              style={{ 
+                                backgroundColor: `${se.stories.color}15`, 
+                                color: se.stories.color,
+                                border: `1px solid ${se.stories.color}30`
+                              }}
                             >
-                              <span>{se.stories.icon}</span>
+                              <span className="text-sm">{se.stories.icon}</span>
                               <span>{se.stories.title}</span>
                             </span>
                           ))}
                           {(entry as any).story_entries.length > 2 && (
-                            <span className="text-xs text-charcoal/50 dark:text-white/50">
+                            <span className="text-xs px-2 py-1 bg-charcoal/10 dark:bg-white/10 rounded-lg font-semibold">
                               +{(entry as any).story_entries.length - 2}
                             </span>
                           )}
