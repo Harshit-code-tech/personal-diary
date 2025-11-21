@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import { Book } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -32,23 +34,25 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center px-4">
-      {/* Logo/Brand */}
-      <div className="absolute top-8 left-8">
-        <Link href="/" className="font-serif text-2xl font-bold text-charcoal dark:text-teal">
-          📔 My Diary
+    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4">
+      {/* Logo/Brand with Theme Switcher */}
+      <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
+          <Book className="w-6 h-6" />
+          <span>My Diary</span>
         </Link>
+        <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md bg-white dark:bg-graphite rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
         {/* Welcome Header */}
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-white mb-2">
-            Welcome
+            Welcome Back
           </h1>
           <p className="text-charcoal/60 dark:text-white/60">
             Sign in to your private diary or{' '}
-            <Link href="/signup" className="text-gold dark:text-teal hover:underline">
+            <Link href="/signup" className="text-gold dark:text-teal hover:underline font-medium">
               create a new account
             </Link>
           </p>

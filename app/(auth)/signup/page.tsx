@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import { Book } from 'lucide-react'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -108,23 +110,23 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Back Link */}
-        <div className="mb-6">
-          <Link 
-            href="/" 
-            className="text-charcoal/60 dark:text-white/60 hover:text-gold dark:hover:text-teal transition-colors inline-flex items-center gap-2"
-          >
-            ← Back to Home
-          </Link>
-        </div>
+    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center p-4">
+      {/* Logo/Brand with Theme Switcher */}
+      <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
+          <Book className="w-6 h-6" />
+          <span>My Diary</span>
+        </Link>
+        <ThemeSwitcher />
+      </div>
+
+      <div className="w-full max-w-md mt-8">
 
         {/* Card */}
-        <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-graphite">
+        <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-8 border border-charcoal/10 dark:border-white/10">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-5xl mb-3">📔</div>
+            <Book className="w-16 h-16 text-gold dark:text-teal mx-auto mb-3" />
             <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal mb-2">
               Create Account
             </h1>
