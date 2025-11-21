@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { Plus, User, ArrowLeft } from 'lucide-react'
+import { Plus, User, ArrowLeft, Search, Filter, SortAsc, X } from 'lucide-react'
 
 interface Person {
   id: string
@@ -20,9 +20,15 @@ interface Person {
 
 export default function PeoplePage() {
   const [people, setPeople] = useState<Person[]>([])
+  const [filteredPeople, setFilteredPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedRelationship, setSelectedRelationship] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'name' | 'recent' | 'entries'>('name')
   const { user } = useAuth()
   const supabase = createClient()
+
+  const relationships = ['all', 'Family', 'Friend', 'Partner', 'Colleague', 'Mentor', 'Acquaintance', 'Other']
 
   useEffect(() => {
     if (user) {
@@ -52,12 +58,42 @@ export default function PeoplePage() {
       })) || []
 
       setPeople(peopleWithCounts)
+      setFilteredPeople(peopleWithCounts)
     } catch (error) {
       console.error('Error fetching people:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  // Apply filters whenever search, relationship filter, or sort changes
+  useEffect(() => {
+    let result = [...people]
+
+    // Search filter
+    if (searchQuery) {
+      result = result.filter(person =>
+        person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        person.notes?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Relationship filter
+    if (selectedRelationship !== 'all') {
+      result = result.filter(person => person.relationship === selectedRelationship)
+    }
+
+    // Sort
+    if (sortBy === 'name') {
+      result.sort((a, b) => a.name.localeCompare(b.name))
+    } else if (sortBy === 'recent') {
+      result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    } else if (sortBy === 'entries') {
+      result.sort((a, b) => (b.entry_count || 0) - (a.entry_count || 0))
+    }
+
+    setFilteredPeople(result)
+  }, [people, searchQuery, selectedRelationship, sortBy])
 
   const getInitials = (name: string) => {
     return name
@@ -114,6 +150,68 @@ export default function PeoplePage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Search and Filters */}
+        <div className="mb-8 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search people by name or notes..."
+              className="w-full pl-12 pr-12 py-4 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal shadow-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-charcoal/10 dark:hover:bg-white/10 rounded transition-colors"
+              >
+                <X className="w-4 h-4 text-charcoal/60 dark:text-white/60" />
+              </button>
+            )}
+          </div>
+
+          {/* Filters and Sort */}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Relationship Filter */}
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-charcoal/60 dark:text-white/60" />
+              <select
+                value={selectedRelationship}
+                onChange={(e) => setSelectedRelationship(e.target.value)}
+                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              >
+                {relationships.map(rel => (
+                  <option key={rel} value={rel}>
+                    {rel === 'all' ? 'All Relationships' : rel}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Options */}
+            <div className="flex items-center gap-2">
+              <SortAsc className="w-4 h-4 text-charcoal/60 dark:text-white/60" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'name' | 'recent' | 'entries')}
+                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="recent">Recently Added</option>
+                <option value="entries">Most Entries</option>
+              </select>
+            </div>
+
+            {/* Results Count */}
+            <div className="ml-auto text-sm text-charcoal/60 dark:text-white/60">
+              {filteredPeople.length} {filteredPeople.length === 1 ? 'person' : 'people'}
+            </div>
+          </div>
+        </div>
+
+        {/* People Grid */}
         {people.length === 0 ? (
           <div className="text-center py-20">
             <User className="w-20 h-20 mx-auto text-charcoal/20 dark:text-white/20 mb-6" />
@@ -131,9 +229,29 @@ export default function PeoplePage() {
               Add Your First Person
             </Link>
           </div>
+        ) : filteredPeople.length === 0 ? (
+          <div className="text-center py-20">
+            <Search className="w-20 h-20 mx-auto text-charcoal/20 dark:text-white/20 mb-6" />
+            <h2 className="text-2xl font-serif font-bold text-charcoal dark:text-white mb-4">
+              No People Found
+            </h2>
+            <p className="text-charcoal/60 dark:text-white/60 mb-8 max-w-md mx-auto">
+              Try adjusting your search or filters to find more people.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('')
+                setSelectedRelationship('all')
+              }}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-charcoal/10 dark:bg-white/10 text-charcoal dark:text-white rounded-lg font-semibold hover:bg-charcoal/20 dark:hover:bg-white/20 transition-all"
+            >
+              <X className="w-5 h-5" />
+              Clear Filters
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {people.map((person) => (
+            {filteredPeople.map((person) => (
               <Link
                 key={person.id}
                 href={`/app/people/${person.id}`}

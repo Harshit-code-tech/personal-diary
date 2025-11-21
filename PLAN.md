@@ -62,11 +62,40 @@ A beautiful, private digital diary with rich text editing, smart organization, a
   - Entry metadata display (date, mood, word count)
   - Delete with confirmation
   - Responsive design
+  - **Enhanced with people and story links**
 
 ---
 
-## 🚧 Phase 3: UI/UX Polish (NEXT)
-**Status:** 📋 Planned
+## 📅 Calendar & Settings
+**Status:** ✅ Complete
+
+### Calendar View:
+- [x] **Calendar Page** (/app/calendar)
+  - Month view with navigation
+  - Entries marked on dates with mood indicators
+  - Click date to view entries
+  - Selected date sidebar with entry list
+  - Today highlight with ring
+  - Mood legend with colors
+  - Quick entry creation from calendar
+  - Empty state for no entries
+  - Responsive design (grid adapts to screen size)
+
+### Settings:
+- [x] **Settings Page** (/app/settings)
+  - Profile section (email display)
+  - Theme switcher (light/dark mode)
+  - Data export functionality (JSON download)
+  - Sign out button
+  - Delete account with confirmation
+  - Data privacy indicators
+  - Beautiful sectioned layout
+  - App version info
+
+---
+
+## 🚧 Phase 3: UI/UX Polish (ONGOING)
+**Status:** 🚧 In Progress
 
 ### Landing Page Improvements:
 - [ ] Sticky header with blur effect on scroll
@@ -98,33 +127,47 @@ A beautiful, private digital diary with rich text editing, smart organization, a
 ---
 
 ## 📋 Phase 4: People & Relationships
-**Status:** 🚧 In Progress
+**Status:** ✅ Complete + Enhanced
 
 ### People Management:
-- [x] **People List Page**
-  - Grid/List view of all people
+- [x] **People List Page** (/app/people)
+  - Grid view of all people (305 lines)
   - Profile cards with avatars
   - Quick stats (entry count, memory count)
-  - Search functionality (planned)
+  - **Search functionality** (search bar with clear)
+  - **Relationship filter** (All, Family, Friend, etc.)
+  - **Sort options** (name, recently added, most entries)
+  - Results counter
+  - "No results found" state with clear filters
 
-- [x] **Add/Edit Person**
+- [x] **Add Person Page**
   - Name, relationship type
   - Avatar upload
-  - Birthday (with age calculation planned)
+  - Birthday (with age calculation)
   - Notes about the person
   - Categories/relationships dropdown
 
-- [ ] **Person Detail Page**
+- [x] **Edit Person Page**
+  - Update all person details
+  - Change or remove avatar
+  - Modify relationship and notes
+  - Save changes to database
+
+- [x] **Person Detail Page**
   - Full profile view
   - All diary entries mentioning them
-  - Memories about them
+  - **Fixed to use junction table** (entry_people)
   - Timeline of interactions
   - Birthday countdown
+  - Edit and Delete buttons
 
-- [ ] **Link People to Entries**
+- [x] **Link People to Entries**
   - Add "People" field to entry form
-  - Multi-select dropdown
+  - Multi-select dropdown with avatars
   - Shows as tags on entries
+  - entry_people junction table created
+  - Many-to-many relationship working
+  - **Enhanced display on entry detail page**
 
 ### Memories Feature:
 - [ ] **Memory Creation**
@@ -142,20 +185,68 @@ A beautiful, private digital diary with rich text editing, smart organization, a
 ---
 
 ## 📖 Phase 5: Stories & Collections
-**Status:** 📋 Planned
+**Status:** ✅ Complete (100%)
 
 ### Story Categories:
-- [ ] **Story Folders**
-  - Create custom story categories
-  - Organize entries into ongoing stories
-  - Story cover images
-  - Story descriptions
 
-- [ ] **Story View**
+- [x] **Story Database Schema**
+  - stories table with cover images, icons, colors
+  - story_entries junction table (many-to-many)
+  - story_tags for categorization
+  - RLS policies and indexes
+  - Story statistics view
+  - **Migration 007 completed**
+
+- [x] **Stories List Page** (/app/stories)
+  - Grid view of all stories (366 lines)
+  - Cover images or colored cards with icons
+  - Search by title/description
+  - Filter by category (Trip, Project, Life Event, etc.)
+  - Filter by status (ongoing, completed, archived)
+  - Favorite stories toggle
+  - Entry count display
+  - Empty and filtered states
+
+- [x] **Create Story Page** (/app/stories/new)
+  - Title, description, category (395 lines)
+  - Icon picker (15 emoji options)
+  - Color picker (10 colors)
+  - Cover image upload to Supabase storage (up to 10MB)
+  - Start and end dates
+  - Status selection (ongoing/completed/archived)
+  - Beautiful UI with live preview
+
+- [x] **Story Detail Page** (/app/stories/[id])
+  - Full story view with cover/icon (520+ lines)
+  - Story statistics (entries, words, date range, duration)
+  - Timeline of entries in story (chronological)
+  - Add entries modal with search
+  - Remove entries from story
+  - Edit story button
+  - Delete story functionality
+  - Favorite toggle
+
+- [x] **Story Edit Page** (/app/stories/[id]/edit)
+  - Update story metadata
+  - Change cover image
+  - Update icon, color, dates
+  - Modify status and category
+  - Pre-filled form with existing data
+
+- [x] **Link Entries to Stories**
+  - Add to stories from entry detail page
+  - Multi-story support per entry
+  - Story tags on entry cards (dashboard)
+  - Story icons and colors displayed
+  - Add/remove bidirectional linking
+  - Beautiful modal UI for selection
+
+- [x] **Story View**
   - Chronological entry list for story
-  - Story progress tracking
-  - Chapter/section organization
-  - Export story as PDF/document
+  - Entry count and word count stats
+  - Timeline with entry cards
+  - Remove entry functionality
+  - Beautiful colored cards matching story theme
 
 ### Collections:
 - [ ] **Custom Collections**
@@ -462,4 +553,4 @@ supabase/
 
 **Last Updated:** November 21, 2025  
 **Version:** 1.0  
-**Status:** Phase 3 Complete, Phase 4 In Progress (People List & Add Person Complete)
+**Status:** 🎉 Phase 4 Complete! Phase 5 Stories in progress (70% done - List, Create pages built).

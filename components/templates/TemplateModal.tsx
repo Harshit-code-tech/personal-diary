@@ -7,21 +7,18 @@ import { Database } from '@/lib/database.types'
 type Template = Database['public']['Tables']['entry_templates']['Row']
 
 interface TemplateModalProps {
-  isOpen: boolean
   onClose: () => void
-  onSelect: (template: Template) => void
+  onSelect: (template: any) => void
 }
 
-export default function TemplateModal({ isOpen, onClose, onSelect }: TemplateModalProps) {
+export default function TemplateModal({ onClose, onSelect }: TemplateModalProps) {
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
 
   useEffect(() => {
-    if (isOpen) {
-      fetchTemplates()
-    }
-  }, [isOpen])
+    fetchTemplates()
+  }, [])
 
   const fetchTemplates = async () => {
     try {
@@ -40,11 +37,9 @@ export default function TemplateModal({ isOpen, onClose, onSelect }: TemplateMod
     }
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-graphite rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white dark:bg-graphite rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="border-b border-charcoal/10 dark:border-white/10 p-6 flex items-center justify-between">
           <div>

@@ -1,68 +1,80 @@
 'use client'
 
-import { useAuth } from '@/lib/hooks/useAuth'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useRouter } from 'next/navigation'
+import { User, Moon, Sun, Download, LogOut, Trash2, Shield } from 'lucide-react'
 
 export default function SettingsPage() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [settings, setSettings] = useState({
-    theme: 'light',
-    email_reminders_enabled: false,
-    email_frequency: 'daily',
-    email_time: '20:00:00',
-  })
 
   useEffect(() => {
     if (user) {
-      fetchSettings()
+      setEmail(user.email || '')
+      
+      // Get theme from localStorage
+      const savedTheme = localStorage.getItem('theme')
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        setTheme(savedTheme)
+      } else {
+        // Check system preference
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        setTheme(isDark ? 'dark' : 'light')
+      }
+      
+      setLoading(false)
     }
   }, [user])
 
-  const fetchSettings = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single()
-
-      if (data) {
-        setSettings(data)
-      }
-    } catch (error) {
-      console.error('Error fetching settings:', error)
-    } finally {
-      setLoading(false)
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    setTheme(newTheme)
+    localStorage.setItem('theme', newTheme)
+    
+    // Apply theme
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
     }
   }
 
-  const handleSave = async () => {
-    if (!user) return
-    setSaving(true)
-
+  const handleExportData = async () => {
     try {
-      const { error } = await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          ...settings,
-        })
+      // Fetch all user data
+      const [entriesRes, peopleRes, storiesRes] = await Promise.all([
+        supabase.from('entries').select('*').eq('user_id', user?.id),
+        supabase.from('people').select('*').eq('user_id', user?.id),
+        supabase.from('stories').select('*').eq('user_id', user?.id),
+      ])
 
-      if (error) throw error
-      alert('Settings saved successfully!')
+      const exportData = {
+        entries: entriesRes.data || [],
+        people: peopleRes.data || [],
+        stories: storiesRes.data || [],
+        exportDate: new Date().toISOString(),
+      }
+
+      // Create and download JSON file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `diary-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Error saving settings:', error)
-      alert('Failed to save settings')
-    } finally {
-      setSaving(false)
+      console.error('Error exporting data:', error)
+      alert('Failed to export data. Please try again.')
     }
   }
 
@@ -71,127 +83,214 @@ export default function SettingsPage() {
     router.push('/')
   }
 
+  const handleDeleteAccount = async () => {
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true)
+      return
+    }
+
+    try {
+      // Delete all user data
+      await Promise.all([
+        supabase.from('entries').delete().eq('user_id', user?.id),
+        supabase.from('people').delete().eq('user_id', user?.id),
+        supabase.from('stories').delete().eq('user_id', user?.id),
+        supabase.from('folders').delete().eq('user_id', user?.id),
+      ])
+
+      // Sign out
+      await supabase.auth.signOut()
+      router.push('/')
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      alert('Failed to delete account. Please contact support.')
+    }
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
-        <div className="text-charcoal dark:text-white">Loading settings...</div>
+      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+        <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight transition-colors duration-300">
-      {/* Navigation */}
-      <nav className="border-b border-charcoal/10 dark:border-white/10 bg-white dark:bg-graphite">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/app" className="font-serif text-2xl font-bold text-charcoal dark:text-teal">
-            Personal Diary
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <ThemeSwitcher />
-            <Link href="/app" className="hover:text-gold dark:hover:text-teal transition-colors">
-              Entries
-            </Link>
-            <Link href="/app/calendar" className="hover:text-gold dark:hover:text-teal transition-colors">
-              Calendar
-            </Link>
-            <Link href="/app/settings" className="text-gold dark:text-teal font-semibold">
-              Settings
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 text-sm border border-charcoal/20 dark:border-white/20 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-teal mb-8">
+    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+      {/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+        <div className="px-6 py-4">
+          <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
             Settings
           </h1>
+        </div>
+      </header>
 
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8 space-y-6">
-            {/* Email Reminders */}
-            <div>
-              <h2 className="font-serif text-xl font-semibold text-charcoal dark:text-white mb-4">
-                Email Reminders
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        <div className="space-y-6">
+          {/* Profile Section */}
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <User className="w-6 h-6 text-gold dark:text-teal" />
+              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+                Profile
               </h2>
-              
-              <div className="space-y-4">
-                <label className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={settings.email_reminders_enabled}
-                    onChange={(e) => setSettings({ ...settings, email_reminders_enabled: e.target.checked })}
-                    className="w-5 h-5 text-gold dark:text-teal"
-                  />
-                  <span className="text-charcoal dark:text-white">Enable email reminders</span>
-                </label>
-
-                {settings.email_reminders_enabled && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-                        Frequency
-                      </label>
-                      <select
-                        value={settings.email_frequency}
-                        onChange={(e) => setSettings({ ...settings, email_frequency: e.target.value })}
-                        className="w-full px-4 py-2 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg"
-                      >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-                        Time
-                      </label>
-                      <input
-                        type="time"
-                        value={settings.email_time}
-                        onChange={(e) => setSettings({ ...settings, email_time: e.target.value })}
-                        className="w-full px-4 py-2 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg"
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
 
-            {/* Save Button */}
-            <div className="pt-6 border-t border-charcoal/10 dark:border-white/10">
+            <div>
+              <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={email}
+                readOnly
+                className="w-full px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
+              />
+              <p className="text-xs text-charcoal/60 dark:text-white/60 mt-2">
+                Your email cannot be changed
+              </p>
+            </div>
+          </div>
+
+          {/* Appearance Section */}
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              {theme === 'dark' ? (
+                <Moon className="w-6 h-6 text-gold dark:text-teal" />
+              ) : (
+                <Sun className="w-6 h-6 text-gold dark:text-teal" />
+              )}
+              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+                Appearance
+              </h2>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-charcoal dark:text-white">Theme</p>
+                <p className="text-sm text-charcoal/60 dark:text-white/60">
+                  Choose between light and dark mode
+                </p>
+              </div>
               <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                onClick={toggleTheme}
+                className="px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
               >
-                {saving ? 'Saving...' : 'Save Settings'}
+                {theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
               </button>
             </div>
           </div>
 
-          {/* Account Info */}
-          <div className="mt-6 bg-white dark:bg-graphite rounded-lg shadow-sm p-8">
-            <h2 className="font-serif text-xl font-semibold text-charcoal dark:text-white mb-4">
-              Account
-            </h2>
-            <p className="text-charcoal/70 dark:text-white/70 mb-4">
-              Signed in as: <strong>{user?.email}</strong>
+          {/* Data & Privacy Section */}
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Shield className="w-6 h-6 text-gold dark:text-teal" />
+              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+                Data & Privacy
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div>
+                  <p className="font-medium text-charcoal dark:text-white">Export Data</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Download all your diary entries, people, and stories
+                  </p>
+                </div>
+                <button
+                  onClick={handleExportData}
+                  className="flex items-center gap-2 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                >
+                  <Download className="w-5 h-5" />
+                  Export
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-charcoal dark:text-white">Data Storage</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Your data is securely stored and encrypted
+                  </p>
+                </div>
+                <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
+                  Secure
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Account Actions Section */}
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <LogOut className="w-6 h-6 text-gold dark:text-teal" />
+              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+                Account Actions
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div>
+                  <p className="font-medium text-charcoal dark:text-white">Sign Out</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Sign out of your account
+                  </p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                >
+                  Sign Out
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-red-600 dark:text-red-400">Delete Account</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Permanently delete your account and all data
+                  </p>
+                </div>
+                <button
+                  onClick={handleDeleteAccount}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                    showDeleteConfirm
+                      ? 'bg-red-600 text-white hover:bg-red-700'
+                      : 'border border-red-600 dark:border-red-400 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                  }`}
+                >
+                  <Trash2 className="w-5 h-5" />
+                  {showDeleteConfirm ? 'Confirm Delete' : 'Delete Account'}
+                </button>
+              </div>
+              {showDeleteConfirm && (
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-800 dark:text-red-200">
+                    ⚠️ This action cannot be undone. All your entries, people, stories, and data will be permanently deleted. Click "Confirm Delete" again to proceed.
+                  </p>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="mt-2 text-sm text-red-600 dark:text-red-400 hover:underline"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* App Info */}
+          <div className="text-center py-6">
+            <p className="text-sm text-charcoal/60 dark:text-white/60">
+              Personal Diary v1.0.0
             </p>
-            <button
-              onClick={handleSignOut}
-              className="px-6 py-2 border-2 border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-            >
-              Sign Out
-            </button>
+            <p className="text-xs text-charcoal/40 dark:text-white/40 mt-1">
+              Made with ❤️ for your memories
+            </p>
           </div>
         </div>
       </main>

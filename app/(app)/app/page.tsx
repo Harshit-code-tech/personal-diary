@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import FolderNavigation from '@/components/folders/FolderNavigation'
-import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users } from 'lucide-react'
+import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type } from 'lucide-react'
 
 type Entry = {
   id: string
@@ -19,6 +19,21 @@ type Entry = {
   folder_id: string | null
   person_id: string | null
   created_at: string
+  entry_people?: Array<{
+    people: {
+      id: string
+      name: string
+      avatar_url: string | null
+    }
+  }>
+  story_entries?: Array<{
+    stories: {
+      id: string
+      title: string
+      icon: string
+      color: string
+    } | null
+  }>
 }
 
 type Folder = {
@@ -36,6 +51,13 @@ export default function AppPage() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [folderName, setFolderName] = useState<string>('All Entries')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [stats, setStats] = useState({
+    totalEntries: 0,
+    totalWords: 0,
+    peopleCount: 0,
+    storiesCount: 0,
+    currentStreak: 0,
+  })
 
   useEffect(() => {
     if (user) {
@@ -44,25 +66,102 @@ export default function AppPage() {
   }, [user, selectedFolderId])
 
   const fetchEntries = async () => {
+    setFetchingEntries(true)
     try {
+      let folderIds = [selectedFolderId]
+
+      // If a folder is selected, get all its descendants too
+      if (selectedFolderId) {
+        const { data: descendants, error: descError } = await supabase
+          .rpc('get_folder_descendants', { p_folder_id: selectedFolderId })
+
+        if (!descError && descendants) {
+          folderIds = descendants.map((d: any) => d.folder_id)
+        }
+      }
+
       let query = supabase
         .from('entries')
         .select(`
           id, title, content, entry_date, word_count, mood, 
           folder_id, person_id, created_at,
-          folders (name, icon)
+          folders (name, icon),
+          entry_people (
+            people (id, name, avatar_url)
+          ),
+          story_entries (
+            stories (id, title, icon, color)
+          )
         `)
-        .order('created_at', { ascending: false })
+        .order('entry_date', { ascending: false })
         .limit(20)
 
       if (selectedFolderId) {
-        query = query.eq('folder_id', selectedFolderId)
+        query = query.in('folder_id', folderIds)
       }
 
       const { data, error } = await query
 
       if (error) throw error
-      setEntries(data || [])
+      setEntries(data as any || [])
+      
+      // Calculate statistics
+      if (data && data.length > 0) {
+        const totalWords = data.reduce((sum, entry) => sum + (entry.word_count || 0), 0)
+        
+        // Count unique people
+        const peopleIds = new Set<string>()
+        data.forEach(entry => {
+          const entryPeople = entry.entry_people as any
+          if (Array.isArray(entryPeople)) {
+            entryPeople.forEach((ep: any) => {
+              if (ep.people?.id) peopleIds.add(ep.people.id)
+            })
+          }
+        })
+        
+        // Count unique stories
+        const storyIds = new Set<string>()
+        data.forEach(entry => {
+          const storyEntries = entry.story_entries as any
+          if (Array.isArray(storyEntries)) {
+            storyEntries.forEach((se: any) => {
+              if (se.stories?.id) storyIds.add(se.stories.id)
+            })
+          }
+        })
+        
+        // Calculate writing streak
+        const sortedDates = Array.from(new Set(data.map(e => e.entry_date))).sort().reverse()
+        let streak = 0
+        let checkDate = new Date()
+        
+        for (let i = 0; i < sortedDates.length; i++) {
+          const date = checkDate.toISOString().split('T')[0]
+          if (sortedDates.includes(date)) {
+            streak++
+            checkDate.setDate(checkDate.getDate() - 1)
+          } else {
+            break
+          }
+        }
+        
+        setStats({
+          totalEntries: data.length,
+          totalWords,
+          peopleCount: peopleIds.size,
+          storiesCount: storyIds.size,
+          currentStreak: streak,
+        })
+      } else {
+        setStats({
+          totalEntries: 0,
+          totalWords: 0,
+          peopleCount: 0,
+          storiesCount: 0,
+          currentStreak: 0,
+        })
+      }
     } catch (error) {
       console.error('Error fetching entries:', error)
     } finally {
@@ -89,7 +188,7 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
@@ -122,6 +221,13 @@ export default function AppPage() {
             >
               <Users className="w-4 h-4" />
               People
+            </Link>
+            <Link
+              href="/app/stories"
+              className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors flex items-center gap-1"
+            >
+              <BookMarked className="w-4 h-4" />
+              Stories
             </Link>
             <Link
               href="/app/calendar"
@@ -186,6 +292,91 @@ export default function AppPage() {
               </Link>
             </div>
 
+            {/* Statistics Cards */}
+            {!selectedFolderId && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                {/* Total Entries */}
+                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-3 bg-gold/10 dark:bg-teal/10 rounded-xl group-hover:bg-gold/20 dark:group-hover:bg-teal/20 transition-colors">
+                      <FileText className="w-6 h-6 text-gold dark:text-teal" />
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-gold/50 dark:text-teal/50" />
+                  </div>
+                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                    {stats.totalEntries}
+                  </div>
+                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                    Total Entries
+                  </div>
+                </div>
+
+                {/* Total Words */}
+                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-3 bg-purple-500/10 dark:bg-purple-400/10 rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/20 transition-colors">
+                      <Type className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-purple-500/50 dark:text-purple-400/50" />
+                  </div>
+                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                    {stats.totalWords.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                    Words Written
+                  </div>
+                </div>
+
+                {/* People Mentioned */}
+                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-xl group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/20 transition-colors">
+                      <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                    </div>
+                    <Smile className="w-5 h-5 text-blue-500/50 dark:text-blue-400/50" />
+                  </div>
+                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                    {stats.peopleCount}
+                  </div>
+                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                    People Featured
+                  </div>
+                </div>
+
+                {/* Stories Created */}
+                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-3 bg-orange-500/10 dark:bg-orange-400/10 rounded-xl group-hover:bg-orange-500/20 dark:group-hover:bg-orange-400/20 transition-colors">
+                      <BookOpen className="w-6 h-6 text-orange-500 dark:text-orange-400" />
+                    </div>
+                    <FileText className="w-5 h-5 text-orange-500/50 dark:text-orange-400/50" />
+                  </div>
+                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                    {stats.storiesCount}
+                  </div>
+                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                    Stories Created
+                  </div>
+                </div>
+
+                {/* Writing Streak */}
+                <div className="group bg-gradient-to-br from-gold/90 via-gold to-gold/80 dark:from-teal/90 dark:via-teal dark:to-teal/80 rounded-xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-3 bg-white/20 dark:bg-midnight/20 rounded-xl group-hover:bg-white/30 dark:group-hover:bg-midnight/30 transition-colors">
+                      <Zap className="w-6 h-6 text-white dark:text-midnight" />
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-white/70 dark:text-midnight/70" />
+                  </div>
+                  <div className="text-3xl font-bold text-white dark:text-midnight mb-1">
+                    {stats.currentStreak} days
+                  </div>
+                  <div className="text-sm text-white/90 dark:text-midnight/90 font-medium">
+                    Current Streak 🔥
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Entries List */}
             {fetchingEntries ? (
               <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8 text-center">
@@ -213,20 +404,20 @@ export default function AppPage() {
                   <Link
                     key={entry.id}
                     href={`/app/entry/${entry.id}`}
-                    className="block bg-white dark:bg-graphite rounded-lg shadow-sm p-6 hover:shadow-md transition-all border border-transparent hover:border-gold dark:hover:border-teal group"
+                    className="block bg-white dark:bg-graphite rounded-xl shadow-md hover:shadow-2xl p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/30 dark:hover:border-teal/30 group hover:scale-[1.02]"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="font-serif text-2xl font-semibold text-charcoal dark:text-teal group-hover:text-gold dark:group-hover:text-teal mb-2">
+                        <h3 className="font-serif text-2xl font-semibold text-charcoal dark:text-teal group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors">
                           {entry.title}
                         </h3>
                         {entry.mood && (
-                          <span className="inline-block px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-gold/10 to-gold/20 dark:from-teal/10 dark:to-teal/20 text-gold dark:text-teal rounded-full text-sm font-medium">
                             {entry.mood}
                           </span>
                         )}
                       </div>
-                      <span className="text-sm text-charcoal/60 dark:text-white/60">
+                      <span className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
                         {new Date(entry.entry_date).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -247,6 +438,52 @@ export default function AppPage() {
                           <span>📁</span>
                           {(entry as any).folders?.name || 'Folder'}
                         </span>
+                      )}
+                      {entry.entry_people && entry.entry_people.length > 0 && (
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          <div className="flex gap-1 flex-wrap">
+                            {entry.entry_people.map((ep) => (
+                              <span
+                                key={ep.people.id}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-xs font-medium"
+                              >
+                                {ep.people.avatar_url ? (
+                                  <img
+                                    src={ep.people.avatar_url}
+                                    alt={ep.people.name}
+                                    className="w-4 h-4 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-4 h-4 rounded-full bg-gold/20 dark:bg-teal/20 flex items-center justify-center text-[8px]">
+                                    {ep.people.name.charAt(0)}
+                                  </div>
+                                )}
+                                {ep.people.name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {(entry as any).story_entries && (entry as any).story_entries.length > 0 && (
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <BookMarked className="w-4 h-4" />
+                          {(entry as any).story_entries.slice(0, 2).map((se: any) => (
+                            <span
+                              key={se.stories.id}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                              style={{ backgroundColor: `${se.stories.color}20`, color: se.stories.color }}
+                            >
+                              <span>{se.stories.icon}</span>
+                              <span>{se.stories.title}</span>
+                            </span>
+                          ))}
+                          {(entry as any).story_entries.length > 2 && (
+                            <span className="text-xs text-charcoal/50 dark:text-white/50">
+                              +{(entry as any).story_entries.length - 2}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   </Link>

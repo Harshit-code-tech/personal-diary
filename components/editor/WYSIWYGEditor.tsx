@@ -25,6 +25,8 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         heading: {
           levels: [1, 2, 3],
         },
+        // Exclude link from StarterKit to avoid duplication
+        link: false,
       }),
       Image.configure({
         HTMLAttributes: {
