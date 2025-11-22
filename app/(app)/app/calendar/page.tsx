@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, ArrowLeft } from 'lucide-react'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 interface Entry {
   id: string
@@ -125,16 +126,27 @@ export default function CalendarPage() {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
-              Calendar
-            </h1>
-            <Link
-              href="/app/entry/new"
-              className="flex items-center gap-2 px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
-            >
-              <Plus className="w-5 h-5" />
-              New Entry
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/app"
+                className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-charcoal dark:text-white" />
+              </Link>
+              <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
+                Calendar
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeSwitcher />
+              <Link
+                href="/app/new"
+                className="flex items-center gap-2 px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+              >
+                <Plus className="w-5 h-5" />
+                New Entry
+              </Link>
+            </div>
           </div>
 
           {/* Month Navigation */}
@@ -209,16 +221,20 @@ export default function CalendarPage() {
 
                       {/* Entry Indicators */}
                       {dayEntries.length > 0 && (
-                        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
-                          {dayEntries.slice(0, 3).map((entry, idx) => (
-                            <div
-                              key={idx}
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: isSelected ? '#fff' : getMoodColor(entry.mood) }}
-                            />
-                          ))}
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          {dayEntries.slice(0, 3).map((entry, idx) => {
+                            const moodColor = getMoodColor(entry.mood)
+                            return (
+                              <div
+                                key={idx}
+                                className="w-3 h-3 rounded-full ring-2 ring-white dark:ring-midnight shadow-lg"
+                                style={{ backgroundColor: moodColor }}
+                                title={entry.mood || 'No mood'}
+                              />
+                            )
+                          })}
                           {dayEntries.length > 3 && (
-                            <div className="text-[10px] text-charcoal/60 dark:text-white/60">
+                            <div className="text-xs font-bold text-charcoal/80 dark:text-white/80">
                               +{dayEntries.length - 3}
                             </div>
                           )}

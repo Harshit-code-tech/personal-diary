@@ -41,8 +41,13 @@ export default function ThemeSwitcher() {
 
   const applyTheme = (theme: Theme) => {
     const html = document.documentElement
-    html.classList.remove('light', 'dark', 'grey')
-    html.classList.add(theme)
+    html.classList.remove('light', 'dark', 'grey', 'theme-grey')
+    
+    if (theme === 'grey') {
+      html.classList.add('theme-grey')
+    } else {
+      html.classList.add(theme)
+    }
     
     // Set data attribute for CSS
     html.setAttribute('data-theme', theme)

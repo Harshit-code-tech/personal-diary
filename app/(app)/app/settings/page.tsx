@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
-import { User, Moon, Sun, Download, LogOut, Trash2, Shield } from 'lucide-react'
+import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 export default function SettingsPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -119,10 +121,19 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-6 py-4">
-          <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
-            Settings
-          </h1>
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/app"
+              className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-charcoal dark:text-white" />
+            </Link>
+            <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
+              Settings
+            </h1>
+          </div>
+          <ThemeSwitcher />
         </div>
       </header>
 

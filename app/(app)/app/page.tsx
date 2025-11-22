@@ -191,7 +191,7 @@ export default function AppPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
+        <div className="w-full px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}

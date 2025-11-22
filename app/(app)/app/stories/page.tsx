@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import { Plus, ArrowLeft, BookOpen, Calendar, FileText, Star, Archive, Search, Filter, X } from 'lucide-react'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 interface Story {
   id: string
@@ -170,13 +171,16 @@ export default function StoriesPage() {
             </h1>
           </div>
 
-          <Link
-            href="/app/stories/new"
-            className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            New Story
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeSwitcher />
+            <Link
+              href="/app/stories/new"
+              className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              New Story
+            </Link>
+          </div>
         </div>
       </header>
 

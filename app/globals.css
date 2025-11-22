@@ -32,35 +32,50 @@ body {
   @apply bg-gold/50 dark:bg-teal/50;
 }
 
-/* Grey mode (tired mode) - improved contrast */
-.theme-grey {
-  --paper: #D3D3D3;
-  --charcoal: #2E2E2E;
-  --gold: #6B6B6B;
-  --midnight: #3A3A3A;
-  --graphite: #4A4A4A;
-  --teal: #8B8B8B;
+/* Grey mode (tired mode) - calm, low contrast for tired eyes */
+html.theme-grey {
+  --paper: #B8B8B8;
+  --charcoal: #3A3A3A;
+  --gold: #707070;
+  --midnight: #505050;
+  --graphite: #606060;
+  --teal: #787878;
+  background-color: #B8B8B8;
+  color: #3A3A3A;
 }
 
-.theme-grey body {
-  @apply bg-[#D3D3D3] text-[#2E2E2E];
+html.theme-grey body {
+  background-color: #B8B8B8;
+  color: #3A3A3A;
 }
 
-.theme-grey .bg-white {
-  @apply bg-[#E8E8E8];
+/* Override all backgrounds to grey tones */
+html.theme-grey .bg-white,
+html.theme-grey .bg-paper {
+  background-color: #C8C8C8;
 }
 
-.theme-grey .bg-paper {
-  @apply bg-[#D3D3D3];
+html.theme-grey .bg-midnight,
+html.theme-grey .bg-graphite {
+  background-color: #606060;
 }
 
-.theme-grey .dark\\:bg-midnight,
-.theme-grey .dark\\:bg-graphite {
-  @apply bg-[#4A4A4A];
+/* Text colors */
+html.theme-grey .text-charcoal,
+html.theme-grey .text-white {
+  color: #3A3A3A;
 }
 
-.theme-grey .text-charcoal {
-  @apply text-[#2E2E2E];
+html.theme-grey .text-gold,
+html.theme-grey .text-teal {
+  color: #505050;
+}
+
+/* Soften shadows */
+html.theme-grey .shadow-lg,
+html.theme-grey .shadow-xl,
+html.theme-grey .shadow-2xl {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Calendar Heatmap Styling */
