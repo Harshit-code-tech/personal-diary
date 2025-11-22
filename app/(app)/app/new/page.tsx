@@ -22,7 +22,6 @@ interface Folder {
   name: string
   icon: string
   color: string
-  is_date_folder: boolean
 }
 
 export default function NewEntryPage() {
@@ -76,9 +75,9 @@ export default function NewEntryPage() {
     try {
       const { data, error } = await supabase
         .from('folders')
-        .select('id, name, icon, color, is_date_folder')
+        .select('id, name, icon, color')
         .eq('user_id', user?.id)
-        .eq('is_date_folder', false) // Only show custom folders
+        .eq('folder_type', 'custom') // Only show custom folders
         .order('name')
 
       if (error) throw error
