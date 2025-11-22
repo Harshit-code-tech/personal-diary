@@ -16,11 +16,13 @@ interface Entry {
 
 const moods = [
   { value: 'happy', emoji: '😊', color: '#10B981' },
-  { value: 'sad', emoji: '😢', color: '#3B82F6' },
-  { value: 'excited', emoji: '🤩', color: '#F59E0B' },
+  { value: 'sad', emoji: '😔', color: '#3B82F6' },
+  { value: 'angry', emoji: '😡', color: '#EF4444' },
   { value: 'anxious', emoji: '😰', color: '#8B5CF6' },
-  { value: 'calm', emoji: '😌', color: '#2DD4BF' },
-  { value: 'angry', emoji: '😠', color: '#EF4444' },
+  { value: 'peaceful', emoji: '😌', color: '#2DD4BF' },
+  { value: 'excited', emoji: '🎉', color: '#F59E0B' },
+  { value: 'tired', emoji: '😴', color: '#9CA3AF' },
+  { value: 'thoughtful', emoji: '💭', color: '#6366F1' },
   { value: 'grateful', emoji: '🙏', color: '#D4AF37' },
   { value: 'neutral', emoji: '😐', color: '#6B7280' },
 ]
@@ -98,7 +100,15 @@ export default function CalendarPage() {
   }
 
   const getMoodColor = (mood?: string) => {
-    const moodObj = moods.find(m => m.value === mood)
+    if (!mood) return '#6B7280' // Default grey for no mood
+    
+    // Extract mood value from format like "😊 Happy" -> "happy"
+    // Split by space and take the last word, then lowercase it
+    const words = mood.trim().split(/\s+/)
+    const moodWord = words[words.length - 1].toLowerCase()
+    
+    const moodObj = moods.find(m => m.value === moodWord)
+    
     return moodObj?.color || '#6B7280'
   }
 

@@ -17,6 +17,14 @@ interface Person {
   avatar_url: string | null
 }
 
+interface Folder {
+  id: string
+  name: string
+  icon: string
+  color: string
+  is_date_folder: boolean
+}
+
 export default function NewEntryPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
@@ -27,6 +35,8 @@ export default function NewEntryPage() {
   const [people, setPeople] = useState<Person[]>([])
   const [selectedPeople, setSelectedPeople] = useState<string[]>([])
   const [showTemplates, setShowTemplates] = useState(false)
+  const [folders, setFolders] = useState<Folder[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<string>('auto') // 'auto' = date folder, or folder id
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -43,6 +53,7 @@ export default function NewEntryPage() {
   useEffect(() => {
     if (user) {
       fetchPeople()
+      fetchFolders()
     }
   }, [user])
 
@@ -58,6 +69,22 @@ export default function NewEntryPage() {
       setPeople(data || [])
     } catch (err) {
       console.error('Error fetching people:', err)
+    }
+  }
+
+  const fetchFolders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('folders')
+        .select('id, name, icon, color, is_date_folder')
+        .eq('user_id', user?.id)
+        .eq('is_date_folder', false) // Only show custom folders
+        .order('name')
+
+      if (error) throw error
+      setFolders(data || [])
+    } catch (err) {
+      console.error('Error fetching folders:', err)
     }
   }
 
@@ -117,16 +144,25 @@ export default function NewEntryPage() {
     try {
       const wordCount = calculateWordCount(content)
 
-      // Auto-create date folder (prevents duplicates!)
-      const { data: folderData, error: folderError } = await supabase
-        .rpc('get_or_create_date_folder', {
-          p_user_id: user.id,
-          p_date: entryDate || new Date().toISOString().split('T')[0]
-        })
+      let finalFolderId = null
 
-      if (folderError) {
-        console.error('Folder creation error:', folderError)
-        // Continue anyway - entry can exist without folder
+      // If user selected a custom folder, use it
+      if (selectedFolder && selectedFolder !== 'auto') {
+        finalFolderId = selectedFolder
+      } else {
+        // Auto-create date folder (prevents duplicates!)
+        const { data: folderData, error: folderError } = await supabase
+          .rpc('get_or_create_date_folder', {
+            p_user_id: user.id,
+            p_date: entryDate || new Date().toISOString().split('T')[0]
+          })
+
+        if (folderError) {
+          console.error('Folder creation error:', folderError)
+          // Continue anyway - entry can exist without folder
+        } else {
+          finalFolderId = folderData
+        }
       }
 
       const { data, error: insertError } = await supabase
@@ -138,7 +174,7 @@ export default function NewEntryPage() {
           mood: mood || null,
           entry_date: entryDate,
           word_count: wordCount,
-          folder_id: folderData || null, // Auto-assign to date folder
+          folder_id: finalFolderId,
         })
         .select()
         .single()
@@ -280,6 +316,60 @@ export default function NewEntryPage() {
               </div>
             </div>
           )}
+
+          {/* Folder Selector */}
+          <div className="mb-8 p-6 bg-gradient-to-br from-purple-500/5 to-transparent dark:from-purple-400/5 dark:to-transparent rounded-xl border border-purple-500/10 dark:border-purple-400/10">
+            <label className="block text-sm font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
+              <div className="p-2 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg">
+                <FileText className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+              </div>
+              Save to Folder
+              <span className="ml-auto text-xs font-normal text-charcoal/50 dark:text-white/50">
+                Colors help you organize entries visually
+              </span>
+            </label>
+            <div className="flex flex-wrap gap-3">
+              {/* Auto (Date Folder) Option */}
+              <button
+                onClick={() => setSelectedFolder('auto')}
+                className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  selectedFolder === 'auto'
+                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white shadow-xl scale-105 ring-2 ring-purple-500/30'
+                    : 'bg-white dark:bg-charcoal text-charcoal dark:text-white hover:bg-purple-500/10 dark:hover:bg-purple-400/10 border border-charcoal/10 dark:border-white/10 hover:border-purple-500/30 dark:hover:border-purple-400/30 hover:scale-105 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Auto (Date Folder)</span>
+              </button>
+
+              {/* Custom Folders */}
+              {folders.map((folder) => (
+                <button
+                  key={folder.id}
+                  onClick={() => setSelectedFolder(folder.id)}
+                  className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                    selectedFolder === folder.id
+                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white shadow-xl scale-105 ring-2 ring-purple-500/30'
+                      : 'bg-white dark:bg-charcoal text-charcoal dark:text-white hover:bg-purple-500/10 dark:hover:bg-purple-400/10 border border-charcoal/10 dark:border-white/10 hover:border-purple-500/30 dark:hover:border-purple-400/30 hover:scale-105 shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  <span className="text-lg">{folder.icon}</span>
+                  <span>{folder.name}</span>
+                  {/* Color indicator dot */}
+                  <div 
+                    className="w-3 h-3 rounded-full ring-2 ring-white/50" 
+                    style={{ backgroundColor: folder.color }}
+                    title={`Color: ${folder.color}`}
+                  />
+                </button>
+              ))}
+            </div>
+            {folders.length === 0 && (
+              <p className="text-sm text-charcoal/50 dark:text-white/50 mt-2">
+                No custom folders yet. Create one from the sidebar to organize your entries!
+              </p>
+            )}
+          </div>
 
           {/* Entry Date */}
           <div className="mb-8 flex items-center gap-4">

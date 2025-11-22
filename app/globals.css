@@ -34,48 +34,76 @@ body {
 
 /* Grey mode (tired mode) - calm, low contrast for tired eyes */
 html.theme-grey {
-  --paper: #B8B8B8;
-  --charcoal: #3A3A3A;
+  --paper: #A0A0A0;
+  --charcoal: #2E2E2E;
   --gold: #707070;
-  --midnight: #505050;
-  --graphite: #606060;
+  --midnight: #4E4E4E;
+  --graphite: #5E5E5E;
   --teal: #787878;
-  background-color: #B8B8B8;
-  color: #3A3A3A;
 }
 
-html.theme-grey body {
-  background-color: #B8B8B8;
-  color: #3A3A3A;
+/* Apply grey background to entire page */
+html.theme-grey,
+html.theme-grey body,
+html.theme-grey main,
+html.theme-grey #__next,
+html.theme-grey aside,
+html.theme-grey nav {
+  background-color: #A0A0A0 !important;
+  color: #2E2E2E !important;
 }
 
-/* Override all backgrounds to grey tones */
+/* Override card/component backgrounds */
 html.theme-grey .bg-white,
-html.theme-grey .bg-paper {
-  background-color: #C8C8C8;
+html.theme-grey .bg-paper,
+html.theme-grey [class*="bg-[#FFF5E6]"],
+html.theme-grey [class*="bg-\\[#FFF5E6\\]"] {
+  background-color: #B5B5B5 !important;
 }
 
 html.theme-grey .bg-midnight,
-html.theme-grey .bg-graphite {
-  background-color: #606060;
+html.theme-grey .bg-graphite,
+html.theme-grey [class*="bg-midnight"],
+html.theme-grey [class*="bg-graphite"] {
+  background-color: #5E5E5E !important;
 }
 
 /* Text colors */
 html.theme-grey .text-charcoal,
-html.theme-grey .text-white {
-  color: #3A3A3A;
+html.theme-grey .text-white,
+html.theme-grey [class*="text-charcoal"],
+html.theme-grey [class*="text-white"] {
+  color: #2E2E2E !important;
 }
 
 html.theme-grey .text-gold,
-html.theme-grey .text-teal {
-  color: #505050;
+html.theme-grey .text-teal,
+html.theme-grey [class*="text-gold"],
+html.theme-grey [class*="text-teal"] {
+  color: #4E4E4E !important;
+}
+
+/* Accent colors muted */
+html.theme-grey .bg-gold,
+html.theme-grey [class*="bg-gold"] {
+  background-color: #707070 !important;
+}
+
+html.theme-grey .bg-teal,
+html.theme-grey [class*="bg-teal"] {
+  background-color: #787878 !important;
+}
+
+/* Headers with proper weight */
+html.theme-grey h1,
+html.theme-grey h2,
+html.theme-grey h3 {
+  color: #2E2E2E !important;
 }
 
 /* Soften shadows */
-html.theme-grey .shadow-lg,
-html.theme-grey .shadow-xl,
-html.theme-grey .shadow-2xl {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+html.theme-grey [class*="shadow"] {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Calendar Heatmap Styling */
