@@ -97,24 +97,134 @@ export default function NewEntryPage() {
 
   const handleTemplateSelect = (template: any) => {
     if (template.content_template) {
-      // Convert escaped newlines to actual newlines and wrap in paragraph tags for HTML
-      const formattedContent = template.content_template
-        .replace(/\\n/g, '\n')  // Convert \n to actual newlines
-        .split('\n')
-        .map((line: string) => {
-          if (line.trim().startsWith('#')) {
-            // Convert markdown headers to HTML
-            const level = line.match(/^#+/)?.[0].length || 1
-            const text = line.replace(/^#+\s*/, '')
-            return `<h${level}>${text}</h${level}>`
-          } else if (line.trim()) {
-            return `<p>${line}</p>`
-          } else {
-            return '<br>'
+      // Convert template markdown to HTML
+      const lines = template.content_template.replace(/\\n/g, '\n').split('\n')
+      let html = ''
+      let inList = false
+      let listType = ''
+      let listItems: string[] = []
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        const trimmedLine = line.trim()
+        
+        // Headers
+        if (trimmedLine.startsWith('#')) {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
           }
-        })
-        .join('')
-      setContent(formattedContent)
+          
+          const level = line.match(/^#+/)?.[0].length || 1
+          const text = line.replace(/^#+\s*/, '')
+          html += `<h${level}>${text}</h${level}>`
+        }
+        // Blockquote
+        else if (trimmedLine.startsWith('>')  || trimmedLine.startsWith('> "')) {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
+          }
+          
+          const quoteText = line.replace(/^>\s*/, '')
+          html += `<blockquote><p>${quoteText}</p></blockquote>`
+        }
+        // Numbered list
+        else if (trimmedLine.match(/^\d+\.\s/)) {
+          if (!inList || listType !== 'ol') {
+            // Close any other list type
+            if (inList && listType === 'ul') {
+              html += `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+              listItems = []
+            }
+            inList = true
+            listType = 'ol'
+          }
+          const itemText = line.replace(/^\d+\.\s*/, '')
+          listItems.push(itemText)
+        }
+        // Bullet list
+        else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+          if (!inList || listType !== 'ul') {
+            // Close any other list type
+            if (inList && listType === 'ol') {
+              html += `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>`
+              listItems = []
+            }
+            inList = true
+            listType = 'ul'
+          }
+          const itemText = line.replace(/^[-*]\s*/, '')
+          listItems.push(itemText)
+        }
+        // Table row (preserve as-is for now)
+        else if (trimmedLine.startsWith('|')) {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
+          }
+          html += `<p>${line}</p>`
+        }
+        // Bold text
+        else if (trimmedLine.includes('**')) {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
+          }
+          
+          const formatted = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+          html += `<p>${formatted}</p>`
+        }
+        // Empty line
+        else if (trimmedLine === '') {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
+          }
+          html += '<p><br></p>'
+        }
+        // Regular text
+        else if (trimmedLine) {
+          // Close any open list
+          if (inList) {
+            html += listType === 'ol' 
+              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+            inList = false
+            listItems = []
+          }
+          html += `<p>${line}</p>`
+        }
+      }
+      
+      // Close any remaining open list
+      if (inList) {
+        html += listType === 'ol' 
+          ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
+          : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
+      }
+      
+      setContent(html)
     }
     if (template.name !== 'Blank' && !title) {
       setTitle(`${template.name} - ${new Date().toLocaleDateString()}`)

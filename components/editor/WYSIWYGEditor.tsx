@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
+import { useEffect } from 'react'
 import { 
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
   Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo 
@@ -53,6 +54,14 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
       onChange(editor.getHTML())
     },
   })
+
+  // Sync editor content when content prop changes (e.g., from template selection)
+  // MUST be called before any conditional returns to follow Rules of Hooks
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content)
+    }
+  }, [content, editor])
 
   if (!editor) {
     return null
