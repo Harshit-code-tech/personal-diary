@@ -33,6 +33,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
   const [folderName, setFolderName] = useState('')
   const [folderIcon, setFolderIcon] = useState('📁')
   const [folderColor, setFolderColor] = useState('#D4AF37')
+  const [parentFolderId, setParentFolderId] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, folder: FolderItem} | null>(null)
   const { user } = useAuth()
   const supabase = createClient()
@@ -53,13 +54,31 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
 
       if (error) throw error
 
+      // Get entry counts for each folder
+      const folderIds = data?.map(f => f.id) || []
+      const { data: entryCounts } = await supabase
+        .from('entries')
+        .select('folder_id')
+        .in('folder_id', folderIds)
+
+      const countMap = new Map<string, number>()
+      entryCounts?.forEach(entry => {
+        if (entry.folder_id) {
+          countMap.set(entry.folder_id, (countMap.get(entry.folder_id) || 0) + 1)
+        }
+      })
+
       // Build tree structure
       const folderMap = new Map<string, FolderItem>()
       const rootFolders: FolderItem[] = []
 
-      // First pass: create all folders
+      // First pass: create all folders with entry counts
       data?.forEach(folder => {
-        folderMap.set(folder.id, { ...folder, children: [] })
+        folderMap.set(folder.id, { 
+          ...folder, 
+          children: [],
+          entry_count: countMap.get(folder.id) || 0
+        })
       })
 
       // Second pass: build tree
@@ -106,7 +125,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
           folder_type: 'custom',
           icon: folderIcon,
           color: folderColor,
-          parent_id: null
+          parent_id: parentFolderId
         })
 
       if (error) throw error
@@ -115,6 +134,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       setFolderName('')
       setFolderIcon('📁')
       setFolderColor('#D4AF37')
+      setParentFolderId(null)
       fetchFolders()
     } catch (error) {
       console.error('Error creating folder:', error)
@@ -162,6 +182,23 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       console.error('Error deleting folder:', error)
       alert('Failed to delete folder')
     }
+  }
+
+  // Helper function to flatten folder tree for parent selector
+  const getAllCustomFolders = (folderList: FolderItem[] = folders): FolderItem[] => {
+    const result: FolderItem[] = []
+    const traverse = (items: FolderItem[], depth = 0) => {
+      items.forEach(item => {
+        if (item.folder_type === 'custom') {
+          result.push({ ...item, name: '  '.repeat(depth) + item.name })
+          if (item.children && item.children.length > 0) {
+            traverse(item.children, depth + 1)
+          }
+        }
+      })
+    }
+    traverse(folderList)
+    return result
   }
 
   const renderFolder = (folder: FolderItem, level: number = 0) => {
@@ -307,7 +344,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
 
       {/* New Folder Modal - Full Screen Centered Overlay */}
       {showNewFolder && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowNewFolder(false)}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => {
+          setShowNewFolder(false)
+          setParentFolderId(null)
+        }}>
           <div className="bg-white dark:bg-graphite rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="sticky top-0 bg-gradient-to-b from-white dark:from-graphite to-transparent p-8 pb-6 border-b border-charcoal/10 dark:border-white/10">
@@ -319,7 +359,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   <h3 className="text-3xl font-black text-charcoal dark:text-teal">Create Custom Folder</h3>
                 </div>
                 <button
-                  onClick={() => setShowNewFolder(false)}
+                  onClick={() => {
+                    setShowNewFolder(false)
+                    setParentFolderId(null)
+                  }}
                   className="p-2 hover:bg-charcoal/10 dark:hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <X className="w-6 h-6 text-charcoal/60 dark:text-white/60" />
@@ -341,6 +384,25 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   className="w-full px-6 py-4 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
                   autoFocus
                 />
+              </div>
+
+              <div>
+                <label className="block text-base font-bold text-charcoal dark:text-white mb-4">
+                  Parent Folder (Optional)
+                  <span className="ml-2 text-xs font-normal text-charcoal/50 dark:text-white/50">Create a subfolder</span>
+                </label>
+                <select
+                  value={parentFolderId || ''}
+                  onChange={(e) => setParentFolderId(e.target.value || null)}
+                  className="w-full px-6 py-4 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
+                >
+                  <option value="">No parent (root folder)</option>
+                  {getAllCustomFolders().map(folder => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.icon} {folder.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -386,7 +448,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             {/* Footer */}
             <div className="sticky bottom-0 bg-gradient-to-t from-white dark:from-graphite to-transparent p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4">
               <button
-                onClick={() => setShowNewFolder(false)}
+                onClick={() => {
+                  setShowNewFolder(false)
+                  setParentFolderId(null)
+                }}
                 className="flex-1 px-6 py-4 border-2 border-charcoal/20 dark:border-white/20 rounded-xl hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all font-bold text-lg hover:scale-105"
               >
                 Cancel

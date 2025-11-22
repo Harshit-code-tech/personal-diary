@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 
@@ -236,6 +237,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           </Link>
 
           <div className="flex gap-3">
+            <ThemeSwitcher />
             {!editing ? (
               <>
                 <button

@@ -97,7 +97,24 @@ export default function NewEntryPage() {
 
   const handleTemplateSelect = (template: any) => {
     if (template.content_template) {
-      setContent(template.content_template)
+      // Convert escaped newlines to actual newlines and wrap in paragraph tags for HTML
+      const formattedContent = template.content_template
+        .replace(/\\n/g, '\n')  // Convert \n to actual newlines
+        .split('\n')
+        .map((line: string) => {
+          if (line.trim().startsWith('#')) {
+            // Convert markdown headers to HTML
+            const level = line.match(/^#+/)?.[0].length || 1
+            const text = line.replace(/^#+\s*/, '')
+            return `<h${level}>${text}</h${level}>`
+          } else if (line.trim()) {
+            return `<p>${line}</p>`
+          } else {
+            return '<br>'
+          }
+        })
+        .join('')
+      setContent(formattedContent)
     }
     if (template.name !== 'Blank' && !title) {
       setTitle(`${template.name} - ${new Date().toLocaleDateString()}`)
