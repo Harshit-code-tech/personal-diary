@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import { ArrowLeft, Download, FileText, FileDown, Calendar, Filter, Check } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { exportToMarkdown, exportToPDF, downloadMarkdown } from '@/lib/export-utils'
 import toast from 'react-hot-toast'
 
@@ -111,7 +111,7 @@ export default function ExportPage() {
   }
 
   if (authLoading || loading) {
-    return <LoadingSkeleton.Page />
+    return <PageLoadingSkeleton />
   }
 
   return (

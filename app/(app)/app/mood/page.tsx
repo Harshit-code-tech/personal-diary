@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import { ArrowLeft, Smile, TrendingUp, Calendar, BarChart3 } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { MoodBarChart, MoodTimeline, MoodPieChart } from '@/components/charts/MoodCharts'
 
 type MoodEntry = {
@@ -129,7 +129,7 @@ export default function MoodAnalysisPage() {
     : entries
 
   if (authLoading || loading) {
-    return <LoadingSkeleton.Page />
+    return <PageLoadingSkeleton />
   }
 
   return (
