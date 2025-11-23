@@ -1,42 +1,54 @@
-# Phase 6: Advanced Navigation & AI Features
+# Phase 6: Advanced Navigation & Production Polish
 
 ## Overview
 
-Phase 6 focuses on advanced folder navigation, AI-powered features, and production hardening. This phase will transform the diary into an intelligent, context-aware journaling platform.
+Phase 6 focuses on advanced folder navigation, enhanced user experience, and production hardening. This phase makes the diary more intuitive, powerful, and production-ready.
 
 **Status**: 🟡 Planning  
 **Start Date**: TBD  
-**Estimated Duration**: 3-4 weeks  
-**Complexity**: High
+**Estimated Duration**: 2-3 weeks  
+**Complexity**: Medium-High
 
 ---
 
 ## Goals
 
-1. **Advanced Folder Navigation** - Google Drive-style tree navigation
-2. **AI Features** - Sentiment analysis, auto-tagging, insights
-3. **Production Hardening** - Fix security warnings, optimize performance
-4. **Enhanced Search** - Vector search, semantic search
-5. **Collaboration** (Optional) - Share entries with trusted people
+1. **Advanced Folder Navigation** - Google Drive-style tree navigation with multi-folder support
+2. **Production Hardening** - Fix security warnings, optimize performance
+3. **Enhanced Features** - Better export, statistics dashboard, improved search
+4. **UI/UX Polish** - Animations, loading states, error handling
+5. **Performance Optimization** - Caching, lazy loading, code splitting
+
+**Note**: AI features moved to future consideration (see `FUTURE_AI_INTEGRATION_FEATURES.md`)
 
 ---
 
 ## Part 1: Advanced Folder Navigation 🗂️
 
 ### Priority: HIGH
+### Cost: FREE (no external APIs)
 
 ### Current State
-- Single folder per entry
-- Dropdown folder selector
-- Date-based auto-folders
-- Limited folder hierarchy visualization
+- ✅ Single folder per entry
+- ✅ Dropdown folder selector
+- ✅ Date-based auto-folders (Year → Month)
+- ❌ No folder hierarchy visualization
+- ❌ No multi-folder support
+- ❌ No tree view
 
 ### Target State
-- Multi-folder entry assignment (one entry in multiple folders)
-- Tree view navigation with expand/collapse
-- Breadcrumb navigation
-- Context-aware folder suggestions
-- Drag-and-drop folder organization
+- ✅ Multi-folder entry assignment (one entry in multiple folders)
+- ✅ Tree view navigation with expand/collapse
+- ✅ Breadcrumb navigation
+- ✅ Visual folder hierarchy
+- ✅ Drag-and-drop folder organization
+- ✅ Folder search and quick navigation
+
+### Why This Matters
+Users want to organize entries like files in Google Drive:
+- Work entry could be in: `2025/November` AND `Work/Projects` AND `Important`
+- Travel entry could be in: `2025/July` AND `Travel/Europe` AND `Memories`
+- Currently: Only one folder possible = limited organization
 
 ### Database Changes
 
@@ -203,11 +215,27 @@ export function FolderBreadcrumbs({
 
 ---
 
-## Part 2: AI-Powered Features 🤖
+## Part 2: Statistics & Analytics Dashboard 📊
 
 ### Priority: MEDIUM-HIGH
+### Cost: FREE (all calculations in database)
 
-### 2.1 Sentiment Analysis
+### 2.1 Writing Statistics
+
+**Goal**: Show users their journaling patterns and progress
+
+**Metrics to Display**:
+- Total entries count
+- Current streak (days in a row)
+- Longest streak ever
+- Average entries per week/month
+- Total words written
+- Average words per entry
+- Most active day of week
+- Most active time of day
+- Monthly writing trends (chart)
+
+**Implementation**:
 
 **Goal**: Automatically detect emotional tone of entries
 
