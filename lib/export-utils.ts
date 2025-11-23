@@ -14,7 +14,7 @@ type Entry = {
 /**
  * Strip HTML tags and return plain text
  */
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] })
   return clean.replace(/&nbsp;/g, ' ').trim()
 }

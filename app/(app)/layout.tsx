@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
+import KeyboardShortcutsHelp from '@/components/ui/KeyboardShortcutsHelp'
+import OfflineIndicator from '@/components/ui/OfflineIndicator'
 
 export default async function AppLayout({
   children,
@@ -17,6 +19,8 @@ export default async function AppLayout({
   return (
     <ErrorBoundary>
       {children}
+      <KeyboardShortcutsHelp />
+      <OfflineIndicator />
     </ErrorBoundary>
   )
 }

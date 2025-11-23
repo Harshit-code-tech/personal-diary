@@ -96,7 +96,7 @@ export type SettingsFormData = z.infer<typeof settingsSchema>
 // Helper function to format validation errors
 export const formatZodErrors = (error: z.ZodError): Record<string, string> => {
   const formattedErrors: Record<string, string> = {}
-  error.errors.forEach((err) => {
+  error.issues.forEach((err) => {
     if (err.path.length > 0) {
       formattedErrors[err.path[0].toString()] = err.message
     }

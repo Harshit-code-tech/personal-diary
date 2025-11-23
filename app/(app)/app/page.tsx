@@ -289,11 +289,11 @@ export default function AppPage() {
               <Search className="w-5 h-5" />
             </Link>
             <Link
-              href="/app/analytics"
+              href="/app/insights"
               className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-300 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-400/10 flex items-center gap-2"
             >
               <BarChart3 className="w-4 h-4" />
-              Analytics
+              Insights
             </Link>
             <Link
               href="/app/mood"

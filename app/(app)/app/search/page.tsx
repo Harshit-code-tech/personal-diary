@@ -62,14 +62,14 @@ export default function SearchPage() {
     setLoading(true)
     try {
       const { data, error } = await supabase.rpc('search_entries', {
-        p_user_id: user.id,
-        search_query: query || null,
+        search_query: query || '',
+        user_id_param: user.id,
         date_from: filters.dateFrom || null,
         date_to: filters.dateTo || null,
         mood_filter: filters.mood || null,
-        folder_filter: filters.folderId || null,
-        person_filter: filters.personId || null,
-        story_filter: filters.storyId || null,
+        folder_id_param: filters.folderId || null,
+        limit_count: 50,
+        offset_count: 0
       })
 
       if (error) throw error
