@@ -41,6 +41,7 @@ export default function LifeTimelinePage() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [customCategory, setCustomCategory] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -93,6 +94,14 @@ export default function LifeTimelinePage() {
       return
     }
 
+    if (formData.category === 'other' && !customCategory.trim()) {
+      toast.error('Please specify the category')
+      return
+    }
+
+    // Use custom category if "other" is selected
+    const finalCategory = formData.category === 'other' ? customCategory.trim() : formData.category
+
     try {
       if (editingId) {
         const { error } = await supabase
@@ -101,7 +110,7 @@ export default function LifeTimelinePage() {
             title: formData.title.trim(),
             description: formData.description.trim() || null,
             event_date: formData.event_date,
-            category: formData.category,
+            category: finalCategory,
             icon: formData.icon,
             color: formData.color,
             is_major: formData.is_major
@@ -429,7 +438,12 @@ export default function LifeTimelinePage() {
                 </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => updateCategoryDefaults(e.target.value)}
+                  onChange={(e) => {
+                    updateCategoryDefaults(e.target.value)
+                    if (e.target.value !== 'other') {
+                      setCustomCategory('')
+                    }
+                  }}
                   className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
                 >
                   {categories.map((cat) => (
@@ -439,6 +453,21 @@ export default function LifeTimelinePage() {
                   ))}
                 </select>
               </div>
+
+              {formData.category === 'other' && (
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    Specify Category *
+                  </label>
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                    placeholder="e.g., Hobby, Volunteering, Family..."
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="flex items-center gap-2 cursor-pointer">

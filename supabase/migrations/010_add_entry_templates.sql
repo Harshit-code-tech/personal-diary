@@ -56,8 +56,7 @@ INSERT INTO entry_templates (id, name, description, content_template, icon, is_s
   ('550e8400-e29b-41d4-a716-446655440003', 'Work Reflection', 'Daily work journal', '# Work Day Reflection\n\n## Accomplishments\n- \n\n## Challenges\n- \n\n## Tomorrow''s Goals\n- \n', '💼', true),
   ('550e8400-e29b-41d4-a716-446655440004', 'Morning Pages', 'Stream of consciousness', '# Morning Pages\n\nWrite whatever comes to mind. No editing, no judgment.\n\n', '☀️', true),
   ('550e8400-e29b-41d4-a716-446655440005', 'Weekly Review', 'Weekly reflection', '# Week of [DATE]\n\n## Wins This Week\n\n## Challenges Faced\n\n## Lessons Learned\n\n## Next Week''s Focus\n\n', '📊', true),
-  ('550e8400-e29b-41d4-a716-446655440006', 'Travel Log', 'Document your adventures', '# Travel Entry\n\n**Location:** \n**Date:** \n\n## What I Did Today\n\n\n## Favorite Moments\n\n\n## Photos\n\n', '✈️', true),
-  ('550e8400-e29b-41d4-a716-446655440007', 'Blank Canvas', 'Start from scratch', '# \n\n', '📝', true);
+  ('550e8400-e29b-41d4-a716-446655440006', 'Travel Log', 'Document your adventures', '# Travel Entry\n\n**Location:** \n**Date:** \n\n## What I Did Today\n\n\n## Favorite Moments\n\n\n## Photos\n\n', '✈️', true);
 
 -- Success message
 DO $$
@@ -65,6 +64,6 @@ BEGIN
   RAISE NOTICE '✨ Entry templates system added!';
   RAISE NOTICE '';
   RAISE NOTICE '📝 Created entry_templates table with RLS';
-  RAISE NOTICE '✅ Added 7 default system templates';
+  RAISE NOTICE '✅ Added 6 default system templates';
   RAISE NOTICE '🔒 Users can create their own custom templates';
 END $$;

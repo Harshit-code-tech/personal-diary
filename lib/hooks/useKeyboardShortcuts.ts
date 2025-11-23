@@ -14,17 +14,18 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       shortcuts.forEach((shortcut) => {
-        const ctrlMatch = shortcut.ctrl ? event.ctrlKey : true
-        const metaMatch = shortcut.meta ? event.metaKey : true
-        const shiftMatch = shortcut.shift ? event.shiftKey : true
         const keyMatch = event.key.toLowerCase() === shortcut.key.toLowerCase()
+        
+        // Support both Ctrl (Windows/Linux) and Cmd (Mac)
+        const modifierPressed = (shortcut.ctrl || shortcut.meta) 
+          ? (event.ctrlKey || event.metaKey) 
+          : true
+        
+        const shiftMatch = shortcut.shift ? event.shiftKey : !event.shiftKey
 
-        if (keyMatch && ctrlMatch && metaMatch && shiftMatch) {
-          // Check if Ctrl or Meta is actually required
-          if ((shortcut.ctrl || shortcut.meta) && (event.ctrlKey || event.metaKey)) {
-            event.preventDefault()
-            shortcut.action()
-          }
+        if (keyMatch && modifierPressed && shiftMatch) {
+          event.preventDefault()
+          shortcut.action()
         }
       })
     }

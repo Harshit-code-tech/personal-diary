@@ -69,7 +69,11 @@ export default function KeyboardShortcutsHelp() {
                 {(shortcut.ctrl || shortcut.meta) && (
                   <>
                     <kbd className="px-2 py-1 bg-charcoal/10 dark:bg-white/10 border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
-                      <Command className="w-3 h-3 inline" />
+                      {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? (
+                        <Command className="w-3 h-3 inline" />
+                      ) : (
+                        'Ctrl'
+                      )}
                     </kbd>
                     <span className="text-charcoal/40 dark:text-white/40">+</span>
                   </>

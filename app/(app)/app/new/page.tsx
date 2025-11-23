@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar } from 'lucide-r
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import TemplateModal from '@/components/templates/TemplateModal'
 import TagInput from '@/components/tags/TagInput'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 
@@ -400,6 +401,8 @@ export default function NewEntryPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            <ThemeSwitcher />
+            
             <button
               onClick={() => setShowTemplates(true)}
               className="group flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-charcoal text-charcoal dark:text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 border border-charcoal/10 dark:border-white/10 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-105"

@@ -256,8 +256,8 @@ export default function AppPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="w-full px-6 py-5 flex items-center justify-between">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-midnight/70 border-b border-gold/20 dark:border-teal/20 shadow-lg">
+        <div className="max-w-full px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-5">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -325,8 +325,9 @@ export default function AppPage() {
             </Link>
             <Link
               href="/app"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 flex items-center gap-2"
             >
+              <FileText className="w-4 h-4" />
               Entries
             </Link>
             <Link
