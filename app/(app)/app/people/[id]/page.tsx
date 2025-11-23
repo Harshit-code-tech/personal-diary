@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Calendar, BookOpen, Heart, TrendingUp, Clock, MessageCircle, Sparkles } from 'lucide-react'
 
@@ -122,10 +123,11 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
 
       if (error) throw error
 
+      toast.success('Person deleted successfully!')
       router.push('/app/people')
     } catch (error) {
       console.error('Error deleting person:', error)
-      alert('Failed to delete person')
+      toast.error('Failed to delete person. Please try again.')
       setDeleting(false)
     }
   }

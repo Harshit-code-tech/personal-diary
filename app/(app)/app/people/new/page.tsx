@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, User, Upload, Save, X } from 'lucide-react'
 
@@ -84,10 +85,11 @@ export default function NewPersonPage() {
 
       if (error) throw error
 
+      toast.success('Person added successfully!')
       router.push('/app/people')
     } catch (error) {
       console.error('Error creating person:', error)
-      alert('Failed to add person')
+      toast.error('Failed to add person. Please try again.')
     } finally {
       setSaving(false)
     }

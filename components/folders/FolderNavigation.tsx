@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
+import toast from 'react-hot-toast'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Folder, ChevronRight, ChevronDown, Plus, User, BookOpen, MoreVertical, Edit2, Trash2, Zap, X } from 'lucide-react'
 import Link from 'next/link'
@@ -136,9 +137,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       setFolderColor('#D4AF37')
       setParentFolderId(null)
       fetchFolders()
+      toast.success('Folder created successfully!')
     } catch (error) {
       console.error('Error creating folder:', error)
-      alert('Failed to create folder')
+      toast.error('Failed to create folder. Please try again.')
     }
   }
 
@@ -161,9 +163,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       setEditingFolder(null)
       setFolderName('')
       fetchFolders()
+      toast.success('Folder updated successfully!')
     } catch (error) {
       console.error('Error updating folder:', error)
-      alert('Failed to update folder')
+      toast.error('Failed to update folder. Please try again.')
     }
   }
 
@@ -178,9 +181,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
 
       if (error) throw error
       fetchFolders()
+      toast.success('Folder deleted successfully!')
     } catch (error) {
       console.error('Error deleting folder:', error)
-      alert('Failed to delete folder')
+      toast.error('Failed to delete folder. Please try again.')
     }
   }
 

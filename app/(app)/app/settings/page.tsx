@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
@@ -74,9 +75,10 @@ export default function SettingsPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
+      toast.success('Data exported successfully!')
     } catch (error) {
       console.error('Error exporting data:', error)
-      alert('Failed to export data. Please try again.')
+      toast.error('Failed to export data. Please try again.')
     }
   }
 
@@ -105,7 +107,7 @@ export default function SettingsPage() {
       router.push('/')
     } catch (error) {
       console.error('Error deleting account:', error)
-      alert('Failed to delete account. Please contact support.')
+      toast.error('Failed to delete account. Please contact support.')
     }
   }
 

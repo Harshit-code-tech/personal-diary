@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Calendar, FileText, Star, Plus, X, Clock, TrendingUp } from 'lucide-react'
 
@@ -134,10 +135,11 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
 
       if (error) throw error
 
+      toast.success('Story deleted successfully!')
       router.push('/app/stories')
     } catch (error) {
       console.error('Error deleting story:', error)
-      alert('Failed to delete story')
+      toast.error('Failed to delete story. Please try again.')
       setDeleting(false)
     }
   }
@@ -161,9 +163,10 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       setShowAddEntries(false)
       setSelectedEntries([])
       fetchStoryData()
+      toast.success('Entries added to story successfully!')
     } catch (error) {
       console.error('Error adding entries:', error)
-      alert('Failed to add entries to story')
+      toast.error('Failed to add entries to story. Please try again.')
     }
   }
 

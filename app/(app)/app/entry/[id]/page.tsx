@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
@@ -141,9 +142,10 @@ export default function EntryPage({ params }: { params: { id: string } }) {
 
       setEditing(false)
       fetchEntry()
+      toast.success('Entry updated successfully!')
     } catch (error) {
       console.error('Error updating entry:', error)
-      alert('Failed to update entry')
+      toast.error('Failed to update entry. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -163,10 +165,11 @@ export default function EntryPage({ params }: { params: { id: string } }) {
 
       if (error) throw error
 
+      toast.success('Entry deleted successfully!')
       router.push('/app')
     } catch (error) {
       console.error('Error deleting entry:', error)
-      alert('Failed to delete entry')
+      toast.error('Failed to delete entry. Please try again.')
       setDeleting(false)
     }
   }
@@ -189,9 +192,10 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       setShowAddStories(false)
       setSelectedStories([])
       fetchEntry()
+      toast.success('Added to story successfully!')
     } catch (error) {
       console.error('Error adding to stories:', error)
-      alert('Failed to add to stories')
+      toast.error('Failed to add to story. Please try again.')
     }
   }
 

@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
+import toast from 'react-hot-toast'
+import { entrySchema, formatZodErrors } from '@/lib/validation'
 import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
@@ -30,7 +32,7 @@ export default function NewEntryPage() {
   const [mood, setMood] = useState('')
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [people, setPeople] = useState<Person[]>([])
   const [selectedPeople, setSelectedPeople] = useState<string[]>([])
   const [showTemplates, setShowTemplates] = useState(false)
@@ -254,18 +256,31 @@ export default function NewEntryPage() {
   }
 
   const handleSave = async () => {
-    if (!title.trim() || !content.trim()) {
-      setError('Please provide both title and content')
+    // Clear previous errors
+    setErrors({})
+
+    // Validate input
+    const validation = entrySchema.safeParse({
+      title: title.trim(),
+      content: content.trim(),
+      mood: mood || null,
+      entry_date: entryDate,
+      folder_id: selectedFolder && selectedFolder !== 'auto' ? selectedFolder : null,
+    })
+
+    if (!validation.success) {
+      const formattedErrors = formatZodErrors(validation.error)
+      setErrors(formattedErrors)
+      toast.error('Please check the form for errors')
       return
     }
 
     if (!user) {
-      setError('You must be logged in to create entries')
+      toast.error('You must be logged in to create entries')
       return
     }
 
     setSaving(true)
-    setError('')
 
     try {
       const wordCount = calculateWordCount(content)
@@ -324,10 +339,11 @@ export default function NewEntryPage() {
         }
       }
 
+      toast.success('Entry created successfully!')
       router.push(`/app/entry/${data.id}`)
     } catch (err: any) {
       console.error('Error saving entry:', err)
-      setError(err.message || 'Failed to save entry')
+      toast.error(err.message || 'Failed to save entry')
       setSaving(false)
     }
   }
@@ -379,9 +395,14 @@ export default function NewEntryPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-800 dark:text-red-200">
-            {error}
+        {Object.keys(errors).length > 0 && (
+          <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
+            <p className="text-red-800 dark:text-red-200 font-semibold mb-2">Please fix the following errors:</p>
+            <ul className="list-disc list-inside text-red-800 dark:text-red-200">
+              {Object.entries(errors).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -391,7 +412,14 @@ export default function NewEntryPage() {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value)
+                if (errors.title) {
+                  const newErrors = { ...errors }
+                  delete newErrors.title
+                  setErrors(newErrors)
+                }
+              }}
               placeholder="What's on your mind?"
               className="w-full font-serif text-4xl md:text-5xl font-bold text-charcoal dark:text-teal bg-transparent border-none outline-none placeholder:text-charcoal/20 dark:placeholder:text-teal/20 mb-2 focus:placeholder:text-charcoal/40 dark:focus:placeholder:text-teal/40 transition-all"
               autoFocus

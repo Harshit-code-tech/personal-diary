@@ -6,6 +6,7 @@ import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { 
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
   Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo 
@@ -81,7 +82,7 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
           editor.chain().focus().setImage({ src: url }).run()
         } catch (error) {
           console.error('Failed to upload image:', error)
-          alert('Failed to upload image')
+          toast.error('Failed to upload image. Please try again.')
         }
       }
     }

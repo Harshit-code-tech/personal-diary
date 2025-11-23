@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import ErrorBoundary from '@/components/ui/ErrorBoundary'
 
 export default async function AppLayout({
   children,
@@ -13,5 +14,9 @@ export default async function AppLayout({
     redirect('/login')
   }
 
-  return <>{children}</>
+  return (
+    <ErrorBoundary>
+      {children}
+    </ErrorBoundary>
+  )
 }

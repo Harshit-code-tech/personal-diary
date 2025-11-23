@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import DOMPurify from 'isomorphic-dompurify'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import FolderNavigation from '@/components/folders/FolderNavigation'
@@ -51,6 +52,10 @@ export default function AppPage() {
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [folderName, setFolderName] = useState<string>('All Entries')
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [totalCount, setTotalCount] = useState(0)
+  const ITEMS_PER_PAGE = 20
   const [stats, setStats] = useState({
     totalEntries: 0,
     totalWords: 0,
@@ -61,9 +66,17 @@ export default function AppPage() {
 
   useEffect(() => {
     if (user) {
+      setPage(1) // Reset to page 1 when folder changes
+      setEntries([]) // Clear entries
       fetchEntries()
     }
   }, [user, selectedFolderId])
+
+  useEffect(() => {
+    if (user && page > 1) {
+      fetchEntries() // Load more when page changes
+    }
+  }, [page])
 
   const fetchEntries = async () => {
     setFetchingEntries(true)
@@ -80,6 +93,9 @@ export default function AppPage() {
         }
       }
 
+      const from = (page - 1) * ITEMS_PER_PAGE
+      const to = from + ITEMS_PER_PAGE - 1
+
       let query = supabase
         .from('entries')
         .select(`
@@ -92,21 +108,29 @@ export default function AppPage() {
           story_entries (
             stories (id, title, icon, color)
           )
-        `)
+        `, { count: 'exact' })
         .order('entry_date', { ascending: false })
-        .limit(20)
+        .range(from, to)
 
       if (selectedFolderId) {
         query = query.in('folder_id', folderIds)
       }
 
-      const { data, error } = await query
+      const { data, error, count } = await query
 
       if (error) throw error
-      setEntries(data as any || [])
       
-      // Calculate statistics
-      if (data && data.length > 0) {
+      if (page === 1) {
+        setEntries(data as any || [])
+      } else {
+        setEntries(prev => [...prev, ...(data as any || [])])
+      }
+      
+      setTotalCount(count || 0)
+      setHasMore((data?.length || 0) === ITEMS_PER_PAGE)
+      
+      // Calculate statistics (only for first page)
+      if (page === 1 && data && data.length > 0) {
         const totalWords = data.reduce((sum, entry) => sum + (entry.word_count || 0), 0)
         
         // Count unique people
@@ -175,7 +199,12 @@ export default function AppPage() {
   }
 
   const extractTextPreview = (html: string, maxLength: number = 150) => {
-    const text = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+    // Sanitize HTML first
+    const sanitized = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i'],
+      ALLOWED_ATTR: []
+    })
+    const text = sanitized.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 
@@ -524,6 +553,29 @@ export default function AppPage() {
                     </div>
                   </Link>
                 ))}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {!fetchingEntries && hasMore && entries.length > 0 && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={() => {
+                    setPage(prev => prev + 1)
+                    fetchEntries()
+                  }}
+                  className="px-8 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-lg"
+                >
+                  Load More Entries
+                </button>
+              </div>
+            )}
+
+            {/* End of results message */}
+            {!fetchingEntries && !hasMore && entries.length > 0 && (
+              <div className="text-center mt-8 text-charcoal/60 dark:text-white/60">
+                <p>You've reached the end of your entries</p>
+                <p className="text-sm mt-1">Total: {totalCount} {totalCount === 1 ? 'entry' : 'entries'}</p>
               </div>
             )}
           </div>
