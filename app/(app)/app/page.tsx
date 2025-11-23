@@ -8,6 +8,7 @@ import DOMPurify from 'isomorphic-dompurify'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import FolderNavigation from '@/components/folders/FolderNavigation'
+import NotificationBell from '@/components/notifications/NotificationBell'
 import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type, Search, BarChart3, Bell, Star, Target } from 'lucide-react'
 
 type Entry = {
@@ -279,6 +280,7 @@ export default function AppPage() {
           
           <nav className="flex items-center gap-3">
             <ThemeSwitcher />
+            <NotificationBell />
             <Link
               href="/app/search"
               className="p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"

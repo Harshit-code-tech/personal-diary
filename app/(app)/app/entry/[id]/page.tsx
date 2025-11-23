@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus, Target, Star } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
@@ -27,6 +27,14 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const [showAddStories, setShowAddStories] = useState(false)
   const [allStories, setAllStories] = useState<any[]>([])
   const [selectedStories, setSelectedStories] = useState<string[]>([])
+  const [linkedGoals, setLinkedGoals] = useState<any[]>([])
+  const [linkedEvents, setLinkedEvents] = useState<any[]>([])
+  const [showAddGoals, setShowAddGoals] = useState(false)
+  const [showAddEvents, setShowAddEvents] = useState(false)
+  const [allGoals, setAllGoals] = useState<any[]>([])
+  const [allEvents, setAllEvents] = useState<any[]>([])
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
+  const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
@@ -90,6 +98,57 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       if (!allStoriesError && allStoriesData) {
         const storyIds = new Set(storiesData?.map((s: any) => s.stories?.id).filter(Boolean))
         setAllStories(allStoriesData.filter(s => !storyIds.has(s.id)))
+      }
+
+      // Fetch linked goals
+      const { data: goalsData, error: goalsError } = await supabase
+        .from('entry_goals')
+        .select(`
+          goals (
+            id, title, category, progress, is_completed
+          )
+        `)
+        .eq('entry_id', params.id)
+
+      if (!goalsError && goalsData) {
+        setLinkedGoals(goalsData.map(eg => eg.goals).filter(Boolean))
+      }
+
+      // Fetch all user goals for adding
+      const { data: allGoalsData, error: allGoalsError } = await supabase
+        .from('goals')
+        .select('id, title, category, progress, is_completed')
+        .eq('user_id', user?.id)
+        .eq('is_completed', false)
+
+      if (!allGoalsError && allGoalsData) {
+        const goalIds = new Set(goalsData?.map((g: any) => g.goals?.id).filter(Boolean))
+        setAllGoals(allGoalsData.filter(g => !goalIds.has(g.id)))
+      }
+
+      // Fetch linked life events
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('entry_life_events')
+        .select(`
+          life_events (
+            id, title, category, icon, color, event_date, is_major
+          )
+        `)
+        .eq('entry_id', params.id)
+
+      if (!eventsError && eventsData) {
+        setLinkedEvents(eventsData.map(ele => ele.life_events).filter(Boolean))
+      }
+
+      // Fetch all user life events for adding
+      const { data: allEventsData, error: allEventsError } = await supabase
+        .from('life_events')
+        .select('id, title, category, icon, color, event_date, is_major')
+        .eq('user_id', user?.id)
+
+      if (!allEventsError && allEventsData) {
+        const eventIds = new Set(eventsData?.map((e: any) => e.life_events?.id).filter(Boolean))
+        setAllEvents(allEventsData.filter(e => !eventIds.has(e.id)))
       }
     } catch (error) {
       console.error('Error fetching entry:', error)
@@ -212,6 +271,92 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       fetchEntry()
     } catch (error) {
       console.error('Error removing from story:', error)
+    }
+  }
+
+  const addGoalsToEntry = async () => {
+    if (selectedGoals.length === 0) return
+
+    try {
+      const { error } = await supabase
+        .from('entry_goals')
+        .insert(
+          selectedGoals.map(goalId => ({
+            entry_id: params.id,
+            goal_id: goalId
+          }))
+        )
+
+      if (error) throw error
+
+      toast.success('Goals linked!')
+      setShowAddGoals(false)
+      setSelectedGoals([])
+      fetchEntry()
+    } catch (error) {
+      console.error('Error adding goals:', error)
+      toast.error('Failed to link goals')
+    }
+  }
+
+  const removeGoal = async (goalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('entry_goals')
+        .delete()
+        .eq('goal_id', goalId)
+        .eq('entry_id', params.id)
+
+      if (error) throw error
+
+      toast.success('Goal unlinked')
+      fetchEntry()
+    } catch (error) {
+      console.error('Error removing goal:', error)
+      toast.error('Failed to unlink goal')
+    }
+  }
+
+  const addEventsToEntry = async () => {
+    if (selectedEvents.length === 0) return
+
+    try {
+      const { error } = await supabase
+        .from('entry_life_events')
+        .insert(
+          selectedEvents.map(eventId => ({
+            entry_id: params.id,
+            life_event_id: eventId
+          }))
+        )
+
+      if (error) throw error
+
+      toast.success('Events linked!')
+      setShowAddEvents(false)
+      setSelectedEvents([])
+      fetchEntry()
+    } catch (error) {
+      console.error('Error adding events:', error)
+      toast.error('Failed to link events')
+    }
+  }
+
+  const removeEvent = async (eventId: string) => {
+    try {
+      const { error } = await supabase
+        .from('entry_life_events')
+        .delete()
+        .eq('life_event_id', eventId)
+        .eq('entry_id', params.id)
+
+      if (error) throw error
+
+      toast.success('Event unlinked')
+      fetchEntry()
+    } catch (error) {
+      console.error('Error removing event:', error)
+      toast.error('Failed to unlink event')
     }
   }
 
@@ -363,6 +508,97 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                 ))}
               </div>
             )}
+
+            {/* Linked Goals */}
+            <div className="flex items-center gap-3 flex-wrap pt-4 border-t border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center gap-2 text-sm font-medium text-charcoal/70 dark:text-white/70">
+                <Target className="w-4 h-4" />
+                <span>Goals:</span>
+              </div>
+              {linkedGoals.length > 0 ? (
+                <>
+                  {linkedGoals.map((goal: any) => (
+                    <div key={goal.id} className="group relative">
+                      <Link
+                        href="/app/goals"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 dark:bg-green-400/10 text-green-600 dark:text-green-400 rounded-full text-sm font-medium hover:bg-green-500/20 dark:hover:bg-green-400/20 transition-colors"
+                      >
+                        <span>🎯</span>
+                        <span>{goal.title}</span>
+                        <span className="text-xs opacity-70">({goal.progress}%)</span>
+                      </Link>
+                      <button
+                        onClick={() => removeGoal(goal.id)}
+                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setShowAddGoals(true)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border-2 border-dashed border-charcoal/30 dark:border-white/30 text-charcoal/60 dark:text-white/60 rounded-full text-sm font-medium hover:border-green-500 dark:hover:border-green-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Link Goal</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAddGoals(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 border-2 border-dashed border-charcoal/30 dark:border-white/30 text-charcoal/60 dark:text-white/60 rounded-full text-sm font-medium hover:border-green-500 dark:hover:border-green-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Link Goal</span>
+                </button>
+              )}
+            </div>
+
+            {/* Linked Life Events */}
+            <div className="flex items-center gap-3 flex-wrap pt-4 border-t border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center gap-2 text-sm font-medium text-charcoal/70 dark:text-white/70">
+                <Star className="w-4 h-4" />
+                <span>Life Events:</span>
+              </div>
+              {linkedEvents.length > 0 ? (
+                <>
+                  {linkedEvents.map((event: any) => (
+                    <div key={event.id} className="group relative">
+                      <Link
+                        href="/app/timeline"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium hover:opacity-80 transition-colors"
+                        style={{ backgroundColor: `${event.color}20`, color: event.color }}
+                      >
+                        <span>{event.icon}</span>
+                        <span>{event.title}</span>
+                        {event.is_major && <span className="text-xs">⭐</span>}
+                      </Link>
+                      <button
+                        onClick={() => removeEvent(event.id)}
+                        className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setShowAddEvents(true)}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 border-2 border-dashed border-charcoal/30 dark:border-white/30 text-charcoal/60 dark:text-white/60 rounded-full text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Link Event</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAddEvents(true)}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 border-2 border-dashed border-charcoal/30 dark:border-white/30 text-charcoal/60 dark:text-white/60 rounded-full text-sm font-medium hover:border-indigo-500 dark:hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Link Event</span>
+                </button>
+              )}
+            </div>
 
             {/* Linked Stories */}
             <div className="flex items-center gap-3 flex-wrap pt-4 border-t border-charcoal/10 dark:border-white/10">
@@ -584,6 +820,199 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                   className="flex-1 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Add {selectedStories.length > 0 ? `to ${selectedStories.length}` : ''}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Goals Modal */}
+      {showAddGoals && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal">
+                  Link Goals
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddGoals(false)
+                    setSelectedGoals([])
+                  }}
+                  className="p-2 hover:bg-charcoal/10 dark:hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 max-h-96 overflow-y-auto">
+              {allGoals.length === 0 ? (
+                <div className="text-center py-8">
+                  <Target className="w-12 h-12 mx-auto text-charcoal/20 dark:text-white/20 mb-3" />
+                  <p className="text-charcoal/60 dark:text-white/60 mb-4">
+                    {linkedGoals.length > 0
+                      ? 'All your active goals are already linked'
+                      : 'No active goals yet'}
+                  </p>
+                  <Link
+                    href="/app/goals"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create a Goal
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {allGoals.map((goal) => (
+                    <label
+                      key={goal.id}
+                      className="flex items-center gap-3 p-3 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedGoals.includes(goal.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedGoals([...selectedGoals, goal.id])
+                          } else {
+                            setSelectedGoals(selectedGoals.filter(id => id !== goal.id))
+                          }
+                        }}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-charcoal dark:text-white">{goal.title}</div>
+                        <div className="text-xs text-charcoal/60 dark:text-white/60">
+                          {goal.category} • {goal.progress}% complete
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {allGoals.length > 0 && (
+              <div className="p-6 border-t border-charcoal/10 dark:border-white/10 flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowAddGoals(false)
+                    setSelectedGoals([])
+                  }}
+                  className="flex-1 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addGoalsToEntry}
+                  disabled={selectedGoals.length === 0}
+                  className="flex-1 px-6 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Link {selectedGoals.length > 0 ? selectedGoals.length : ''}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Life Events Modal */}
+      {showAddEvents && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal">
+                  Link Life Events
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddEvents(false)
+                    setSelectedEvents([])
+                  }}
+                  className="p-2 hover:bg-charcoal/10 dark:hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 max-h-96 overflow-y-auto">
+              {allEvents.length === 0 ? (
+                <div className="text-center py-8">
+                  <Star className="w-12 h-12 mx-auto text-charcoal/20 dark:text-white/20 mb-3" />
+                  <p className="text-charcoal/60 dark:text-white/60 mb-4">
+                    {linkedEvents.length > 0
+                      ? 'All your life events are already linked'
+                      : 'No life events yet'}
+                  </p>
+                  <Link
+                    href="/app/timeline"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create an Event
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {allEvents.map((event) => (
+                    <label
+                      key={event.id}
+                      className="flex items-center gap-3 p-3 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedEvents.includes(event.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedEvents([...selectedEvents, event.id])
+                          } else {
+                            setSelectedEvents(selectedEvents.filter(id => id !== event.id))
+                          }
+                        }}
+                      />
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
+                        style={{ backgroundColor: event.color }}
+                      >
+                        {event.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-charcoal dark:text-white flex items-center gap-1">
+                          {event.title}
+                          {event.is_major && <span className="text-xs">⭐</span>}
+                        </div>
+                        <div className="text-xs text-charcoal/60 dark:text-white/60">
+                          {new Date(event.event_date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {allEvents.length > 0 && (
+              <div className="p-6 border-t border-charcoal/10 dark:border-white/10 flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowAddEvents(false)
+                    setSelectedEvents([])
+                  }}
+                  className="flex-1 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addEventsToEntry}
+                  disabled={selectedEvents.length === 0}
+                  className="flex-1 px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Link {selectedEvents.length > 0 ? selectedEvents.length : ''}
                 </button>
               </div>
             )}
