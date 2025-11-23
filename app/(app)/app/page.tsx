@@ -8,7 +8,7 @@ import DOMPurify from 'isomorphic-dompurify'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import FolderNavigation from '@/components/folders/FolderNavigation'
-import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type } from 'lucide-react'
+import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type, Search } from 'lucide-react'
 
 type Entry = {
   id: string
@@ -56,6 +56,8 @@ export default function AppPage() {
   const [hasMore, setHasMore] = useState(true)
   const [totalCount, setTotalCount] = useState(0)
   const ITEMS_PER_PAGE = 20
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [allTags, setAllTags] = useState<string[]>([])
   const [stats, setStats] = useState({
     totalEntries: 0,
     totalWords: 0,
@@ -69,8 +71,9 @@ export default function AppPage() {
       setPage(1) // Reset to page 1 when folder changes
       setEntries([]) // Clear entries
       fetchEntries()
+      fetchAllTags()
     }
-  }, [user, selectedFolderId])
+  }, [user, selectedFolderId, selectedTag])
 
   useEffect(() => {
     if (user && page > 1) {
@@ -100,7 +103,7 @@ export default function AppPage() {
         .from('entries')
         .select(`
           id, title, content, entry_date, word_count, mood, 
-          folder_id, person_id, created_at,
+          folder_id, person_id, created_at, tags,
           folders (name, icon),
           entry_people (
             people (id, name, avatar_url)
@@ -114,6 +117,10 @@ export default function AppPage() {
 
       if (selectedFolderId) {
         query = query.in('folder_id', folderIds)
+      }
+
+      if (selectedTag) {
+        query = query.contains('tags', [selectedTag])
       }
 
       const { data, error, count } = await query
@@ -198,6 +205,35 @@ export default function AppPage() {
     router.push('/')
   }
 
+  const fetchAllTags = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('entries')
+        .select('tags')
+        .eq('user_id', user?.id)
+        .not('tags', 'is', null)
+
+      if (error) throw error
+
+      // Flatten and count tags
+      const tagCount: Record<string, number> = {}
+      data?.forEach((entry: any) => {
+        entry.tags?.forEach((tag: string) => {
+          tagCount[tag] = (tagCount[tag] || 0) + 1
+        })
+      })
+
+      // Sort by frequency
+      const sortedTags = Object.entries(tagCount)
+        .sort(([, a], [, b]) => b - a)
+        .map(([tag]) => tag)
+
+      setAllTags(sortedTags)
+    } catch (err) {
+      console.error('Error fetching tags:', err)
+    }
+  }
+
   const extractTextPreview = (html: string, maxLength: number = 150) => {
     // Sanitize HTML first
     const sanitized = DOMPurify.sanitize(html, {
@@ -243,6 +279,20 @@ export default function AppPage() {
           
           <nav className="flex items-center gap-3">
             <ThemeSwitcher />
+            <Link
+              href="/app/search"
+              className="p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
+              title="Search"
+            >
+              <Search className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/app/mood"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-pink-500 dark:hover:text-pink-400 transition-all duration-300 rounded-xl hover:bg-pink-500/10 dark:hover:bg-pink-400/10 flex items-center gap-2"
+            >
+              <Smile className="w-4 h-4" />
+              Moods
+            </Link>
             <Link
               href="/app"
               className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
@@ -409,6 +459,44 @@ export default function AppPage() {
                   <div className="text-sm text-white/90 dark:text-midnight/90 font-medium">
                     Current Streak 🔥
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tag Filter */}
+            {allTags.length > 0 && (
+              <div className="mb-8 p-6 bg-white dark:bg-graphite rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-2xl">🏷️</span>
+                  <h3 className="text-lg font-bold text-charcoal dark:text-white">Filter by Tag</h3>
+                  {selectedTag && (
+                    <button
+                      onClick={() => setSelectedTag(null)}
+                      className="ml-auto text-sm font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                    >
+                      Clear Filter
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {allTags.slice(0, 15).map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                        selectedTag === tag
+                          ? 'bg-orange-500 dark:bg-orange-400 text-white shadow-lg scale-105'
+                          : 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 dark:hover:bg-orange-400/20 hover:scale-105'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                  {allTags.length > 15 && (
+                    <span className="px-4 py-2 text-sm text-charcoal/50 dark:text-white/50">
+                      +{allTags.length - 15} more
+                    </span>
+                  )}
                 </div>
               </div>
             )}

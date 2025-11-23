@@ -317,6 +317,23 @@ export default function EntryPage({ params }: { params: { id: string } }) {
               </span>
             </div>
 
+            {/* Tags */}
+            {entry.tags && entry.tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-medium text-charcoal/70 dark:text-white/70">
+                  🏷️
+                </span>
+                {entry.tags.map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 rounded-full text-sm font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {/* Linked People */}
             {linkedPeople.length > 0 && (
               <div className="flex items-center gap-3 flex-wrap pt-4 border-t border-charcoal/10 dark:border-white/10">

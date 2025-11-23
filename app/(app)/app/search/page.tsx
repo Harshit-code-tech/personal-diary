@@ -1,0 +1,361 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/lib/hooks/useAuth'
+import Link from 'next/link'
+import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile } from 'lucide-react'
+import { ListSkeleton } from '@/components/ui/LoadingSkeleton'
+import DOMPurify from 'isomorphic-dompurify'
+
+interface SearchResult {
+  id: string
+  title: string
+  content: string
+  entry_date: string
+  mood: string | null
+  word_count: number
+  created_at: string
+  rank: number
+}
+
+export default function SearchPage() {
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    dateFrom: '',
+    dateTo: '',
+    mood: '',
+    folderId: '',
+    personId: '',
+    storyId: ''
+  })
+  const [people, setPeople] = useState<any[]>([])
+  const [stories, setStories] = useState<any[]>([])
+  const [folders, setFolders] = useState<any[]>([])
+  const { user } = useAuth()
+  const supabase = createClient()
+
+  useEffect(() => {
+    if (user) {
+      fetchFiltersData()
+    }
+  }, [user])
+
+  const fetchFiltersData = async () => {
+    const [peopleRes, storiesRes, foldersRes] = await Promise.all([
+      supabase.from('people').select('id, name').eq('user_id', user?.id),
+      supabase.from('stories').select('id, title, icon').eq('user_id', user?.id),
+      supabase.from('folders').select('id, name, icon').eq('user_id', user?.id).eq('folder_type', 'custom')
+    ])
+    
+    setPeople(peopleRes.data || [])
+    setStories(storiesRes.data || [])
+    setFolders(foldersRes.data || [])
+  }
+
+  const handleSearch = async () => {
+    if (!user) return
+    
+    setLoading(true)
+    try {
+      const { data, error } = await supabase.rpc('search_entries', {
+        p_user_id: user.id,
+        search_query: query || null,
+        date_from: filters.dateFrom || null,
+        date_to: filters.dateTo || null,
+        mood_filter: filters.mood || null,
+        folder_filter: filters.folderId || null,
+        person_filter: filters.personId || null,
+        story_filter: filters.storyId || null,
+      })
+
+      if (error) throw error
+      setResults(data || [])
+    } catch (error) {
+      console.error('Search error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const extractTextPreview = (html: string, maxLength: number = 200) => {
+    const sanitized = DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: []
+    })
+    const text = sanitized.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+  }
+
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text
+    const regex = new RegExp(`(${query})`, 'gi')
+    return text.replace(regex, '<mark class="bg-gold/30 dark:bg-teal/30">$1</mark>')
+  }
+
+  const clearFilters = () => {
+    setFilters({
+      dateFrom: '',
+      dateTo: '',
+      mood: '',
+      folderId: '',
+      personId: '',
+      storyId: ''
+    })
+  }
+
+  const hasActiveFilters = Object.values(filters).some(v => v !== '')
+
+  return (
+    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+      {/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-4 mb-4">
+            <Link
+              href="/app"
+              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-2xl font-bold text-charcoal dark:text-white">
+              Search Your Diary
+            </h1>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="Search titles, content, moods..."
+                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              disabled={loading}
+              className="px-6 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-3 rounded-xl border-2 transition-colors ${
+                showFilters || hasActiveFilters
+                  ? 'bg-gold/10 dark:bg-teal/10 border-gold dark:border-teal text-gold dark:text-teal'
+                  : 'border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5'
+              }`}
+            >
+              <Filter className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-charcoal dark:text-white">Filters</h3>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm text-charcoal/60 dark:text-white/60 hover:text-charcoal dark:hover:text-white"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Date Range */}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    From Date
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    To Date
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  />
+                </div>
+
+                {/* Mood Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    <Smile className="w-4 h-4 inline mr-1" />
+                    Mood
+                  </label>
+                  <select
+                    value={filters.mood}
+                    onChange={(e) => setFilters({ ...filters, mood: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  >
+                    <option value="">All Moods</option>
+                    <option value="😊 Happy">😊 Happy</option>
+                    <option value="😔 Sad">😔 Sad</option>
+                    <option value="😡 Angry">😡 Angry</option>
+                    <option value="😰 Anxious">😰 Anxious</option>
+                    <option value="😌 Peaceful">😌 Peaceful</option>
+                    <option value="🎉 Excited">🎉 Excited</option>
+                    <option value="😴 Tired">😴 Tired</option>
+                    <option value="💭 Thoughtful">💭 Thoughtful</option>
+                  </select>
+                </div>
+
+                {/* Person Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    <User className="w-4 h-4 inline mr-1" />
+                    Person
+                  </label>
+                  <select
+                    value={filters.personId}
+                    onChange={(e) => setFilters({ ...filters, personId: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  >
+                    <option value="">All People</option>
+                    {people.map((person) => (
+                      <option key={person.id} value={person.id}>
+                        {person.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Story Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    <BookMarked className="w-4 h-4 inline mr-1" />
+                    Story
+                  </label>
+                  <select
+                    value={filters.storyId}
+                    onChange={(e) => setFilters({ ...filters, storyId: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  >
+                    <option value="">All Stories</option>
+                    {stories.map((story) => (
+                      <option key={story.id} value={story.id}>
+                        {story.icon} {story.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Folder Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                    📁 Folder
+                  </label>
+                  <select
+                    value={filters.folderId}
+                    onChange={(e) => setFilters({ ...filters, folderId: e.target.value })}
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  >
+                    <option value="">All Folders</option>
+                    {folders.map((folder) => (
+                      <option key={folder.id} value={folder.id}>
+                        {folder.icon} {folder.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Results */}
+      <main className="max-w-6xl mx-auto px-6 py-8">
+        {loading ? (
+          <ListSkeleton count={5} />
+        ) : results.length > 0 ? (
+          <>
+            <div className="mb-6 text-charcoal/60 dark:text-white/60">
+              Found {results.length} {results.length === 1 ? 'entry' : 'entries'}
+            </div>
+            <div className="space-y-4">
+              {results.map((result) => (
+                <Link
+                  key={result.id}
+                  href={`/app/entry/${result.id}`}
+                  className="block bg-white dark:bg-graphite p-6 rounded-xl shadow-sm border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <h3 className="text-xl font-bold text-charcoal dark:text-white flex-1">
+                      {result.title}
+                    </h3>
+                    {result.mood && (
+                      <span className="px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium">
+                        {result.mood}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3">
+                    {extractTextPreview(result.content, 250)}
+                  </p>
+
+                  <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60">
+                    <span>
+                      {new Date(result.entry_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </span>
+                    <span>•</span>
+                    <span>{result.word_count} words</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        ) : query || hasActiveFilters ? (
+          <div className="text-center py-16">
+            <Search className="w-16 h-16 mx-auto mb-4 text-charcoal/20 dark:text-white/20" />
+            <h3 className="text-2xl font-bold text-charcoal dark:text-white mb-2">
+              No results found
+            </h3>
+            <p className="text-charcoal/60 dark:text-white/60">
+              Try adjusting your search query or filters
+            </p>
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <Search className="w-16 h-16 mx-auto mb-4 text-charcoal/20 dark:text-white/20" />
+            <h3 className="text-2xl font-bold text-charcoal dark:text-white mb-2">
+              Search your diary
+            </h3>
+            <p className="text-charcoal/60 dark:text-white/60">
+              Enter a search term to find entries, or use filters to narrow down
+            </p>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}

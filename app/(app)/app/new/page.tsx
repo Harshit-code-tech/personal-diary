@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import TemplateModal from '@/components/templates/TemplateModal'
+import TagInput from '@/components/tags/TagInput'
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 
@@ -33,6 +34,8 @@ export default function NewEntryPage() {
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [tags, setTags] = useState<string[]>([])
+  const [popularTags, setPopularTags] = useState<string[]>([])
   const [people, setPeople] = useState<Person[]>([])
   const [selectedPeople, setSelectedPeople] = useState<string[]>([])
   const [showTemplates, setShowTemplates] = useState(false)
@@ -55,6 +58,7 @@ export default function NewEntryPage() {
     if (user) {
       fetchPeople()
       fetchFolders()
+      fetchPopularTags()
     }
   }, [user])
 
@@ -86,6 +90,37 @@ export default function NewEntryPage() {
       setFolders(data || [])
     } catch (err) {
       console.error('Error fetching folders:', err)
+    }
+  }
+
+  const fetchPopularTags = async () => {
+    try {
+      // Get all tags from user's entries and count occurrences
+      const { data, error } = await supabase
+        .from('entries')
+        .select('tags')
+        .eq('user_id', user?.id)
+        .not('tags', 'is', null)
+
+      if (error) throw error
+      
+      // Flatten and count tags
+      const tagCount: Record<string, number> = {}
+      data?.forEach((entry: any) => {
+        entry.tags?.forEach((tag: string) => {
+          tagCount[tag] = (tagCount[tag] || 0) + 1
+        })
+      })
+
+      // Sort by frequency and take top 10
+      const popular = Object.entries(tagCount)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([tag]) => tag)
+
+      setPopularTags(popular)
+    } catch (err) {
+      console.error('Error fetching popular tags:', err)
     }
   }
 
@@ -316,6 +351,7 @@ export default function NewEntryPage() {
           entry_date: entryDate,
           word_count: wordCount,
           folder_id: finalFolderId,
+          tags: tags.length > 0 ? tags : null,
         })
         .select()
         .single()
@@ -567,6 +603,26 @@ export default function NewEntryPage() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Tags */}
+          <div className="mb-8 p-6 bg-gradient-to-br from-orange-500/5 to-transparent dark:from-orange-400/5 dark:to-transparent rounded-xl border border-orange-500/10 dark:border-orange-400/10">
+            <label className="block text-sm font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
+              <div className="p-2 bg-orange-500/10 dark:bg-orange-400/10 rounded-lg">
+                <span className="text-orange-500 dark:text-orange-400">🏷️</span>
+              </div>
+              Tags
+              <span className="ml-auto text-xs font-normal text-charcoal/50 dark:text-white/50">
+                Press Enter to add, Backspace to remove
+              </span>
+            </label>
+            <TagInput
+              tags={tags}
+              onChange={setTags}
+              suggestions={popularTags}
+              placeholder="Add tags (e.g., work, travel, family)..."
+              maxTags={10}
+            />
           </div>
 
           {/* Date Display */}

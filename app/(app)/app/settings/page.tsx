@@ -208,7 +208,23 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
                 <div>
-                  <p className="font-medium text-charcoal dark:text-white">Export Data</p>
+                  <p className="font-medium text-charcoal dark:text-white">Export Entries</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Download your entries as Markdown or PDF
+                  </p>
+                </div>
+                <Link
+                  href="/app/export"
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 dark:bg-blue-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                >
+                  <Download className="w-5 h-5" />
+                  Export
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div>
+                  <p className="font-medium text-charcoal dark:text-white">Export All Data (JSON)</p>
                   <p className="text-sm text-charcoal/60 dark:text-white/60">
                     Download all your diary entries, people, and stories
                   </p>
@@ -218,7 +234,7 @@ export default function SettingsPage() {
                   className="flex items-center gap-2 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
                 >
                   <Download className="w-5 h-5" />
-                  Export
+                  Export JSON
                 </button>
               </div>
 
