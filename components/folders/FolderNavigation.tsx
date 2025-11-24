@@ -212,7 +212,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
     return (
       <div key={folder.id} className="relative group">
         <Link
-          href={`/app/folder/${folder.id}`}
+          href={`/app?folder=${folder.id}`}
           onClick={(e) => {
             if (hasChildren) {
               e.preventDefault()

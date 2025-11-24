@@ -48,6 +48,16 @@ export default function AppPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const supabase = createClient()
+  
+  // Read folder from URL query parameter
+  const [urlFolderId, setUrlFolderId] = useState<string | null>(null)
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const folderId = params.get('folder')
+    setUrlFolderId(folderId)
+    setSelectedFolderId(folderId)
+  }, [])
   const [entries, setEntries] = useState<Entry[]>([])
   const [fetchingEntries, setFetchingEntries] = useState(true)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
@@ -437,7 +447,7 @@ export default function AppPage() {
                 </p>
               </div>
               <Link
-                href="/app/new"
+                href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
                 className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
               >
                 <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
@@ -598,7 +608,7 @@ export default function AppPage() {
                   Start writing your first entry to begin your journey of self-discovery
                 </p>
                 <Link
-                  href="/app/new"
+                  href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
                   className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 >
                   <Plus className="w-5 h-5" />
