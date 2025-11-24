@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { entrySchema, formatZodErrors } from '@/lib/validation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, ChevronRight, ChevronDown } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import TemplateModal from '@/components/templates/TemplateModal'
 import TagInput from '@/components/tags/TagInput'
@@ -19,13 +19,6 @@ interface Person {
   id: string
   name: string
   avatar_url: string | null
-}
-
-interface Folder {
-  id: string
-  name: string
-  icon: string
-  color: string
 }
 
 export default function NewEntryPage() {
@@ -40,18 +33,36 @@ export default function NewEntryPage() {
   const [people, setPeople] = useState<Person[]>([])
   const [selectedPeople, setSelectedPeople] = useState<string[]>([])
   const [showTemplates, setShowTemplates] = useState(false)
-  const [folders, setFolders] = useState<Folder[]>([])
-  const [selectedFolder, setSelectedFolder] = useState<string>('auto') // 'auto' = date folder, or folder id
+  const [folders, setFolders] = useState<any[]>([])
+  const [selectedFolders, setSelectedFolders] = useState<string[]>([])
+  const [showFolderSelector, setShowFolderSelector] = useState(false)
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
+    // Debug: Log full URL
+    console.log('Current URL:', window.location.href)
+    console.log('Search params:', searchParams.toString())
+    
     // Pre-fill date from URL parameter (from calendar)
     const dateParam = searchParams.get('date')
     if (dateParam) {
+      console.log('Setting entry date from URL:', dateParam)
       setEntryDate(dateParam)
+    }
+    
+    // Pre-select folder from URL (when clicking from folder view)
+    const folderParam = searchParams.get('folder')
+    console.log('Folder parameter from URL:', folderParam)
+    console.log('All search params keys:', Array.from(searchParams.keys()))
+    if (folderParam) {
+      console.log('Pre-selecting folder from URL:', folderParam)
+      setSelectedFolders([folderParam])
+    } else {
+      console.log('No folder parameter in URL')
     }
   }, [searchParams])
 
@@ -82,12 +93,12 @@ export default function NewEntryPage() {
     try {
       const { data, error } = await supabase
         .from('folders')
-        .select('id, name, icon, color')
+        .select('id, name, icon, color, parent_id, is_expanded, sort_order, folder_type')
         .eq('user_id', user?.id)
-        .eq('folder_type', 'custom') // Only show custom folders
-        .order('name')
+        .order('sort_order')
 
       if (error) throw error
+      console.log('Fetched folders:', data?.length || 0, 'folders')
       setFolders(data || [])
     } catch (err) {
       console.error('Error fetching folders:', err)
@@ -301,7 +312,6 @@ export default function NewEntryPage() {
       content: content.trim(),
       mood: mood || null,
       entry_date: entryDate,
-      folder_id: selectedFolder && selectedFolder !== 'auto' ? selectedFolder : null,
     })
 
     if (!validation.success) {
@@ -321,27 +331,7 @@ export default function NewEntryPage() {
     try {
       const wordCount = calculateWordCount(content)
 
-      let finalFolderId = null
-
-      // If user selected a custom folder, use it
-      if (selectedFolder && selectedFolder !== 'auto') {
-        finalFolderId = selectedFolder
-      } else {
-        // Auto-create date folder (prevents duplicates!)
-        const { data: folderData, error: folderError } = await supabase
-          .rpc('get_or_create_date_folder', {
-            p_user_id: user.id,
-            p_date: entryDate || new Date().toISOString().split('T')[0]
-          })
-
-        if (folderError) {
-          console.error('Folder creation error:', folderError)
-          // Continue anyway - entry can exist without folder
-        } else {
-          finalFolderId = folderData
-        }
-      }
-
+      // Entry will be auto-assigned to date folder by trigger
       const { data, error: insertError } = await supabase
         .from('entries')
         .insert({
@@ -351,13 +341,29 @@ export default function NewEntryPage() {
           mood: mood || null,
           entry_date: entryDate,
           word_count: wordCount,
-          folder_id: finalFolderId,
           tags: tags.length > 0 ? tags : null,
         })
         .select()
         .single()
 
       if (insertError) throw insertError
+
+      // Link to selected folders (in addition to auto date folder)
+      if (selectedFolders.length > 0) {
+        const folderLinks = selectedFolders.map(folderId => ({
+          entry_id: data.id,
+          folder_id: folderId,
+        }))
+
+        const { error: folderError } = await supabase
+          .from('entry_folders')
+          .insert(folderLinks)
+
+        if (folderError) {
+          console.error('Error linking folders:', folderError)
+          // Continue - entry is saved
+        }
+      }
 
       // Link selected people to this entry
       if (selectedPeople.length > 0) {
@@ -514,54 +520,52 @@ export default function NewEntryPage() {
           <div className="mb-8 p-6 bg-gradient-to-br from-purple-500/5 to-transparent dark:from-purple-400/5 dark:to-transparent rounded-xl border border-purple-500/10 dark:border-purple-400/10">
             <label className="block text-sm font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
               <div className="p-2 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg">
-                <FileText className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+                <Folder className="w-4 h-4 text-purple-500 dark:text-purple-400" />
               </div>
-              Save to Folder
+              Additional Folders
               <span className="ml-auto text-xs font-normal text-charcoal/50 dark:text-white/50">
-                Colors help you organize entries visually
+                Auto-saves to date folder + {selectedFolders.length} more
               </span>
             </label>
-            <div className="flex flex-wrap gap-3">
-              {/* Auto (Date Folder) Option */}
-              <button
-                onClick={() => setSelectedFolder('auto')}
-                className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                  selectedFolder === 'auto'
-                    ? 'bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white shadow-xl scale-105 ring-2 ring-purple-500/30'
-                    : 'bg-white dark:bg-charcoal text-charcoal dark:text-white hover:bg-purple-500/10 dark:hover:bg-purple-400/10 border border-charcoal/10 dark:border-white/10 hover:border-purple-500/30 dark:hover:border-purple-400/30 hover:scale-105 shadow-sm hover:shadow-md'
-                }`}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Auto (Date Folder)</span>
-              </button>
-
-              {/* Custom Folders */}
-              {folders.map((folder) => (
-                <button
-                  key={folder.id}
-                  onClick={() => setSelectedFolder(folder.id)}
-                  className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                    selectedFolder === folder.id
-                      ? 'bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white shadow-xl scale-105 ring-2 ring-purple-500/30'
-                      : 'bg-white dark:bg-charcoal text-charcoal dark:text-white hover:bg-purple-500/10 dark:hover:bg-purple-400/10 border border-charcoal/10 dark:border-white/10 hover:border-purple-500/30 dark:hover:border-purple-400/30 hover:scale-105 shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <span className="text-lg">{folder.icon}</span>
-                  <span>{folder.name}</span>
-                  {/* Color indicator dot */}
-                  <div 
-                    className="w-3 h-3 rounded-full ring-2 ring-white/50" 
-                    style={{ backgroundColor: folder.color }}
-                    title={`Color: ${folder.color}`}
-                  />
-                </button>
-              ))}
-            </div>
-            {folders.length === 0 && (
-              <p className="text-sm text-charcoal/50 dark:text-white/50 mt-2">
-                No custom folders yet. Create one from the sidebar to organize your entries!
-              </p>
+            
+            {/* Selected Folders Display */}
+            {selectedFolders.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {selectedFolders.map(folderId => {
+                  const folder = folders.find(f => f.id === folderId)
+                  console.log('Rendering selected folder:', folderId, 'Found:', folder)
+                  if (!folder) return null
+                  return (
+                    <div
+                      key={folder.id}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium"
+                      style={{ backgroundColor: `${folder.color}20`, color: folder.color }}
+                    >
+                      <span>{folder.icon}</span>
+                      <span>{folder.name}</span>
+                      <button
+                        onClick={() => setSelectedFolders(prev => prev.filter(id => id !== folderId))}
+                        className="hover:opacity-70 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
             )}
+            
+            <button
+              onClick={() => setShowFolderSelector(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 border-2 border-dashed border-purple-500/30 dark:border-purple-400/30 text-purple-600 dark:text-purple-400 rounded-lg text-sm font-medium hover:border-purple-500 dark:hover:border-purple-400 hover:bg-purple-500/5 dark:hover:bg-purple-400/5 transition-all"
+            >
+              <Folder className="w-4 h-4" />
+              <span>Select Folders</span>
+            </button>
+            
+            <p className="text-xs text-charcoal/50 dark:text-white/50 mt-3">
+              💡 Entry will automatically be saved to its date folder (e.g., "2025 → November → 23")
+            </p>
           </div>
 
           {/* Entry Date */}
@@ -689,6 +693,124 @@ export default function NewEntryPage() {
           onSelect={handleTemplateSelect}
         />
       )}
+
+      {/* Folder Selector Modal */}
+      {showFolderSelector && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col">
+            <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal flex items-center gap-2">
+                  <Folder className="w-5 h-5" />
+                  Select Folders
+                </h3>
+                <button
+                  onClick={() => setShowFolderSelector(false)}
+                  className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-sm text-charcoal/60 dark:text-white/60 mt-2">
+                Choose additional folders for this entry
+              </p>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              {folders.filter(f => f.folder_type !== 'year' && f.folder_type !== 'month' && f.folder_type !== 'day').length === 0 ? (
+                <p className="text-center text-charcoal/50 dark:text-white/50 py-8">
+                  No custom folders available. Date folders are auto-assigned.
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {folders
+                    .filter(f => !f.parent_id && f.folder_type !== 'year' && f.folder_type !== 'month' && f.folder_type !== 'day')
+                    .map(folder => renderFolderTreeItem(folder, 0))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-charcoal/10 dark:border-white/10">
+              <button
+                onClick={() => setShowFolderSelector(false)}
+                className="w-full px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all"
+              >
+                Done ({selectedFolders.length} selected)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
+
+  function renderFolderTreeItem(folder: any, level: number): React.ReactNode {
+    // Skip date-based folders (year, month, day)
+    if (folder.folder_type === 'year' || folder.folder_type === 'month' || folder.folder_type === 'day') {
+      return null
+    }
+
+    const isSelected = selectedFolders.includes(folder.id)
+    const hasChildren = folders.some(f => f.parent_id === folder.id && f.folder_type !== 'year' && f.folder_type !== 'month' && f.folder_type !== 'day')
+    const isExpanded = expandedFolders.has(folder.id)
+
+    return (
+      <div key={folder.id}>
+        <div
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+          style={{ paddingLeft: `${level * 20 + 12}px` }}
+        >
+          {hasChildren && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpandedFolders(prev => {
+                  const newSet = new Set(prev)
+                  if (newSet.has(folder.id)) {
+                    newSet.delete(folder.id)
+                  } else {
+                    newSet.add(folder.id)
+                  }
+                  return newSet
+                })
+              }}
+              className="p-0.5 hover:bg-charcoal/10 dark:hover:bg-white/10 rounded"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+          )}
+          {!hasChildren && <div className="w-5" />}
+          
+          <label className="flex items-center gap-2 flex-1 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => {
+                setSelectedFolders(prev =>
+                  prev.includes(folder.id)
+                    ? prev.filter(id => id !== folder.id)
+                    : [...prev, folder.id]
+                )
+              }}
+              className="w-4 h-4 rounded border-2 border-charcoal/30 dark:border-white/30 text-purple-500 focus:ring-purple-500"
+            />
+            <span className="text-lg">{folder.icon}</span>
+            <span className="font-medium text-charcoal dark:text-white">{folder.name}</span>
+          </label>
+        </div>
+
+        {isExpanded && hasChildren && (
+          <div>
+            {folders
+              .filter(f => f.parent_id === folder.id && f.folder_type !== 'year' && f.folder_type !== 'month' && f.folder_type !== 'day')
+              .map(child => renderFolderTreeItem(child, level + 1))}
+          </div>
+        )}
+      </div>
+    )
+  }
 }

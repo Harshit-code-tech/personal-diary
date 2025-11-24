@@ -6,9 +6,10 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus, Target, Star } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus, Target, Star, Folder } from 'lucide-react'
 import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import MultiFolderSelector from '@/components/folders/MultiFolderSelector'
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 
@@ -508,6 +509,18 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                 ))}
               </div>
             )}
+
+            {/* Folders Section */}
+            <div className="pt-4 border-t border-charcoal/10 dark:border-white/10">
+              <div className="flex items-center gap-2 text-sm font-medium text-charcoal/70 dark:text-white/70 mb-3">
+                <Folder className="w-4 h-4" />
+                <span>In Folders:</span>
+              </div>
+              <MultiFolderSelector
+                entryId={params.id}
+                onUpdate={fetchEntry}
+              />
+            </div>
 
             {/* Linked Goals */}
             <div className="flex items-center gap-3 flex-wrap pt-4 border-t border-charcoal/10 dark:border-white/10">

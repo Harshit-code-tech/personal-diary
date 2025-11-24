@@ -100,12 +100,41 @@ export default function AppPage() {
       const from = (page - 1) * ITEMS_PER_PAGE
       const to = from + ITEMS_PER_PAGE - 1
 
+      // If folder is selected, query through entry_folders junction table
+      let entryIds: string[] | null = null
+      if (selectedFolderId) {
+        const { data: entryFolders, error: efError } = await supabase
+          .from('entry_folders')
+          .select('entry_id')
+          .in('folder_id', folderIds)
+        
+        if (!efError && entryFolders) {
+          entryIds = entryFolders.map(ef => ef.entry_id)
+          
+          // If no entries in selected folders, return early
+          if (entryIds.length === 0) {
+            setEntries([])
+            setTotalCount(0)
+            setHasMore(false)
+            setStats({
+              totalEntries: 0,
+              totalWords: 0,
+              peopleCount: 0,
+              storiesCount: 0,
+              currentStreak: 0,
+            })
+            setFetchingEntries(false)
+            return
+          }
+        }
+      }
+
       let query = supabase
         .from('entries')
         .select(`
           id, title, content, entry_date, word_count, mood, 
           folder_id, person_id, created_at, tags,
-          folders (name, icon),
+          folders!entries_folder_id_fkey (name, icon),
           entry_people (
             people (id, name, avatar_url)
           ),
@@ -116,8 +145,8 @@ export default function AppPage() {
         .order('entry_date', { ascending: false })
         .range(from, to)
 
-      if (selectedFolderId) {
-        query = query.in('folder_id', folderIds)
+      if (entryIds) {
+        query = query.in('id', entryIds)
       }
 
       if (selectedTag) {
@@ -350,6 +379,13 @@ export default function AppPage() {
             >
               <Calendar className="w-4 h-4" />
               Calendar
+            </Link>
+            <Link
+              href="/app/statistics"
+              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-all duration-300 rounded-xl hover:bg-blue-500/10 dark:hover:bg-blue-400/10 flex items-center gap-2"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Stats
             </Link>
             <Link
               href="/app/settings"

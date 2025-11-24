@@ -55,17 +55,15 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
 
       if (error) throw error
 
-      // Get entry counts for each folder
-      const folderIds = data?.map(f => f.id) || []
+      // Get entry counts for each folder using the junction table
       const { data: entryCounts } = await supabase
-        .from('entries')
-        .select('folder_id')
-        .in('folder_id', folderIds)
+        .from('entry_folders')
+        .select('folder_id, entry_id')
 
       const countMap = new Map<string, number>()
-      entryCounts?.forEach(entry => {
-        if (entry.folder_id) {
-          countMap.set(entry.folder_id, (countMap.get(entry.folder_id) || 0) + 1)
+      entryCounts?.forEach(ef => {
+        if (ef.folder_id) {
+          countMap.set(ef.folder_id, (countMap.get(ef.folder_id) || 0) + 1)
         }
       })
 
@@ -213,9 +211,11 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
 
     return (
       <div key={folder.id} className="relative group">
-        <button
-          onClick={() => {
+        <Link
+          href={`/app/folder/${folder.id}`}
+          onClick={(e) => {
             if (hasChildren) {
+              e.preventDefault()
               toggleFolder(folder.id)
             }
             onFolderSelect?.(folder.id)
@@ -251,11 +251,11 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
               isSelected 
                 ? 'bg-gold/30 dark:bg-teal/30 text-charcoal dark:text-teal' 
                 : 'bg-charcoal/10 dark:bg-white/10 text-charcoal/60 dark:text-white/60 group-hover:bg-charcoal/20 dark:group-hover:bg-white/20'
-            }`}>
+              }`}>
               {folder.entry_count}
             </span>
           )}
-        </button>
+        </Link>
 
         {isExpanded && hasChildren && (
           <div className="mt-1 space-y-1">
