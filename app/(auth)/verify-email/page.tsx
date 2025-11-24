@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
@@ -10,14 +12,53 @@ export default function VerifyEmailPage() {
   const email = searchParams?.get('email') || ''
   const [resending, setResending] = useState(false)
   const [resent, setResent] = useState(false)
+  const supabase = createClient()
+
+  // Auto-check if user is verified
+  useEffect(() => {
+    const checkVerification = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user?.email_confirmed_at) {
+        toast.success('Email verified successfully!')
+        router.push('/app')
+      }
+    }
+
+    // Check immediately
+    checkVerification()
+
+    // Check every 3 seconds
+    const interval = setInterval(checkVerification, 3000)
+
+    return () => clearInterval(interval)
+  }, [router, supabase])
 
   const handleResend = async () => {
+    if (!email) {
+      toast.error('No email address provided')
+      return
+    }
+
     setResending(true)
-    // In production, call your API to resend email
-    setTimeout(() => {
-      setResending(false)
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      })
+
+      if (error) throw error
+
       setResent(true)
-    }, 2000)
+      toast.success('Verification email sent!')
+      
+      // Reset "resent" state after 5 seconds
+      setTimeout(() => setResent(false), 5000)
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resend email')
+    } finally {
+      setResending(false)
+    }
   }
 
   return (

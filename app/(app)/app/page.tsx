@@ -6,10 +6,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import DOMPurify from 'isomorphic-dompurify'
 import Link from 'next/link'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import AppHeader from '@/components/layout/AppHeader'
 import FolderNavigation from '@/components/folders/FolderNavigation'
-import NotificationBell from '@/components/notifications/NotificationBell'
-import { BookOpen, Plus, Calendar, Settings, LogOut, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type, Search, BarChart3, Bell, Star, Target } from 'lucide-react'
+import { Plus, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type } from 'lucide-react'
 
 type Entry = {
   id: string
@@ -240,11 +239,6 @@ export default function AppPage() {
     }
   }
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   const fetchAllTags = async () => {
     try {
       const { data, error } = await supabase
@@ -295,134 +289,46 @@ export default function AppPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-midnight/70 border-b border-gold/20 dark:border-teal/20 shadow-lg">
-        <div className="max-w-full px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2.5 hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 lg:hidden group hover:scale-110"
-            >
-              {sidebarOpen ? 
-                <X className="w-5 h-5 group-hover:text-gold dark:group-hover:text-teal transition-colors" /> : 
-                <Menu className="w-5 h-5 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-              }
-            </button>
-            <Link href="/app" className="group flex items-center gap-4">
-              <div className="p-2.5 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <BookOpen className="w-7 h-7 text-gold dark:text-teal" />
-              </div>
-              <span className="font-serif text-3xl font-black bg-gradient-to-r from-charcoal to-charcoal/70 dark:from-teal dark:to-teal/70 bg-clip-text text-transparent">
-                My Diary
-              </span>
-            </Link>
-          </div>
-          
-          <nav className="flex items-center gap-3">
-            <ThemeSwitcher />
-            <NotificationBell />
-            <Link
-              href="/app/search"
-              className="p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
-              title="Search"
-            >
-              <Search className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/app/insights"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-300 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-400/10 flex items-center gap-2"
-            >
-              <BarChart3 className="w-4 h-4" />
-              Insights
-            </Link>
-            <Link
-              href="/app/mood"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-pink-500 dark:hover:text-pink-400 transition-all duration-300 rounded-xl hover:bg-pink-500/10 dark:hover:bg-pink-400/10 flex items-center gap-2"
-            >
-              <Smile className="w-4 h-4" />
-              Moods
-            </Link>
-            <Link
-              href="/app/reminders"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-yellow-500 dark:hover:text-yellow-400 transition-all duration-300 rounded-xl hover:bg-yellow-500/10 dark:hover:bg-yellow-400/10 flex items-center gap-2"
-            >
-              <Bell className="w-4 h-4" />
-              Reminders
-            </Link>
-            <Link
-              href="/app/timeline"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-indigo-500 dark:hover:text-indigo-400 transition-all duration-300 rounded-xl hover:bg-indigo-500/10 dark:hover:bg-indigo-400/10 flex items-center gap-2"
-            >
-              <Star className="w-4 h-4" />
-              Timeline
-            </Link>
-            <Link
-              href="/app/goals"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-green-500 dark:hover:text-green-400 transition-all duration-300 rounded-xl hover:bg-green-500/10 dark:hover:bg-green-400/10 flex items-center gap-2"
-            >
-              <Target className="w-4 h-4" />
-              Goals
-            </Link>
-            <Link
-              href="/app"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 flex items-center gap-2"
-            >
-              <FileText className="w-4 h-4" />
-              Entries
-            </Link>
-            <Link
-              href="/app/people"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-all duration-300 rounded-xl hover:bg-blue-500/10 dark:hover:bg-blue-400/10 flex items-center gap-2"
-            >
-              <Users className="w-4 h-4" />
-              People
-            </Link>
-            <Link
-              href="/app/stories"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-all duration-300 rounded-xl hover:bg-orange-500/10 dark:hover:bg-orange-400/10 flex items-center gap-2"
-            >
-              <BookMarked className="w-4 h-4" />
-              Stories
-            </Link>
-            <Link
-              href="/app/calendar"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-purple-500 dark:hover:text-purple-400 transition-all duration-300 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-400/10 flex items-center gap-2"
-            >
-              <Calendar className="w-4 h-4" />
-              Calendar
-            </Link>
-            <Link
-              href="/app/statistics"
-              className="px-4 py-2 text-sm font-bold text-charcoal dark:text-white hover:text-blue-500 dark:hover:text-blue-400 transition-all duration-300 rounded-xl hover:bg-blue-500/10 dark:hover:bg-blue-400/10 flex items-center gap-2"
-            >
-              <BarChart3 className="w-4 h-4" />
-              Stats
-            </Link>
-            <Link
-              href="/app/settings"
-              className="p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="p-2.5 text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          </nav>
-        </div>
-      </header>
+      <AppHeader />
 
-      <div className="flex">
+      <div className="flex relative">
+        {/* Sidebar Toggle Button for Mobile - Floating */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110"
+          aria-label={sidebarOpen ? 'Close folders' : 'Open folders'}
+        >
+          {sidebarOpen ? 
+            <X className="w-6 h-6" /> : 
+            <Menu className="w-6 h-6" />
+          }
+        </button>
+
+        {/* Overlay for mobile sidebar */}
+        {sidebarOpen && (
+          <div
+            className="lg:hidden fixed inset-0 bg-black/30 dark:bg-black/50 z-30 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
         {/* Sidebar */}
         <aside
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:sticky top-[85px] left-0 z-40 w-80 h-[calc(100vh-85px)] bg-gradient-to-b from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
+          } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] bg-gradient-to-b from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
         >
           <div className="p-6">
+            <div className="flex items-center justify-between mb-4 lg:hidden">
+              <h2 className="font-serif text-2xl font-bold text-charcoal dark:text-teal">Folders</h2>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 hover:bg-gold/10 dark:hover:bg-teal/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             <FolderNavigation
               onFolderSelect={(folderId) => {
                 setSelectedFolderId(folderId)
@@ -434,106 +340,106 @@ export default function AppPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-10">
-              <div>
-                <h1 className="font-serif text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-3 leading-tight">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
+              <div className="flex-1">
+                <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight">
                   {folderName}
                 </h1>
-                <p className="text-lg text-charcoal/70 dark:text-white/70 font-medium">
+                <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 font-medium">
                   Welcome back, <span className="text-gold dark:text-teal font-bold">{user?.email?.split('@')[0]}</span> ✨
                 </p>
               </div>
               <Link
                 href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
-                className="group flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 w-full sm:w-auto justify-center"
               >
-                <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" />
-                New Entry
+                <Plus className="w-5 sm:w-6 h-5 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
+                <span className="text-sm sm:text-base">New Entry</span>
               </Link>
             </div>
 
             {/* Statistics Cards */}
             {!selectedFolderId && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 {/* Total Entries */}
-                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-3 bg-gold/10 dark:bg-teal/10 rounded-xl group-hover:bg-gold/20 dark:group-hover:bg-teal/20 transition-colors">
-                      <FileText className="w-6 h-6 text-gold dark:text-teal" />
+                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="p-2 sm:p-3 bg-gold/10 dark:bg-teal/10 rounded-lg sm:rounded-xl group-hover:bg-gold/20 dark:group-hover:bg-teal/20 transition-colors">
+                      <FileText className="w-4 sm:w-6 h-4 sm:h-6 text-gold dark:text-teal" />
                     </div>
-                    <TrendingUp className="w-5 h-5 text-gold/50 dark:text-teal/50" />
+                    <TrendingUp className="w-3 sm:w-5 h-3 sm:h-5 text-gold/50 dark:text-teal/50" />
                   </div>
-                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-charcoal dark:text-white mb-1">
                     {stats.totalEntries}
                   </div>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                  <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 font-medium">
                     Total Entries
                   </div>
                 </div>
 
                 {/* Total Words */}
-                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-3 bg-purple-500/10 dark:bg-purple-400/10 rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/20 transition-colors">
-                      <Type className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="p-2 sm:p-3 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg sm:rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/20 transition-colors">
+                      <Type className="w-4 sm:w-6 h-4 sm:h-6 text-purple-500 dark:text-purple-400" />
                     </div>
-                    <TrendingUp className="w-5 h-5 text-purple-500/50 dark:text-purple-400/50" />
+                    <TrendingUp className="w-3 sm:w-5 h-3 sm:h-5 text-purple-500/50 dark:text-purple-400/50" />
                   </div>
-                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-charcoal dark:text-white mb-1">
                     {stats.totalWords.toLocaleString()}
                   </div>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                  <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 font-medium">
                     Words Written
                   </div>
                 </div>
 
                 {/* People Mentioned */}
-                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-xl group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/20 transition-colors">
-                      <Users className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="p-2 sm:p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg sm:rounded-xl group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/20 transition-colors">
+                      <Users className="w-4 sm:w-6 h-4 sm:h-6 text-blue-500 dark:text-blue-400" />
                     </div>
-                    <Smile className="w-5 h-5 text-blue-500/50 dark:text-blue-400/50" />
+                    <Smile className="w-3 sm:w-5 h-3 sm:h-5 text-blue-500/50 dark:text-blue-400/50" />
                   </div>
-                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-charcoal dark:text-white mb-1">
                     {stats.peopleCount}
                   </div>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                  <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 font-medium">
                     People Featured
                   </div>
                 </div>
 
                 {/* Stories Created */}
-                <div className="group bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-3 bg-orange-500/10 dark:bg-orange-400/10 rounded-xl group-hover:bg-orange-500/20 dark:group-hover:bg-orange-400/20 transition-colors">
-                      <BookOpen className="w-6 h-6 text-orange-500 dark:text-orange-400" />
+                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="p-2 sm:p-3 bg-orange-500/10 dark:bg-orange-400/10 rounded-lg sm:rounded-xl group-hover:bg-orange-500/20 dark:group-hover:bg-orange-400/20 transition-colors">
+                      <BookMarked className="w-4 sm:w-6 h-4 sm:h-6 text-orange-500 dark:text-orange-400" />
                     </div>
-                    <FileText className="w-5 h-5 text-orange-500/50 dark:text-orange-400/50" />
+                    <FileText className="w-3 sm:w-5 h-3 sm:h-5 text-orange-500/50 dark:text-orange-400/50" />
                   </div>
-                  <div className="text-3xl font-bold text-charcoal dark:text-white mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-charcoal dark:text-white mb-1">
                     {stats.storiesCount}
                   </div>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60 font-medium">
+                  <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 font-medium">
                     Stories Created
                   </div>
                 </div>
 
                 {/* Writing Streak */}
-                <div className="group bg-gradient-to-br from-gold/90 via-gold to-gold/80 dark:from-teal/90 dark:via-teal dark:to-teal/80 rounded-xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 hover:scale-105">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="p-3 bg-white/20 dark:bg-midnight/20 rounded-xl group-hover:bg-white/30 dark:group-hover:bg-midnight/30 transition-colors">
-                      <Zap className="w-6 h-6 text-white dark:text-midnight" />
+                <div className="group bg-gradient-to-br from-gold/90 via-gold to-gold/80 dark:from-teal/90 dark:via-teal dark:to-teal/80 rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 hover:scale-105 col-span-2 sm:col-span-1">
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <div className="p-2 sm:p-3 bg-white/20 dark:bg-midnight/20 rounded-lg sm:rounded-xl group-hover:bg-white/30 dark:group-hover:bg-midnight/30 transition-colors">
+                      <Zap className="w-4 sm:w-6 h-4 sm:h-6 text-white dark:text-midnight" />
                     </div>
-                    <TrendingUp className="w-5 h-5 text-white/70 dark:text-midnight/70" />
+                    <TrendingUp className="w-3 sm:w-5 h-3 sm:h-5 text-white/70 dark:text-midnight/70" />
                   </div>
-                  <div className="text-3xl font-bold text-white dark:text-midnight mb-1">
+                  <div className="text-2xl sm:text-3xl font-bold text-white dark:text-midnight mb-1">
                     {stats.currentStreak} days
                   </div>
-                  <div className="text-sm text-white/90 dark:text-midnight/90 font-medium">
+                  <div className="text-xs sm:text-sm text-white/90 dark:text-midnight/90 font-medium">
                     Current Streak 🔥
                   </div>
                 </div>
@@ -542,14 +448,16 @@ export default function AppPage() {
 
             {/* Tag Filter */}
             {allTags.length > 0 && (
-              <div className="mb-8 p-6 bg-white dark:bg-graphite rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-2xl">🏷️</span>
-                  <h3 className="text-lg font-bold text-charcoal dark:text-white">Filter by Tag</h3>
+              <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl sm:text-2xl">🏷️</span>
+                    <h3 className="text-base sm:text-lg font-bold text-charcoal dark:text-white">Filter by Tag</h3>
+                  </div>
                   {selectedTag && (
                     <button
                       onClick={() => setSelectedTag(null)}
-                      className="ml-auto text-sm font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      className="sm:ml-auto text-sm font-medium text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                     >
                       Clear Filter
                     </button>
@@ -560,7 +468,7 @@ export default function AppPage() {
                     <button
                       key={tag}
                       onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
                         selectedTag === tag
                           ? 'bg-orange-500 dark:bg-orange-400 text-white shadow-lg scale-105'
                           : 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 dark:hover:bg-orange-400/20 hover:scale-105'
@@ -570,7 +478,7 @@ export default function AppPage() {
                     </button>
                   ))}
                   {allTags.length > 15 && (
-                    <span className="px-4 py-2 text-sm text-charcoal/50 dark:text-white/50">
+                    <span className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-charcoal/50 dark:text-white/50">
                       +{allTags.length - 15} more
                     </span>
                   )}
@@ -580,69 +488,69 @@ export default function AppPage() {
 
             {/* Entries List */}
             {fetchingEntries ? (
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Loading skeleton */}
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white dark:bg-graphite rounded-xl shadow-md p-6 animate-pulse">
+                  <div key={i} className="bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 animate-pulse">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 space-y-3">
-                        <div className="h-7 bg-gradient-to-r from-charcoal/10 to-charcoal/5 dark:from-white/10 dark:to-white/5 rounded w-3/4"></div>
-                        <div className="h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-1/4"></div>
+                        <div className="h-6 sm:h-7 bg-gradient-to-r from-charcoal/10 to-charcoal/5 dark:from-white/10 dark:to-white/5 rounded w-3/4"></div>
+                        <div className="h-4 sm:h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-1/4"></div>
                       </div>
-                      <div className="h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-24"></div>
+                      <div className="h-4 sm:h-5 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-20 sm:w-24"></div>
                     </div>
                     <div className="space-y-2">
-                      <div className="h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded"></div>
-                      <div className="h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-5/6"></div>
+                      <div className="h-3 sm:h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded"></div>
+                      <div className="h-3 sm:h-4 bg-gradient-to-r from-charcoal/5 to-transparent dark:from-white/5 dark:to-transparent rounded w-5/6"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-gradient-to-br from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
-                <div className="text-8xl mb-6 animate-bounce">📝</div>
-                <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal bg-gradient-to-r from-gold to-gold/60 dark:from-teal dark:to-teal/60 bg-clip-text text-transparent">
+              <div className="bg-gradient-to-br from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight rounded-xl sm:rounded-2xl shadow-xl p-8 sm:p-12 lg:p-16 text-center border border-gold/20 dark:border-teal/20">
+                <div className="text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6 animate-bounce">📝</div>
+                <h3 className="font-serif text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-charcoal dark:text-teal bg-gradient-to-r from-gold to-gold/60 dark:from-teal dark:to-teal/60 bg-clip-text text-transparent">
                   Your Journal Awaits
                 </h3>
-                <p className="text-lg text-charcoal/70 dark:text-white/70 mb-8 max-w-md mx-auto">
+                <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 mb-6 sm:mb-8 max-w-md mx-auto">
                   Start writing your first entry to begin your journey of self-discovery
                 </p>
                 <Link
                   href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                   Create First Entry
                 </Link>
               </div>
             ) : (
-              <div className="grid gap-6">
+              <div className="grid gap-4 sm:gap-6">
                 {entries.map((entry) => (
                   <Link
                     key={entry.id}
                     href={`/app/entry/${entry.id}`}
-                    className="group block bg-white dark:bg-graphite rounded-2xl shadow-lg hover:shadow-2xl p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.02] hover:-translate-y-1"
+                    className="group block bg-white dark:bg-graphite rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.01] sm:hover:scale-[1.02] hover:-translate-y-1"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-2xl font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors duration-300">
+                    <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-serif text-xl sm:text-2xl font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors duration-300 line-clamp-2">
                           {entry.title}
                         </h3>
                         {entry.mood && (
-                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-gold/10 via-gold/15 to-gold/20 dark:from-teal/10 dark:via-teal/15 dark:to-teal/20 text-gold dark:text-teal rounded-full text-sm font-bold shadow-sm">
-                            <span className="text-base">{entry.mood}</span>
+                          <span className="inline-flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-gold/10 via-gold/15 to-gold/20 dark:from-teal/10 dark:via-teal/15 dark:to-teal/20 text-gold dark:text-teal rounded-full text-xs sm:text-sm font-bold shadow-sm">
+                            <span className="text-sm sm:text-base">{entry.mood}</span>
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-sm text-charcoal/70 dark:text-white/70 font-bold">
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className="text-xs sm:text-sm text-charcoal/70 dark:text-white/70 font-bold whitespace-nowrap">
                           {new Date(entry.entry_date).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
                           })}
                         </span>
-                        <span className="text-xs text-charcoal/50 dark:text-white/50">
+                        <span className="text-[10px] sm:text-xs text-charcoal/50 dark:text-white/50 whitespace-nowrap">
                           {new Date(entry.created_at).toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
@@ -652,64 +560,70 @@ export default function AppPage() {
                     </div>
                     
                     <div
-                      className="text-charcoal/80 dark:text-white/80 line-clamp-3 mb-5 leading-relaxed"
+                      className="text-sm sm:text-base text-charcoal/80 dark:text-white/80 line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-5 leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: extractTextPreview(entry.content, 200) }}
                     />
                     
-                    <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60 flex-wrap">
-                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
-                        <Type className="w-4 h-4" />
-                        {entry.word_count} words
+                    <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-charcoal/60 dark:text-white/60 flex-wrap">
+                      <span className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
+                        <Type className="w-3 sm:w-4 h-3 sm:h-4" />
+                        <span className="hidden xs:inline">{entry.word_count} words</span>
+                        <span className="xs:hidden">{entry.word_count}w</span>
                       </span>
                       {entry.folder_id && (
-                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
-                          <span className="text-base">{(entry as any).folders?.icon || '📁'}</span>
-                          {(entry as any).folders?.name || 'Folder'}
+                        <span className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
+                          <span className="text-sm sm:text-base">{(entry as any).folders?.icon || '📁'}</span>
+                          <span className="hidden sm:inline">{(entry as any).folders?.name || 'Folder'}</span>
                         </span>
                       )}
                       {entry.entry_people && entry.entry_people.length > 0 && (
                         <div className="flex items-center gap-2">
-                          <div className="flex gap-1.5 flex-wrap">
-                            {entry.entry_people.map((ep) => (
+                          <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+                            {entry.entry_people.slice(0, 2).map((ep) => (
                               <span
                                 key={ep.people.id}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-bold hover:bg-blue-500/20 dark:hover:bg-blue-400/20 transition-colors"
+                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] sm:text-xs font-bold hover:bg-blue-500/20 dark:hover:bg-blue-400/20 transition-colors"
                               >
                                 {ep.people.avatar_url ? (
                                   <img
                                     src={ep.people.avatar_url}
                                     alt={ep.people.name}
-                                    className="w-5 h-5 rounded-full object-cover ring-2 ring-blue-500/20"
+                                    className="w-4 sm:w-5 h-4 sm:h-5 rounded-full object-cover ring-2 ring-blue-500/20"
                                   />
                                 ) : (
-                                  <div className="w-5 h-5 rounded-full bg-blue-500/30 dark:bg-blue-400/30 flex items-center justify-center text-[10px] font-bold">
+                                  <div className="w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-blue-500/30 dark:bg-blue-400/30 flex items-center justify-center text-[8px] sm:text-[10px] font-bold">
                                     {ep.people.name.charAt(0)}
                                   </div>
                                 )}
-                                {ep.people.name}
+                                <span className="hidden sm:inline">{ep.people.name}</span>
                               </span>
                             ))}
+                            {entry.entry_people.length > 2 && (
+                              <span className="inline-flex items-center px-2 py-1 bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-bold">
+                                +{entry.entry_people.length - 2}
+                              </span>
+                            )}
                           </div>
                         </div>
                       )}
                       {(entry as any).story_entries && (entry as any).story_entries.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                           {(entry as any).story_entries.slice(0, 2).map((se: any) => (
                             <span
                               key={se.stories.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:shadow-md transition-all"
+                              className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10px] sm:text-xs font-bold shadow-sm hover:shadow-md transition-all"
                               style={{ 
                                 backgroundColor: `${se.stories.color}15`, 
                                 color: se.stories.color,
                                 border: `1px solid ${se.stories.color}30`
                               }}
                             >
-                              <span className="text-sm">{se.stories.icon}</span>
-                              <span>{se.stories.title}</span>
+                              <span className="text-xs sm:text-sm">{se.stories.icon}</span>
+                              <span className="hidden sm:inline">{se.stories.title}</span>
                             </span>
                           ))}
                           {(entry as any).story_entries.length > 2 && (
-                            <span className="text-xs px-2 py-1 bg-charcoal/10 dark:bg-white/10 rounded-lg font-semibold">
+                            <span className="text-[10px] sm:text-xs px-2 py-1 bg-charcoal/10 dark:bg-white/10 rounded-lg font-semibold">
                               +{(entry as any).story_entries.length - 2}
                             </span>
                           )}
@@ -723,13 +637,13 @@ export default function AppPage() {
 
             {/* Load More Button */}
             {!fetchingEntries && hasMore && entries.length > 0 && (
-              <div className="flex justify-center mt-8">
+              <div className="flex justify-center mt-6 sm:mt-8">
                 <button
                   onClick={() => {
                     setPage(prev => prev + 1)
                     fetchEntries()
                   }}
-                  className="px-8 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-lg"
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity shadow-lg text-sm sm:text-base"
                 >
                   Load More Entries
                 </button>
@@ -738,9 +652,9 @@ export default function AppPage() {
 
             {/* End of results message */}
             {!fetchingEntries && !hasMore && entries.length > 0 && (
-              <div className="text-center mt-8 text-charcoal/60 dark:text-white/60">
-                <p>You've reached the end of your entries</p>
-                <p className="text-sm mt-1">Total: {totalCount} {totalCount === 1 ? 'entry' : 'entries'}</p>
+              <div className="text-center mt-6 sm:mt-8 text-charcoal/60 dark:text-white/60">
+                <p className="text-sm sm:text-base">You've reached the end of your entries</p>
+                <p className="text-xs sm:text-sm mt-1">Total: {totalCount} {totalCount === 1 ? 'entry' : 'entries'}</p>
               </div>
             )}
           </div>

@@ -5,15 +5,34 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft } from 'lucide-react'
+import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft, Mail, Lock } from 'lucide-react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import ReauthModal from '@/components/auth/ReauthModal'
 
 export default function SettingsPage() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  
+  // Change email states
+  const [showChangeEmail, setShowChangeEmail] = useState(false)
+  const [newEmail, setNewEmail] = useState('')
+  const [emailOtp, setEmailOtp] = useState('')
+  const [emailOtpSent, setEmailOtpSent] = useState(false)
+  const [changingEmail, setChangingEmail] = useState(false)
+  
+  // Change password states
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  
+  // Reauthentication states
+  const [showReauthModal, setShowReauthModal] = useState(false)
+  const [reauthAction, setReauthAction] = useState<'changeEmail' | 'changePassword' | 'deleteAccount' | null>(null)
+  
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
@@ -93,6 +112,23 @@ export default function SettingsPage() {
       return
     }
 
+    // Require reauthentication
+    setReauthAction('deleteAccount')
+    setShowReauthModal(true)
+  }
+
+  const handleReauthSuccess = async () => {
+    if (reauthAction === 'deleteAccount') {
+      await executeDeleteAccount()
+    } else if (reauthAction === 'changeEmail') {
+      await executeSendEmailOtp()
+    } else if (reauthAction === 'changePassword') {
+      await executeChangePassword()
+    }
+    setReauthAction(null)
+  }
+
+  const executeDeleteAccount = async () => {
     try {
       // Delete all user data
       await Promise.all([
@@ -104,10 +140,89 @@ export default function SettingsPage() {
 
       // Sign out
       await supabase.auth.signOut()
+      toast.success('Account deleted successfully')
       router.push('/')
     } catch (error) {
       console.error('Error deleting account:', error)
       toast.error('Failed to delete account. Please contact support.')
+    }
+  }
+
+  const handleStartChangeEmail = () => {
+    setShowChangeEmail(true)
+    setEmailOtpSent(false)
+    setEmailOtp('')
+    setNewEmail('')
+  }
+
+  const handleSendEmailOtp = () => {
+    if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    // Require reauthentication before sending OTP
+    setReauthAction('changeEmail')
+    setShowReauthModal(true)
+  }
+
+  const executeSendEmailOtp = async () => {
+    setChangingEmail(true)
+    try {
+      const { error } = await supabase.auth.updateUser(
+        { email: newEmail },
+        {
+          emailRedirectTo: `${window.location.origin}/app/settings`,
+        }
+      )
+
+      if (error) throw error
+
+      setEmailOtpSent(true)
+      toast.success('Verification email sent! Check your new email inbox.')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send verification email')
+    } finally {
+      setChangingEmail(false)
+    }
+  }
+
+  const handleStartChangePassword = () => {
+    setShowChangePassword(true)
+    setNewPassword('')
+    setConfirmPassword('')
+  }
+
+  const handleChangePassword = () => {
+    if (!newPassword || newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    // Require reauthentication before changing password
+    setReauthAction('changePassword')
+    setShowReauthModal(true)
+  }
+
+  const executeChangePassword = async () => {
+    setChangingPassword(true)
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+
+      toast.success('Password updated successfully!')
+      setShowChangePassword(false)
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update password')
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -151,19 +266,154 @@ export default function SettingsPage() {
               </h2>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                readOnly
-                className="w-full px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
-              />
-              <p className="text-xs text-charcoal/60 dark:text-white/60 mt-2">
-                Your email cannot be changed
-              </p>
+            <div className="space-y-6">
+              {/* Email Section */}
+              <div>
+                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                  Email Address
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    readOnly
+                    className="flex-1 px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
+                  />
+                  <button
+                    onClick={handleStartChangeEmail}
+                    className="flex items-center gap-2 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                  >
+                    <Mail className="w-4 h-4" />
+                    Change
+                  </button>
+                </div>
+              </div>
+
+              {/* Change Email Modal */}
+              {showChangeEmail && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-charcoal dark:text-white">Change Email Address</h3>
+                    <button
+                      onClick={() => setShowChangeEmail(false)}
+                      className="text-charcoal/60 dark:text-white/60 hover:text-charcoal dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  {!emailOtpSent ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                          New Email Address
+                        </label>
+                        <input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          placeholder="new.email@example.com"
+                          className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                        />
+                      </div>
+                      <button
+                        onClick={handleSendEmailOtp}
+                        disabled={changingEmail}
+                        className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                      >
+                        {changingEmail ? 'Sending...' : 'Send Verification Email'}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm text-charcoal dark:text-white">
+                        A verification email has been sent to <strong>{newEmail}</strong>. 
+                        Please check your inbox and click the link to confirm your new email address.
+                      </p>
+                      <p className="text-xs text-charcoal/60 dark:text-white/60">
+                        You'll need to verify both your old and new email addresses.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Password Section */}
+              <div>
+                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                  Password
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="password"
+                    value="••••••••••••"
+                    readOnly
+                    className="flex-1 px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
+                  />
+                  <button
+                    onClick={handleStartChangePassword}
+                    className="flex items-center gap-2 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                  >
+                    <Lock className="w-4 h-4" />
+                    Change
+                  </button>
+                </div>
+              </div>
+
+              {/* Change Password Modal */}
+              {showChangePassword && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-charcoal dark:text-white">Change Password</h3>
+                    <button
+                      onClick={() => setShowChangePassword(false)}
+                      className="text-charcoal/60 dark:text-white/60 hover:text-charcoal dark:hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                      minLength={8}
+                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                    />
+                  </div>
+
+                  <p className="text-xs text-charcoal/60 dark:text-white/60">
+                    Password must be at least 8 characters long
+                  </p>
+
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={changingPassword || !newPassword || !confirmPassword}
+                    className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                  >
+                    {changingPassword ? 'Updating...' : 'Update Password'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -323,6 +573,18 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      {/* Reauthentication Modal */}
+      <ReauthModal
+        isOpen={showReauthModal}
+        onClose={() => {
+          setShowReauthModal(false)
+          setReauthAction(null)
+        }}
+        onSuccess={handleReauthSuccess}
+        title="Confirm Your Identity"
+        description="For your security, please re-enter your password to continue"
+      />
     </div>
   )
 }

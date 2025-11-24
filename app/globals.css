@@ -11,13 +11,40 @@
   --teal: #5EEAD4;
 }
 
+/* Base HTML optimizations */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   @apply bg-paper dark:bg-midnight text-charcoal dark:text-white transition-colors;
+  overscroll-behavior: none;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button, a {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -26,10 +53,21 @@ body {
 
 ::-webkit-scrollbar-thumb {
   @apply bg-gold/30 dark:bg-teal/30 rounded-full;
+  transition: background-color 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gold/50 dark:bg-teal/50;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 164, 79, 0.3) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
 }
 
 /* Grey mode (tired mode) - calm, low contrast for tired eyes */
@@ -258,7 +296,44 @@ html.theme-grey [class*="shadow"] {
   }
 }
 
-/* Focus styles */
-input:focus, textarea:focus, button:focus {
+/* Focus styles for accessibility */
+input:focus, textarea:focus, button:focus, select:focus, a:focus {
   @apply outline-none ring-2 ring-gold dark:ring-teal ring-offset-2 ring-offset-paper dark:ring-offset-midnight;
+}
+
+/* Skip to main content link for accessibility */
+.skip-to-main {
+  @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-gold dark:focus:bg-teal focus:text-white dark:focus:text-midnight focus:rounded-lg focus:shadow-lg;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .no-print, header, nav, button, .sidebar {
+    display: none !important;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
 }
