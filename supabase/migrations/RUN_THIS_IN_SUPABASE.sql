@@ -12,6 +12,7 @@ DROP FUNCTION IF EXISTS get_day_of_week_distribution(UUID) CASCADE;
 DROP FUNCTION IF EXISTS get_day_of_week_distribution CASCADE;
 DROP FUNCTION IF EXISTS get_mood_distribution(UUID) CASCADE;
 DROP FUNCTION IF EXISTS get_mood_distribution CASCADE;
+DROP FUNCTION IF EXISTS search_entries(TEXT, UUID, DATE, DATE, TEXT, UUID, UUID, UUID, INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS search_entries(TEXT, UUID, DATE, DATE, TEXT, UUID, INTEGER, INTEGER) CASCADE;
 DROP FUNCTION IF EXISTS search_entries(TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS search_entries CASCADE;
@@ -238,6 +239,8 @@ CREATE OR REPLACE FUNCTION search_entries(
   date_to DATE DEFAULT NULL,
   mood_filter TEXT DEFAULT NULL,
   folder_id_param UUID DEFAULT NULL,
+  person_id_param UUID DEFAULT NULL,
+  story_id_param UUID DEFAULT NULL,
   limit_count INTEGER DEFAULT 50,
   offset_count INTEGER DEFAULT 0
 )
@@ -291,6 +294,20 @@ BEGIN
     AND (date_to IS NULL OR e.entry_date::DATE <= date_to)
     AND (mood_filter IS NULL OR e.mood = mood_filter)
     AND (folder_id_param IS NULL OR e.folder_id = folder_id_param)
+    AND (
+      person_id_param IS NULL 
+      OR EXISTS (
+        SELECT 1 FROM entry_people ep 
+        WHERE ep.entry_id = e.id AND ep.person_id = person_id_param
+      )
+    )
+    AND (
+      story_id_param IS NULL 
+      OR EXISTS (
+        SELECT 1 FROM story_entries se 
+        WHERE se.entry_id = e.id AND se.story_id = story_id_param
+      )
+    )
   ORDER BY rank DESC, e.entry_date DESC
   LIMIT limit_count
   OFFSET offset_count;
@@ -305,7 +322,7 @@ GRANT EXECUTE ON FUNCTION get_writing_statistics(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_monthly_entry_counts(UUID, INTEGER) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_day_of_week_distribution(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_mood_distribution(UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION search_entries(TEXT, UUID, DATE, DATE, TEXT, UUID, INTEGER, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION search_entries(TEXT, UUID, DATE, DATE, TEXT, UUID, UUID, UUID, INTEGER, INTEGER) TO authenticated;
 
 -- ============================================
 -- SUCCESS MESSAGE

@@ -70,6 +70,8 @@ export default function SearchPage() {
         date_to: filters.dateTo || null,
         mood_filter: filters.mood || null,
         folder_id_param: filters.folderId || null,
+        person_id_param: filters.personId || null,
+        story_id_param: filters.storyId || null,
         limit_count: 50,
         offset_count: 0
       })
@@ -131,43 +133,54 @@ export default function SearchPage() {
           {/* Search Bar */}
           <div className="flex gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" aria-hidden="true" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search titles, content, moods..."
+                aria-label="Search your diary entries"
                 className="w-full pl-12 pr-4 py-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
             </div>
             <button
               onClick={handleSearch}
               disabled={loading}
+              aria-label="Execute search"
               className="px-6 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
+              aria-label={showFilters ? 'Hide search filters' : 'Show search filters'}
+              aria-expanded={showFilters}
+              aria-controls="search-filters"
               className={`p-3 rounded-xl border-2 transition-colors ${
                 showFilters || hasActiveFilters
                   ? 'bg-gold/10 dark:bg-teal/10 border-gold dark:border-teal text-gold dark:text-teal'
                   : 'border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5'
               }`}
             >
-              <Filter className="w-5 h-5" />
+              <Filter className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+            <div 
+              id="search-filters"
+              className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10"
+              role="region"
+              aria-label="Search filters"
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-charcoal dark:text-white">Filters</h3>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
+                    aria-label="Clear all filters"
                     className="text-sm text-charcoal/60 dark:text-white/60 hover:text-charcoal dark:hover:text-white"
                   >
                     Clear all

@@ -84,78 +84,162 @@ button, a {
   scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
 }
 
-/* Grey mode (tired mode) - calm, low contrast for tired eyes */
+/* Grey mode (tired mode) - warm taupe palette for tired eyes */
 html.theme-grey {
-  --paper: #A0A0A0;
-  --charcoal: #2E2E2E;
-  --gold: #707070;
-  --midnight: #4E4E4E;
-  --graphite: #5E5E5E;
-  --teal: #787878;
+  --paper: #C5B8A8;          /* Warm beige - main background */
+  --cream: #D4C9BC;          /* Lighter warm grey - elevated surfaces */
+  --charcoal: #3A3632;       /* Warm dark grey - primary text */
+  --gold: #8B7E6F;           /* Muted taupe - accents */
+  --midnight: #5C5550;       /* Medium warm grey - dark surfaces */
+  --graphite: #6F6660;       /* Lighter medium grey - cards */
+  --teal: #8B8278;           /* Warm stone - secondary accents */
+  --navy: #7A6F66;           /* Hover states */
 }
 
 /* Apply grey background to entire page */
 html.theme-grey,
-html.theme-grey body,
+html.theme-grey body {
+  background-color: #C5B8A8 !important;
+  color: #3A3632 !important;
+}
+
 html.theme-grey main,
 html.theme-grey #__next,
 html.theme-grey aside,
-html.theme-grey nav {
-  background-color: #A0A0A0 !important;
-  color: #2E2E2E !important;
+html.theme-grey nav,
+html.theme-grey header,
+html.theme-grey section,
+html.theme-grey article {
+  background-color: transparent !important;
 }
 
-/* Override card/component backgrounds */
+/* Override card/component backgrounds - lighter elevated surfaces */
 html.theme-grey .bg-white,
 html.theme-grey .bg-paper,
+html.theme-grey .bg-cream,
 html.theme-grey [class*="bg-[#FFF5E6]"],
-html.theme-grey [class*="bg-\\[#FFF5E6\\]"] {
-  background-color: #B5B5B5 !important;
+html.theme-grey [class*="bg-\\[#FFF5E6\\]"],
+html.theme-grey [class*="bg-paper"],
+html.theme-grey [class*="bg-cream"] {
+  background-color: #D4C9BC !important;
 }
 
 html.theme-grey .bg-midnight,
 html.theme-grey .bg-graphite,
 html.theme-grey [class*="bg-midnight"],
 html.theme-grey [class*="bg-graphite"] {
-  background-color: #5E5E5E !important;
+  background-color: #6F6660 !important;
 }
 
-/* Text colors */
+/* Backdrop filters */
+html.theme-grey [class*="backdrop-blur"] {
+  background-color: rgba(197, 184, 168, 0.9) !important;
+}
+
+/* Text colors - better contrast */
 html.theme-grey .text-charcoal,
 html.theme-grey .text-white,
 html.theme-grey [class*="text-charcoal"],
 html.theme-grey [class*="text-white"] {
-  color: #2E2E2E !important;
+  color: #3A3632 !important;
 }
 
 html.theme-grey .text-gold,
 html.theme-grey .text-teal,
 html.theme-grey [class*="text-gold"],
 html.theme-grey [class*="text-teal"] {
-  color: #4E4E4E !important;
+  color: #5C5550 !important;
 }
 
-/* Accent colors muted */
+/* Secondary text - muted but readable */
+html.theme-grey [class*="text-charcoal/60"],
+html.theme-grey [class*="text-white/60"],
+html.theme-grey [class*="text-charcoal/70"],
+html.theme-grey [class*="text-white/70"] {
+  color: #5C5550 !important;
+}
+
+html.theme-grey [class*="text-charcoal/40"],
+html.theme-grey [class*="text-white/40"] {
+  color: #7A6F66 !important;
+}
+
+/* Accent colors muted but visible */
 html.theme-grey .bg-gold,
 html.theme-grey [class*="bg-gold"] {
-  background-color: #707070 !important;
+  background-color: #8B7E6F !important;
 }
 
 html.theme-grey .bg-teal,
 html.theme-grey [class*="bg-teal"] {
-  background-color: #787878 !important;
+  background-color: #8B8278 !important;
 }
 
-/* Headers with proper weight */
+/* Gold/teal with opacity */
+html.theme-grey [class*="bg-gold/10"],
+html.theme-grey [class*="bg-teal/10"] {
+  background-color: rgba(139, 126, 111, 0.15) !important;
+}
+
+html.theme-grey [class*="bg-gold/30"],
+html.theme-grey [class*="bg-teal/30"] {
+  background-color: rgba(139, 126, 111, 0.3) !important;
+}
+
+/* Borders - subtle but visible */
+html.theme-grey [class*="border-charcoal/10"],
+html.theme-grey [class*="border-white/10"] {
+  border-color: rgba(58, 54, 50, 0.2) !important;
+}
+
+html.theme-grey [class*="border-charcoal/20"],
+html.theme-grey [class*="border-white/20"] {
+  border-color: rgba(58, 54, 50, 0.25) !important;
+}
+
+html.theme-grey [class*="border-gold"],
+html.theme-grey [class*="border-teal"] {
+  border-color: #8B7E6F !important;
+}
+
+/* Headers with proper contrast */
 html.theme-grey h1,
 html.theme-grey h2,
-html.theme-grey h3 {
-  color: #2E2E2E !important;
+html.theme-grey h3,
+html.theme-grey h4,
+html.theme-grey h5,
+html.theme-grey h6 {
+  color: #3A3632 !important;
 }
 
-/* Soften shadows */
+/* Soften shadows with warm tones */
 html.theme-grey [class*="shadow"] {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(58, 54, 50, 0.15) !important;
+}
+
+/* Hover states */
+html.theme-grey [class*="hover:bg-charcoal/5"]:hover,
+html.theme-grey [class*="hover:bg-white/5"]:hover {
+  background-color: rgba(58, 54, 50, 0.08) !important;
+}
+
+html.theme-grey [class*="hover:bg-gold"]:hover,
+html.theme-grey [class*="hover:bg-teal"]:hover {
+  background-color: #7A6F66 !important;
+}
+
+/* Input fields */
+html.theme-grey input,
+html.theme-grey textarea,
+html.theme-grey select {
+  background-color: #D4C9BC !important;
+  color: #3A3632 !important;
+  border-color: rgba(58, 54, 50, 0.25) !important;
+}
+
+html.theme-grey input::placeholder,
+html.theme-grey textarea::placeholder {
+  color: #7A6F66 !important;
 }
 
 /* Calendar Heatmap Styling */
@@ -267,6 +351,66 @@ html.theme-grey [class*="shadow"] {
 
 .prose code {
   @apply bg-charcoal/10 dark:bg-white/10 px-2 py-1 rounded text-sm;
+}
+
+/* Toast Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-slideOut {
+  animation: slideOut 0.3s ease-in forwards;
+}
+
+/* Dialog/Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out forwards;
 }
 
 .prose pre {

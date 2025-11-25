@@ -152,7 +152,11 @@ export default function AppHeader() {
       <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/app" className="group flex items-center gap-3 flex-shrink-0">
+          <Link 
+            href="/app" 
+            className="group flex items-center gap-3 flex-shrink-0"
+            aria-label="Go to home page"
+          >
             <div className="p-2 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-gold dark:text-teal" />
             </div>
@@ -162,7 +166,10 @@ export default function AppHeader() {
           </Link>
 
           {/* Desktop Navigation - Show all items, hide on mobile */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-1 justify-center max-w-5xl mx-2 lg:mx-4">
+          <nav 
+            className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-1 justify-center max-w-5xl mx-2 lg:mx-4"
+            aria-label="Main navigation"
+          >
             {navLinks.map((link) => {
               const Icon = link.icon
               const active = isActive(link.href)
@@ -175,9 +182,11 @@ export default function AppHeader() {
                       ? `${link.color} bg-opacity-10 scale-105 shadow-sm`
                       : `text-charcoal dark:text-white ${link.hoverColor}`
                   }`}
+                  aria-label={`Navigate to ${link.label}`}
+                  aria-current={active ? 'page' : undefined}
                   title={link.label}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
+                  <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span className="hidden xl:inline">{link.label}</span>
                 </Link>
               )
@@ -192,9 +201,10 @@ export default function AppHeader() {
               className={`p-2 sm:p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 ${
                 menuOpen ? 'hidden sm:flex' : 'flex'
               }`}
+              aria-label="Search entries"
               title="Search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-5 h-5" aria-hidden="true" />
             </Link>
 
             {/* Theme Switcher - Hide on mobile when menu open */}
