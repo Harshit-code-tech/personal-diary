@@ -14,15 +14,18 @@ const config: Config = {
         '3xl': '1920px',
       },
       colors: {
-        // Light mode colors
+        // Light mode - warm, elegant
         paper: '#F7F2E8',
+        cream: '#FFF5E6',
         charcoal: '#1C1C1C',
         gold: '#D4A44F',
         
-        // Dark mode colors
-        midnight: '#121212',
-        graphite: '#1A1A1A',
-        teal: '#5EEAD4',
+        // Dark mode - rich, deep slate palette
+        midnight: '#0F172A',    // slate-900
+        graphite: '#1E293B',    // slate-800
+        navy: '#334155',        // slate-700
+        teal: '#5EEAD4',       // teal-300
+        cyan: '#06B6D4',       // cyan-500
         
         // Grey mode ("I'm Tired...")
         tired: {

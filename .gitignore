@@ -35,6 +35,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Temporary fix files
+*_FIX*.sql
+*_FIX*.md
+CHECK_*.sql
+DEBUG_*.sql
+VERIFY_*.sql
+RESET_*.sql
+
+# Temporary documentation
+*_SUMMARY.md
+*_CHECKLIST.md
+
 # Supabase
 .supabase
 

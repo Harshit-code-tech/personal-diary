@@ -3,12 +3,26 @@
 @tailwind utilities;
 
 :root {
+  /* Light theme - warm, inviting colors */
   --paper: #F7F2E8;
+  --cream: #FFF5E6;
   --charcoal: #1C1C1C;
   --gold: #D4A44F;
-  --midnight: #121212;
-  --graphite: #1A1A1A;
-  --teal: #5EEAD4;
+  
+  /* Dark theme - rich, deep colors with better contrast */
+  --midnight: #0F172A;        /* Deeper blue-black instead of pure black */
+  --graphite: #1E293B;        /* Slate-800 - richer card background */
+  --navy: #334155;            /* Slate-700 - hover states */
+  --teal: #5EEAD4;           /* Bright teal accent */
+  --cyan: #06B6D4;           /* Secondary accent */
+  --purple-dark: #7C3AED;    /* Rich purple for dark mode */
+  --pink-dark: #EC4899;      /* Vibrant pink for dark mode */
+  
+  /* Semantic colors */
+  --text-primary: #1C1C1C;
+  --text-primary-dark: #F1F5F9;  /* Slate-100 - softer white */
+  --text-secondary: #64748B;     /* Slate-500 */
+  --text-secondary-dark: #94A3B8; /* Slate-400 */
 }
 
 /* Base HTML optimizations */

@@ -15,9 +15,11 @@ import {
   Zap,
   ArrowLeft,
   Award,
-  Clock
+  Clock,
+  BarChart3
 } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 interface AnalyticsData {
   totalEntries: number
@@ -252,24 +254,30 @@ export default function InsightsPage() {
   return (
     <div className="min-h-screen bg-cream dark:bg-charcoal pb-16">{/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/80 dark:bg-charcoal/80 border-b border-charcoal/10 dark:border-white/10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/app"
-              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-charcoal dark:text-white">Your Writing Insights</h1>
-              <p className="text-sm text-charcoal/60 dark:text-white/60">
-                Discover patterns and celebrate your journey
-              </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+              <Link
+                href="/app"
+                className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <TrendingUp className="w-6 h-6 text-gold dark:text-teal shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Your Writing Insights</h1>
+                <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 hidden xs:block">
+                  Discover patterns and celebrate your journey
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0">
+              <ThemeSwitcher />
             </div>
           </div>
 
           {/* Time Range Filter */}
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             {[
               { value: 'all', label: 'All Time' },
               { value: '30', label: 'Last 30 Days' },
@@ -279,7 +287,7 @@ export default function InsightsPage() {
               <button
                 key={range.value}
                 onClick={() => setTimeRange(range.value as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   timeRange === range.value
                     ? 'bg-gold dark:bg-teal text-white'
                     : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10'
@@ -292,9 +300,9 @@ export default function InsightsPage() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Key Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <StatCard
             icon={<FileText className="w-6 h-6" />}
             title="Total Entries"

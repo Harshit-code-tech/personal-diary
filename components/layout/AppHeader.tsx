@@ -161,8 +161,8 @@ export default function AppHeader() {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Hidden on small/medium screens, visible on large+ */}
-          <nav className="hidden xl:flex items-center gap-2 flex-1 justify-center max-w-4xl mx-8">
+          {/* Desktop Navigation - Show all items, hide on mobile */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-1 justify-center max-w-5xl mx-2 lg:mx-4">
             {navLinks.map((link) => {
               const Icon = link.icon
               const active = isActive(link.href)
@@ -170,14 +170,15 @@ export default function AppHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-2 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
                     active
-                      ? `${link.color} bg-opacity-10 scale-105`
+                      ? `${link.color} bg-opacity-10 scale-105 shadow-sm`
                       : `text-charcoal dark:text-white ${link.hoverColor}`
                   }`}
+                  title={link.label}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{link.label}</span>
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="hidden xl:inline">{link.label}</span>
                 </Link>
               )
             })}
@@ -217,10 +218,10 @@ export default function AppHeader() {
               <Settings className="w-5 h-5" />
             </Link>
 
-            {/* Hamburger Menu Button - Visible on screens smaller than xl */}
+            {/* Hamburger Menu Button - Visible only on mobile */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="xl:hidden p-2 sm:p-2.5 hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 group hover:scale-110"
+              className="md:hidden p-2 sm:p-2.5 hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 group hover:scale-110"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={menuOpen}
             >

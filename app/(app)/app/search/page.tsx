@@ -15,7 +15,9 @@ interface SearchResult {
   entry_date: string
   mood: string | null
   word_count: number
+  folder_id: string | null
   created_at: string
+  updated_at: string
   rank: number
 }
 

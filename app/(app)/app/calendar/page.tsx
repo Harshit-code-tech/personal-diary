@@ -131,69 +131,69 @@ export default function CalendarPage() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-6 py-4">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+        <div className="px-4 sm:px-6 py-4 sm:py-5">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
               <Link
                 href="/app"
-                className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+                className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors shrink-0"
               >
                 <ArrowLeft className="w-5 h-5 text-charcoal dark:text-white" />
               </Link>
-              <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
-                Calendar
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal dark:text-teal truncate">
+                📅 Calendar
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <ThemeSwitcher />
               <Link
                 href="/app/new"
-                className="flex items-center gap-2 px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all text-sm sm:text-base"
               >
-                <Plus className="w-5 h-5" />
-                New Entry
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden xs:inline">New Entry</span>
               </Link>
             </div>
           </div>
 
           {/* Month Navigation */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between bg-white/50 dark:bg-graphite/50 rounded-xl p-3 backdrop-blur-sm">
             <button
               onClick={previousMonth}
-              className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+              className="p-2 hover:bg-gold/10 dark:hover:bg-teal/10 rounded-lg transition-all hover:scale-110"
             >
-              <ChevronLeft className="w-6 h-6 text-charcoal dark:text-white" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-charcoal dark:text-white" />
             </button>
 
-            <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+            <h2 className="text-lg sm:text-xl font-bold text-charcoal dark:text-white">
               {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </h2>
 
             <button
               onClick={nextMonth}
-              className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+              className="p-2 hover:bg-gold/10 dark:hover:bg-teal/10 rounded-lg transition-all hover:scale-110"
             >
-              <ChevronRight className="w-6 h-6 text-charcoal dark:text-white" />
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-charcoal dark:text-white" />
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Calendar Grid */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <div className="bg-white dark:bg-graphite rounded-2xl shadow-2xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
               {/* Week Day Headers */}
-              <div className="grid grid-cols-7 gap-2 mb-4">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3 sm:mb-4">
                 {weekDays.map(day => (
                   <div
                     key={day}
-                    className="text-center font-semibold text-charcoal/60 dark:text-white/60 text-sm"
+                    className="text-center font-bold text-gold dark:text-teal text-xs sm:text-sm"
                   >
                     {day}
                   </div>
@@ -201,7 +201,7 @@ export default function CalendarPage() {
               </div>
 
               {/* Calendar Days */}
-              <div className="grid grid-cols-7 gap-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2">
                 {days.map((day, index) => {
                   if (day === null) {
                     return <div key={`empty-${index}`} />
@@ -217,34 +217,36 @@ export default function CalendarPage() {
                       key={day}
                       onClick={() => setSelectedDate(isSelected ? null : dateStr)}
                       className={`
-                        aspect-square p-2 rounded-lg transition-all relative
-                        ${isTodayDate ? 'ring-2 ring-gold dark:ring-teal' : ''}
+                        aspect-square p-2 sm:p-3 rounded-xl transition-all relative group
+                        ${isTodayDate ? 'ring-2 ring-gold dark:ring-teal ring-offset-2 ring-offset-white dark:ring-offset-graphite' : ''}
                         ${isSelected
-                          ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-lg scale-105'
-                          : 'hover:bg-charcoal/5 dark:hover:bg-white/5'
+                          ? 'bg-gradient-to-br from-gold to-orange-500 dark:from-teal dark:to-cyan-500 text-white shadow-2xl scale-105 z-10'
+                          : dayEntries.length > 0
+                            ? 'bg-gold/10 dark:bg-teal/10 hover:bg-gold/20 dark:hover:bg-teal/20 hover:scale-105'
+                            : 'hover:bg-charcoal/5 dark:hover:bg-white/5 hover:scale-105'
                         }
                       `}
                     >
-                      <div className={`text-sm font-medium ${isSelected ? 'text-white dark:text-midnight' : 'text-charcoal dark:text-white'}`}>
+                      <div className={`text-sm sm:text-base font-bold ${isSelected ? 'text-white' : isTodayDate ? 'text-gold dark:text-teal' : 'text-charcoal dark:text-white'}`}>
                         {day}
                       </div>
 
                       {/* Entry Indicators */}
                       {dayEntries.length > 0 && (
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        <div className="absolute bottom-1 sm:bottom-2 left-1/2 -translate-x-1/2 flex gap-0.5 sm:gap-1">
                           {dayEntries.slice(0, 3).map((entry, idx) => {
                             const moodColor = getMoodColor(entry.mood)
                             return (
                               <div
                                 key={idx}
-                                className="w-3 h-3 rounded-full ring-2 ring-white dark:ring-midnight shadow-lg"
-                                style={{ backgroundColor: moodColor }}
+                                className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ring-1 sm:ring-2 ring-white dark:ring-graphite shadow-md transition-transform group-hover:scale-125"
+                                style={{ backgroundColor: isSelected ? 'white' : moodColor }}
                                 title={entry.mood || 'No mood'}
                               />
                             )
                           })}
                           {dayEntries.length > 3 && (
-                            <div className="text-xs font-bold text-charcoal/80 dark:text-white/80">
+                            <div className={`text-[10px] sm:text-xs font-bold ml-0.5 ${isSelected ? 'text-white' : 'text-gold dark:text-teal'}`}>
                               +{dayEntries.length - 3}
                             </div>
                           )}
@@ -256,17 +258,20 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="mt-6 bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
-              <h3 className="font-semibold text-charcoal dark:text-white mb-4">Mood Legend</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Mood Legend */}
+            <div className="mt-6 bg-gradient-to-br from-white to-gray-50 dark:from-graphite dark:to-charcoal rounded-2xl shadow-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+              <h3 className="font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
+                <span className="text-xl">🎨</span>
+                Mood Legend
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
                 {moods.map(mood => (
-                  <div key={mood.value} className="flex items-center gap-2">
+                  <div key={mood.value} className="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 dark:hover:bg-midnight/50 transition-colors">
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-4 h-4 rounded-full shadow-md ring-2 ring-white dark:ring-graphite"
                       style={{ backgroundColor: mood.color }}
                     />
-                    <span className="text-sm text-charcoal dark:text-white capitalize">
+                    <span className="text-xs sm:text-sm text-charcoal dark:text-white capitalize font-medium">
                       {mood.emoji} {mood.value}
                     </span>
                   </div>
@@ -277,13 +282,13 @@ export default function CalendarPage() {
 
           {/* Selected Date Entries */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6 sticky top-24">
+            <div className="bg-gradient-to-br from-white to-gray-50 dark:from-graphite dark:to-charcoal rounded-2xl shadow-2xl p-4 sm:p-6 sticky top-24 border border-charcoal/10 dark:border-white/10">
               {selectedDate ? (
                 <>
-                  <h3 className="font-semibold text-charcoal dark:text-white mb-2">
+                  <h3 className="font-bold text-charcoal dark:text-white mb-2 text-base sm:text-lg">
                     {formatSelectedDate()}
                   </h3>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60 mb-4">
+                  <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 mb-4 font-medium">
                     {selectedEntries.length} {selectedEntries.length === 1 ? 'entry' : 'entries'}
                   </div>
 
@@ -293,19 +298,24 @@ export default function CalendarPage() {
                         <Link
                           key={entry.id}
                           href={`/app/entry/${entry.id}`}
-                          className="block p-4 bg-[#FFF5E6] dark:bg-midnight rounded-lg hover:shadow-md transition-shadow"
+                          className="block p-3 sm:p-4 bg-white dark:bg-midnight rounded-xl hover:shadow-lg transition-all hover:scale-102 border border-charcoal/10 dark:border-white/10"
                         >
                           <div className="flex items-start gap-3">
                             {entry.mood && (
                               <div
-                                className="w-3 h-3 rounded-full mt-1 flex-shrink-0"
+                                className="w-3 h-3 sm:w-4 sm:h-4 rounded-full mt-1 flex-shrink-0 shadow-md ring-2 ring-white dark:ring-midnight"
                                 style={{ backgroundColor: getMoodColor(entry.mood) }}
                               />
                             )}
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-charcoal dark:text-white truncate">
+                              <h4 className="font-bold text-sm sm:text-base text-charcoal dark:text-white line-clamp-2">
                                 {entry.title}
                               </h4>
+                              {entry.mood && (
+                                <p className="text-xs text-charcoal/60 dark:text-white/60 mt-1 capitalize">
+                                  {entry.mood}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </Link>
@@ -313,12 +323,13 @@ export default function CalendarPage() {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-charcoal/60 dark:text-white/60 mb-4">
+                      <div className="text-4xl mb-3">📝</div>
+                      <p className="text-charcoal/60 dark:text-white/60 mb-4 text-sm">
                         No entries for this day
                       </p>
                       <Link
                         href={`/app/entry/new?date=${selectedDate}`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gold to-orange-500 dark:from-teal dark:to-cyan-500 text-white rounded-xl font-bold hover:shadow-xl transition-all text-sm"
                       >
                         <Plus className="w-4 h-4" />
                         Create Entry
@@ -328,7 +339,8 @@ export default function CalendarPage() {
                 </>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-charcoal/60 dark:text-white/60">
+                  <div className="text-5xl mb-4">📅</div>
+                  <p className="text-charcoal/60 dark:text-white/60 font-medium">
                     Select a date to view entries
                   </p>
                 </div>

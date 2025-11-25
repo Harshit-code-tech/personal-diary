@@ -317,53 +317,58 @@ export default function GoalsPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
-          <Link
-            href="/app"
-            className="group flex items-center gap-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300"
-          >
-            <div className="p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </div>
-            <span className="font-bold text-lg">Back</span>
-          </Link>
+        <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <Link
+              href="/app"
+              className="group flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
+            >
+              <div className="p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <span className="font-bold text-sm sm:text-lg hidden xs:inline">Back</span>
+            </Link>
+            <Target className="w-6 h-6 text-gold dark:text-teal shrink-0" />
+            <span className="font-bold text-lg text-charcoal dark:text-white hidden md:inline truncate">Goals</span>
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
             <ThemeSwitcher />
             <button
               onClick={() => {
                 resetForm()
                 setShowAddModal(true)
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all"
             >
-              <Plus className="w-5 h-5" />
-              New Goal
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden xs:inline">New Goal</span>
+              <span className="xs:hidden">New</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Page Title & Stats */}
-        <div className="mb-8">
-          <h1 className="font-serif text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-3 leading-tight flex items-center gap-4">
-            <Target className="w-12 h-12 text-gold dark:text-teal" />
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight flex items-center gap-3 sm:gap-4">
+            <Target className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gold dark:text-teal" />
             Goals & Dreams
           </h1>
-          <p className="text-lg text-charcoal/70 dark:text-white/70 font-medium mb-4">
+          <p className="text-sm sm:text-base md:text-lg text-charcoal/70 dark:text-white/70 font-medium mb-3 sm:mb-4">
             Track your aspirations and celebrate your progress
           </p>
           
-          <div className="flex gap-4">
-            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-6 py-3 border border-gold/20 dark:border-teal/20">
-              <div className="text-3xl font-black text-gold dark:text-teal">{activeGoals.length}</div>
-              <div className="text-sm text-charcoal/60 dark:text-white/60">Active Goals</div>
+          <div className="flex gap-3 sm:gap-4">
+            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
+              <div className="text-2xl sm:text-3xl font-black text-gold dark:text-teal">{activeGoals.length}</div>
+              <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Active Goals</div>
             </div>
-            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-6 py-3 border border-gold/20 dark:border-teal/20">
-              <div className="text-3xl font-black text-green-600 dark:text-green-400">{completedGoals.length}</div>
-              <div className="text-sm text-charcoal/60 dark:text-white/60">Completed</div>
+            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
+              <div className="text-2xl sm:text-3xl font-black text-green-600 dark:text-green-400">{completedGoals.length}</div>
+              <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Completed</div>
             </div>
           </div>
         </div>
