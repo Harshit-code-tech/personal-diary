@@ -46,8 +46,21 @@ RESET_*.sql
 # Temporary documentation
 *_SUMMARY.md
 *_CHECKLIST.md
+AUTONOMOUS_*.md
+QUICK_START.md
+
+# Sensitive documentation (contains admin info)
+docs/ADMIN_SETUP_GUIDE.md
+docs/MIGRATION_GUIDE.md
+docs/IMPLEMENTATION_PROGRESS.md
+docs/*ERROR*.md
+docs/*STATUS*.md
 
 # Supabase
+
+# Ignore all documentation and migration files
+docs/
+supabase/migrations/
 .supabase
 
 # PWA
