@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useAutoSave } from '@/lib/hooks/useAutoSave'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useToast } from '@/components/ui/ToastContainer'
@@ -56,6 +57,16 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const supabase = createClient()
   const toastNotify = useToast()
+
+  // Auto-save functionality
+  const { saving: autoSaving, wordCount } = useAutoSave({
+    entryId: params.id,
+    title,
+    content,
+    mood,
+    entryDate,
+    enabled: editing,
+  })
 
   useEffect(() => {
     if (user) {
@@ -765,9 +776,23 @@ export default function EntryPage({ params }: { params: { id: string } }) {
               />
             </div>
 
-            {/* Word Count */}
-            <div className="text-sm text-charcoal/60 dark:text-white/60 text-right">
-              {calculateWordCount(content)} words
+            {/* Word Count and Auto-save Status */}
+            <div className="flex items-center justify-between text-sm">
+              <div className="text-charcoal/60 dark:text-white/60">
+                {autoSaving ? (
+                  <span className="flex items-center gap-2 text-teal dark:text-gold">
+                    <span className="w-2 h-2 rounded-full bg-teal dark:bg-gold animate-pulse"></span>
+                    Auto-saving...
+                  </span>
+                ) : (
+                  <span className="text-charcoal/40 dark:text-white/40">
+                    Auto-save enabled
+                  </span>
+                )}
+              </div>
+              <div className="text-charcoal/60 dark:text-white/60">
+                {wordCount} words
+              </div>
             </div>
           </div>
         )}

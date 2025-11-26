@@ -82,9 +82,10 @@ export default function OfflineIndicator() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="ml-2 p-1 hover:bg-white/20 rounded transition-colors"
+            className="ml-2 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-white/20 rounded transition-colors"
+            aria-label="Sync pending changes"
           >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
           </button>
         )}
       </div>

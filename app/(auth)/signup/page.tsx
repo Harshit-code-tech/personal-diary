@@ -6,6 +6,9 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { Book } from 'lucide-react'
+import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator'
+import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
+import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -13,61 +16,31 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [passwordStrength, setPasswordStrength] = useState('')
   const router = useRouter()
   const supabase = createClient()
-
-  const checkPasswordStrength = (pwd: string) => {
-    if (pwd.length < 8) return 'Too Short'
-    
-    let strength = 0
-    if (pwd.length >= 8) strength++
-    if (/[A-Z]/.test(pwd)) strength++
-    if (/[0-9]/.test(pwd)) strength++
-    if (/[^A-Za-z0-9]/.test(pwd)) strength++
-    
-    if (strength < 2) return 'Weak'
-    if (strength < 4) return 'Medium'
-    return 'Strong'
-  }
-
-  const handlePasswordChange = (pwd: string) => {
-    setPassword(pwd)
-    setPasswordStrength(checkPasswordStrength(pwd))
-  }
+  const { csrfFetch, hasToken } = useCSRFToken()
+  
+  const { errors, touched, handleBlur, handleChange, validateAll } = useFormValidation({
+    email: commonRules.email,
+    password: commonRules.passwordWithStrength,
+    confirmPassword: [
+      {
+        required: true,
+        message: 'Please confirm your password',
+      },
+      {
+        custom: (value) => value === password,
+        message: 'Passwords do not match',
+      },
+    ],
+  })
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      setError('All fields are required')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
-      return
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setError('Password must contain an uppercase letter')
-      return
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setError('Password must contain a number')
-      return
-    }
-
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      setError('Password must contain a special character')
+    // Validate all fields
+    if (!validateAll({ email, password, confirmPassword })) {
       return
     }
 
@@ -94,18 +67,25 @@ export default function SignupPage() {
       // Success - redirect to verification page
       router.push('/verify-email')
     } catch (err: any) {
-      setError(err.message || 'Failed to create account')
+      console.error('Signup error:', err)
+      
+      // Provide helpful error messages
+      if (err.message?.includes('confirmation email')) {
+        setError(
+          'Account created but confirmation email failed to send. ' +
+          'Please contact support or try signing in directly if email confirmation is disabled.'
+        )
+      } else if (err.message?.includes('already registered') || err.message?.includes('already exists')) {
+        setError('This email is already registered. Please sign in instead.')
+      } else if (err.message?.includes('Invalid email')) {
+        setError('Please enter a valid email address.')
+      } else if (err.message?.includes('Password')) {
+        setError('Password does not meet requirements. Use at least 8 characters with uppercase, number, and special character.')
+      } else {
+        setError(err.message || 'Failed to create account. Please try again.')
+      }
     } finally {
       setLoading(false)
-    }
-  }
-
-  const getStrengthColor = () => {
-    switch (passwordStrength) {
-      case 'Strong': return 'text-green-600 dark:text-green-400'
-      case 'Medium': return 'text-yellow-600 dark:text-yellow-400'
-      case 'Weak': return 'text-orange-600 dark:text-orange-400'
-      default: return 'text-red-600 dark:text-red-400'
     }
   }
 
@@ -146,65 +126,127 @@ export default function SignupPage() {
           <form onSubmit={handleSignup} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
+                Email Address <span className="text-red-500">*</span>
               </label>
               <input
+                id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value)
+                  handleChange('email', e.target.value)
+                }}
+                onBlur={(e) => handleBlur('email', e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-midnight border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40"
+                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                  touched.email && errors.email
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                    : touched.email && !errors.email && email
+                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                }`}
                 disabled={loading}
                 required
+                aria-invalid={touched.email && errors.email ? 'true' : 'false'}
+                aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
               />
+              {touched.email && errors.email && (
+                <div id="email-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                  {errors.email}
+                </div>
+              )}
+              {touched.email && !errors.email && email && (
+                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 mt-2 animate-slideDown">
+                  <span className="inline-block w-1 h-1 rounded-full bg-green-500" />
+                  Looks good!
+                </div>
+              )}
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
-                Password
+              <label htmlFor="password" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
+                Password <span className="text-red-500">*</span>
               </label>
               <input
+                id="password"
                 type="password"
                 value={password}
-                onChange={(e) => handlePasswordChange(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  handleChange('password', e.target.value)
+                }}
+                onBlur={(e) => handleBlur('password', e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-midnight border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40"
+                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                  touched.password && errors.password
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                    : touched.password && !errors.password && password
+                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                }`}
                 disabled={loading}
                 required
+                aria-invalid={touched.password && errors.password ? 'true' : 'false'}
+                aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
               />
-              {password && (
-                <p className={`text-sm mt-2 font-medium ${getStrengthColor()}`}>
-                  Strength: {passwordStrength}
-                </p>
+              {touched.password && errors.password && (
+                <div id="password-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                  {errors.password}
+                </div>
               )}
-              <p className="text-xs text-charcoal/60 dark:text-white/60 mt-2">
-                Must be 8+ characters with uppercase, number & special character
-              </p>
+              {password && <PasswordStrengthIndicator password={password} showLabel={true} />}
             </div>
 
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
-                Confirm Password
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
+                Confirm Password <span className="text-red-500">*</span>
               </label>
               <input
+                id="confirmPassword"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value)
+                  handleChange('confirmPassword', e.target.value)
+                }}
+                onBlur={(e) => handleBlur('confirmPassword', e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-midnight border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40"
+                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                  touched.confirmPassword && errors.confirmPassword
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                    : touched.confirmPassword && !errors.confirmPassword && confirmPassword
+                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                }`}
                 disabled={loading}
                 required
+                aria-invalid={touched.confirmPassword && errors.confirmPassword ? 'true' : 'false'}
+                aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirmPassword-error' : undefined}
               />
+              {touched.confirmPassword && errors.confirmPassword && (
+                <div id="confirmPassword-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
+                  <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                  {errors.confirmPassword}
+                </div>
+              )}
+              {touched.confirmPassword && !errors.confirmPassword && confirmPassword && password === confirmPassword && (
+                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 mt-2 animate-slideDown">
+                  <span className="inline-block w-1 h-1 rounded-full bg-green-500" />
+                  Passwords match!
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98"
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Sun, Moon, Cloud } from 'lucide-react'
+import Tooltip from '@/components/ui/Tooltip'
 
 type Theme = 'light' | 'dark' | 'grey'
 
@@ -66,13 +67,15 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-lg border border-charcoal/20 dark:border-white/20 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
-        title={themes[currentTheme].name}
-      >
-        <CurrentIcon className="w-4 h-4" />
-      </button>
+      <Tooltip content={themes[currentTheme].name}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-charcoal/20 dark:border-white/20 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors active:scale-95"
+          aria-label={`Current theme: ${themes[currentTheme].name}. Click to change theme`}
+        >
+          <CurrentIcon className="w-5 h-5" />
+        </button>
+      </Tooltip>
 
       {isOpen && (
         <>

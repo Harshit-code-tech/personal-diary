@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -44,6 +44,12 @@ export default function SearchPage() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const { user } = useAuth()
   const supabase = createClient()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-focus search input on mount
+  useEffect(() => {
+    searchInputRef.current?.focus()
+  }, [])
 
   // Load search history from localStorage
   useEffect(() => {
@@ -162,8 +168,13 @@ export default function SearchPage() {
 
   const highlightText = (text: string, query: string) => {
     if (!query) return text
-    const regex = new RegExp(`(${query})`, 'gi')
-    return text.replace(regex, '<mark class="bg-gold/30 dark:bg-teal/30">$1</mark>')
+    // Split query into words and escape special regex characters
+    const words = query.split(/\s+/).filter(w => w.length > 0)
+      .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    if (words.length === 0) return text
+    // Create regex with word boundaries for better matching
+    const regex = new RegExp(`(${words.join('|')})`, 'gi')
+    return text.replace(regex, '<mark class="bg-gold/30 dark:bg-teal/30 px-0.5 rounded">$1</mark>')
   }
 
   const clearFilters = () => {
@@ -201,14 +212,15 @@ export default function SearchPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" aria-hidden="true" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={query}
                 onChange={(e) => handleQueryChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                placeholder="Search titles, content, moods..."
-                aria-label="Search your diary entries"
+                placeholder="Search titles, content, moods... (Ctrl+K)"
+                aria-label="Search your diary entries - Press Ctrl+K from anywhere"
                 className="w-full pl-12 pr-4 py-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
               

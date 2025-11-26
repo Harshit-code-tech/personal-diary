@@ -5,12 +5,22 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
+import Table from '@tiptap/extension-table'
+import TableCell from '@tiptap/extension-table-cell'
+import TableHeader from '@tiptap/extension-table-header'
+import TableRow from '@tiptap/extension-table-row'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { 
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
-  Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo 
+  Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo,
+  Table as TableIcon, Code
 } from 'lucide-react'
+
+// Create lowlight instance
+const lowlight = createLowlight(common)
 
 interface WYSIWYGEditorProps {
   content: string
@@ -27,8 +37,35 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         heading: {
           levels: [1, 2, 3],
         },
-        // Exclude link from StarterKit to avoid duplication
-        link: false,
+        codeBlock: false, // Disable default code block
+        link: false, // Exclude link from StarterKit to avoid duplication
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'bg-charcoal/5 dark:bg-white/5 rounded-lg p-4 my-4 font-mono text-sm',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse table-auto w-full my-4',
+        },
+      }),
+      TableRow.configure({
+        HTMLAttributes: {
+          class: 'border border-charcoal/20 dark:border-white/20',
+        },
+      }),
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-charcoal/20 dark:border-white/20 bg-gold/10 dark:bg-teal/10 font-bold p-2 text-left',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-charcoal/20 dark:border-white/20 p-2',
+        },
       }),
       Image.configure({
         HTMLAttributes: {
@@ -170,6 +207,28 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
           title="Quote"
         >
           <Quote className="w-4 h-4 text-charcoal dark:text-white" />
+        </button>
+
+        <button
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          className={`p-2 rounded hover:bg-gold/10 dark:hover:bg-teal/10 transition-colors ${
+            editor.isActive('codeBlock') ? 'bg-gold/20 dark:bg-teal/20' : ''
+          }`}
+          title="Code Block"
+        >
+          <Code className="w-4 h-4 text-charcoal dark:text-white" />
+        </button>
+
+        <div className="w-px h-6 bg-charcoal/10 dark:bg-white/10 mx-1"></div>
+
+        <button
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className={`p-2 rounded hover:bg-gold/10 dark:hover:bg-teal/10 transition-colors ${
+            editor.isActive('table') ? 'bg-gold/20 dark:bg-teal/20' : ''
+          }`}
+          title="Insert Table"
+        >
+          <TableIcon className="w-4 h-4 text-charcoal dark:text-white" />
         </button>
 
         <div className="w-px h-6 bg-charcoal/10 dark:bg-white/10 mx-1"></div>

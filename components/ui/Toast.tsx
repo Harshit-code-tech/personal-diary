@@ -64,10 +64,10 @@ const Toast = ({ id, type, title, message, duration = 5000, onClose }: ToastProp
 
       <button
         onClick={handleClose}
-        className="flex-shrink-0 p-1 rounded-lg hover:bg-white/20 transition-colors"
+        className="flex-shrink-0 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors active:scale-95"
         aria-label="Close notification"
       >
-        <X className="w-4 h-4" />
+        <X className="w-5 h-5" />
       </button>
     </div>
   )

@@ -70,6 +70,9 @@ const config: Config = {
       transitionDuration: {
         '400': '400ms',
       },
+      scale: {
+        '98': '0.98',
+      },
     },
   },
   plugins: [

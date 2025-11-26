@@ -9,9 +9,10 @@ import { useToast } from '@/components/ui/ToastContainer'
 import { entrySchema, formatZodErrors } from '@/lib/validation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, ChevronRight, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, ChevronRight, ChevronDown, Clock, AlertCircle } from 'lucide-react'
 import TagInput from '@/components/tags/TagInput'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import { useAutoSaveDraft, formatTimeAgo } from '@/lib/hooks/useAutoSaveDraft'
 
 // Lazy load heavy components
 const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'), {
@@ -57,6 +58,37 @@ export default function NewEntryPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
+
+  // Auto-save draft system
+  const { saveDraft, clearDraft, hasDraft, lastSaved, isDirty } = useAutoSaveDraft({
+    key: 'new-entry',
+    autoSaveDelay: 3000, // Auto-save after 3 seconds of inactivity
+    onRestore: (draft) => {
+      // Restore draft data on mount
+      if (draft.title) setTitle(draft.title)
+      if (draft.content) setContent(draft.content)
+      if (draft.mood) setMood(draft.mood)
+      if (draft.entryDate) setEntryDate(draft.entryDate)
+      if (draft.tags) setTags(draft.tags)
+      if (draft.selectedPeople) setSelectedPeople(draft.selectedPeople)
+      if (draft.selectedFolders) setSelectedFolders(draft.selectedFolders)
+    },
+  })
+
+  // Auto-save on content changes
+  useEffect(() => {
+    if (title || content || mood || tags.length > 0 || selectedPeople.length > 0 || selectedFolders.length > 0) {
+      saveDraft({
+        title,
+        content,
+        mood,
+        entryDate,
+        tags,
+        selectedPeople,
+        selectedFolders,
+      })
+    }
+  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders])
 
   useEffect(() => {
     // Debug: Log full URL
@@ -399,6 +431,7 @@ export default function NewEntryPage() {
       }
 
       toast.success('Entry created successfully!')
+      clearDraft() // Clear draft after successful save
       router.push(`/app/entry/${data.id}`)
     } catch (err: any) {
       console.error('Error saving entry:', err)
@@ -423,6 +456,25 @@ export default function NewEntryPage() {
           </Link>
 
           <div className="flex items-center gap-3">
+            {/* Draft Status Indicator */}
+            {hasDraft && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">
+                {isDirty ? (
+                  <>
+                    <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-pulse" />
+                    <span className="text-blue-700 dark:text-blue-300 font-medium">Saving draft...</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <span className="text-green-700 dark:text-green-300 font-medium">
+                      Draft saved {formatTimeAgo(lastSaved)}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+
             <ThemeSwitcher />
             
             <button

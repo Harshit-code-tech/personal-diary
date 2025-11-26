@@ -1,11 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
+import { generateDailyReminderEmail, generateWeeklySummaryEmail, generateStreakMilestoneEmail } from './templates.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 const GMAIL_USER = Deno.env.get('GMAIL_USER') ?? ''
 const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') ?? ''
+const APP_URL = Deno.env.get('APP_URL') ?? 'https://yourapp.com'
 
 interface EmailJob {
   user_id: string
@@ -57,11 +59,17 @@ serve(async (req) => {
     const results = await Promise.all(
       (pendingEmails || []).map(async (emailJob: any) => {
         try {
-          // Get user settings
+          // Get user settings and profile
           const { data: settings } = await supabase
             .from('user_settings')
             .select('email_reminders_enabled, email_frequency')
             .eq('user_id', emailJob.user_id)
+            .single()
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', emailJob.user_id)
             .single()
 
           // Skip if user disabled reminders
@@ -80,22 +88,34 @@ serve(async (req) => {
             .eq('user_id', emailJob.user_id)
             .single()
 
-          // Generate email content
-          const emailContent = generateEmailContent(
-            emailJob.email_type,
-            streak?.current_streak || 0,
-            streak?.total_entries || 0
-          )
+          // Generate beautiful HTML email content
+          let emailHtml = ''
+          let emailSubject = ''
+          
+          const templateProps = {
+            userName: profile?.name,
+            currentStreak: streak?.current_streak || 0,
+            totalEntries: streak?.total_entries || 0,
+            appUrl: APP_URL,
+          }
+          
+          if (emailJob.email_type === 'daily_reminder') {
+            emailHtml = generateDailyReminderEmail(templateProps)
+            emailSubject = '📝 Daily Journaling Reminder'
+          } else if (emailJob.email_type === 'weekly_summary') {
+            emailHtml = generateWeeklySummaryEmail(templateProps)
+            emailSubject = '📊 Your Weekly Journaling Summary'
+          } else if (emailJob.email_type === 'streak_milestone') {
+            emailHtml = generateStreakMilestoneEmail(templateProps)
+            emailSubject = `🎉 ${streak?.current_streak}-Day Streak Milestone!`
+          }
 
           // Send email via Gmail SMTP
           await smtpClient.send({
             from: GMAIL_USER,
             to: emailJob.users?.email || '',
-            subject: emailJob.email_type === 'daily_reminder' 
-              ? '📝 Daily Journaling Reminder' 
-              : '📊 Your Weekly Journaling Summary',
-            content: emailContent,
-            html: emailContent.replace(/\n/g, '<br>'),
+            subject: emailSubject,
+            html: emailHtml,
           })
           
           // Mark as sent
@@ -143,49 +163,3 @@ serve(async (req) => {
     )
   }
 })
-
-function generateEmailContent(
-  type: 'daily_reminder' | 'weekly_summary',
-  currentStreak: number,
-  totalEntries: number
-): string {
-  if (type === 'daily_reminder') {
-    return `
-      📝 Daily Journaling Reminder
-      
-      Hi there! 👋
-      
-      It's time to reflect on your day and add a new entry to your journal.
-      
-      ${currentStreak > 0 ? `🔥 You're on a ${currentStreak}-day streak! Keep it going!` : ''}
-      
-      Take a few minutes to write about:
-      • What went well today?
-      • What did you learn?
-      • How are you feeling?
-      
-      Click here to start writing: [Your App URL]/app/new
-      
-      Keep journaling! 💙
-    `
-  } else {
-    return `
-      📊 Your Weekly Journaling Summary
-      
-      Hi there! 👋
-      
-      Here's your journaling progress this week:
-      
-      📝 Total Entries: ${totalEntries}
-      🔥 Current Streak: ${currentStreak} days
-      
-      ${currentStreak >= 7 ? '🎉 Amazing! You journaled every day this week!' : 'Keep up the great work!'}
-      
-      Reflection is a powerful tool for personal growth. Keep it up!
-      
-      View your calendar: [Your App URL]/app/calendar
-      
-      Happy journaling! 💙
-    `
-  }
-}

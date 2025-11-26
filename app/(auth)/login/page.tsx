@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { Book } from 'lucide-react'
+import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
+import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -14,11 +16,28 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  const { csrfFetch, hasToken } = useCSRFToken()
+  
+  const { errors, touched, handleBlur, handleChange, validateAll } = useFormValidation({
+    email: commonRules.email,
+    password: [
+      {
+        required: true,
+        message: 'Password is required',
+      },
+    ],
+  })
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    // Validate fields
+    if (!validateAll({ email, password })) {
+      setLoading(false)
+      return
+    }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
@@ -81,23 +100,41 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-              Email
+              Email <span className="text-red-500">*</span>
             </label>
             <input
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                handleChange('email', e.target.value)
+              }}
+              onBlur={(e) => handleBlur('email', e.target.value)}
               required
-              className="w-full px-4 py-3 bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              className={`w-full px-4 py-3 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
+                touched.email && errors.email
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                  : touched.email && !errors.email && email
+                  ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                  : 'border-charcoal/10 dark:border-white/10 focus:border-gold dark:focus:border-teal focus:ring-gold/20 dark:focus:ring-teal/20'
+              }`}
               placeholder="you@example.com"
+              aria-invalid={touched.email && errors.email ? 'true' : 'false'}
+              aria-describedby={touched.email && errors.email ? 'email-error' : undefined}
             />
+            {touched.email && errors.email && (
+              <div id="email-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                {errors.email}
+              </div>
+            )}
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
               <label htmlFor="password" className="block text-sm font-medium text-charcoal dark:text-white">
-                Password
+                Password <span className="text-red-500">*</span>
               </label>
               <Link href="/forgot-password" className="text-xs text-gold dark:text-teal hover:underline">
                 Forgot password?
@@ -107,17 +144,33 @@ export default function LoginPage() {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                handleChange('password', e.target.value)
+              }}
+              onBlur={(e) => handleBlur('password', e.target.value)}
               required
-              className="w-full px-4 py-3 bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              className={`w-full px-4 py-3 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
+                touched.password && errors.password
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                  : 'border-charcoal/10 dark:border-white/10 focus:border-gold dark:focus:border-teal focus:ring-gold/20 dark:focus:ring-teal/20'
+              }`}
               placeholder="••••••••"
+              aria-invalid={touched.password && errors.password ? 'true' : 'false'}
+              aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
             />
+            {touched.password && errors.password && (
+              <div id="password-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
+                <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
+                {errors.password}
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-98"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

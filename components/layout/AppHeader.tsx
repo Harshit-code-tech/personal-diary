@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import NotificationBell from '@/components/notifications/NotificationBell'
+import Tooltip from '@/components/ui/Tooltip'
 import {
   BookOpen,
   Menu,
@@ -196,16 +197,17 @@ export default function AppHeader() {
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search - Always visible on desktop, hidden on mobile when menu open */}
-            <Link
-              href="/app/search"
-              className={`p-2 sm:p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 ${
-                menuOpen ? 'hidden sm:flex' : 'flex'
-              }`}
-              aria-label="Search entries"
-              title="Search"
-            >
-              <Search className="w-5 h-5" aria-hidden="true" />
-            </Link>
+            <Tooltip content="Search entries">
+              <Link
+                href="/app/search"
+                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95 ${
+                  menuOpen ? 'hidden sm:flex' : 'flex'
+                }`}
+                aria-label="Search entries"
+              >
+                <Search className="w-5 h-5" aria-hidden="true" />
+              </Link>
+            </Tooltip>
 
             {/* Theme Switcher - Hide on mobile when menu open */}
             <div className={menuOpen ? 'hidden sm:block' : 'block'}>
@@ -218,38 +220,44 @@ export default function AppHeader() {
             </div>
 
             {/* Settings - Hide on mobile when menu open */}
-            <Link
-              href="/app/settings"
-              className={`hidden lg:flex p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 ${
-                menuOpen ? 'lg:hidden xl:flex' : ''
-              }`}
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </Link>
+            <Tooltip content="Settings">
+              <Link
+                href="/app/settings"
+                className={`hidden lg:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95 ${
+                  menuOpen ? 'lg:hidden xl:flex' : ''
+                }`}
+                aria-label="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
+            </Tooltip>
 
             {/* Hamburger Menu Button - Visible only on mobile */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 sm:p-2.5 hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 group hover:scale-110"
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={menuOpen}
-            >
-              {menuOpen ? (
-                <X className="w-5 h-5 sm:w-6 sm:h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-              ) : (
-                <Menu className="w-5 h-5 sm:w-6 sm:h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-              )}
-            </button>
+            <Tooltip content={menuOpen ? 'Close menu' : 'Open menu'}>
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="md:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 group hover:scale-105 active:scale-95"
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={menuOpen}
+              >
+                {menuOpen ? (
+                  <X className="w-6 h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
+                ) : (
+                  <Menu className="w-6 h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
+                )}
+              </button>
+            </Tooltip>
 
             {/* Sign Out - Hidden on xl+ when visible in desktop nav */}
-            <button
-              onClick={handleSignOut}
-              className="hidden sm:flex lg:flex p-2.5 text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20"
-              title="Sign Out"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
+            <Tooltip content="Sign Out">
+              <button
+                onClick={handleSignOut}
+                className="hidden sm:flex lg:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95"
+                aria-label="Sign out of your account"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>

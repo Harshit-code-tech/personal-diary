@@ -57,7 +57,8 @@ export default function KeyboardShortcutsHelp() {
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors active:scale-95"
+            aria-label="Close keyboard shortcuts"
           >
             <X className="w-5 h-5" />
           </button>
