@@ -16,6 +16,8 @@ interface SearchResult {
   mood: string | null
   word_count: number
   folder_id: string | null
+  folder_name: string | null
+  folder_icon: string | null
   created_at: string
   updated_at: string
   rank: number
@@ -37,8 +39,19 @@ export default function SearchPage() {
   const [people, setPeople] = useState<any[]>([])
   const [stories, setStories] = useState<any[]>([])
   const [folders, setFolders] = useState<any[]>([])
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const { user } = useAuth()
   const supabase = createClient()
+
+  // Load search history from localStorage
+  useEffect(() => {
+    const history = localStorage.getItem('searchHistory')
+    if (history) {
+      setSearchHistory(JSON.parse(history))
+    }
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -58,13 +71,27 @@ export default function SearchPage() {
     setFolders(foldersRes.data || [])
   }
 
-  const handleSearch = async () => {
+  const handleSearch = async (searchQuery?: string) => {
     if (!user) return
+    
+    const queryToSearch = searchQuery || query
+    
+    // Allow search with just filters (no query text required)
+    const hasFilters = filters.dateFrom || filters.dateTo || filters.mood || filters.folderId || filters.personId || filters.storyId
+    if (!queryToSearch && !hasFilters) return // Only return if no query AND no filters
+    
+    // Save to search history (only if there's actual text)
+    if (queryToSearch && queryToSearch.trim() && !searchHistory.includes(queryToSearch)) {
+      const newHistory = [queryToSearch, ...searchHistory].slice(0, 10) // Keep last 10
+      setSearchHistory(newHistory)
+      localStorage.setItem('searchHistory', JSON.stringify(newHistory))
+    }
+    setShowSuggestions(false)
     
     setLoading(true)
     try {
       const { data, error } = await supabase.rpc('search_entries', {
-        search_query: query || '',
+        search_query: queryToSearch || '',
         user_id_param: user.id,
         date_from: filters.dateFrom || null,
         date_to: filters.dateTo || null,
@@ -77,12 +104,51 @@ export default function SearchPage() {
       })
 
       if (error) throw error
-      setResults(data || [])
+      
+      // Fetch folder data for results with folder_id
+      const resultsWithFolders = await Promise.all(
+        (data || []).map(async (result: any) => {
+          if (result.folder_id) {
+            const { data: folderData } = await supabase
+              .from('folders')
+              .select('name, icon')
+              .eq('id', result.folder_id)
+              .single()
+            return {
+              ...result,
+              folder_name: folderData?.name || null,
+              folder_icon: folderData?.icon || null
+            }
+          }
+          return { ...result, folder_name: null, folder_icon: null }
+        })
+      )
+      
+      setResults(resultsWithFolders)
     } catch (error) {
       console.error('Search error:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  // Generate suggestions based on search history and query
+  const generateSuggestions = (inputQuery: string) => {
+    if (!inputQuery.trim()) {
+      setSuggestions(searchHistory.slice(0, 5))
+      return
+    }
+    
+    const filtered = searchHistory.filter(h => 
+      h.toLowerCase().includes(inputQuery.toLowerCase())
+    ).slice(0, 5)
+    setSuggestions(filtered)
+  }
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
+    generateSuggestions(value)
+    setShowSuggestions(true)
   }
 
   const extractTextPreview = (html: string, maxLength: number = 200) => {
@@ -137,15 +203,41 @@ export default function SearchPage() {
               <input
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => handleQueryChange(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 placeholder="Search titles, content, moods..."
                 aria-label="Search your diary entries"
                 className="w-full pl-12 pr-4 py-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
+              
+              {/* Search Suggestions Dropdown */}
+              {showSuggestions && (suggestions.length > 0 || searchHistory.length > 0) && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl shadow-xl z-50 overflow-hidden">
+                  <div className="p-2">
+                    <div className="text-xs font-bold text-charcoal/60 dark:text-white/60 px-3 py-2">
+                      {query ? 'Suggestions' : 'Recent Searches'}
+                    </div>
+                    {(suggestions.length > 0 ? suggestions : searchHistory.slice(0, 5)).map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setQuery(suggestion)
+                          handleSearch(suggestion)
+                        }}
+                        className="w-full text-left px-3 py-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg text-charcoal dark:text-white flex items-center gap-2"
+                      >
+                        <Search className="w-4 h-4 text-charcoal/40 dark:text-white/40" />
+                        <span className="flex-1 truncate">{suggestion}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               disabled={loading}
               aria-label="Execute search"
               className="px-6 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
@@ -320,9 +412,10 @@ export default function SearchPage() {
                   className="block bg-white dark:bg-graphite p-6 rounded-xl shadow-sm border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
-                    <h3 className="text-xl font-bold text-charcoal dark:text-white flex-1">
-                      {result.title}
-                    </h3>
+                    <h3 
+                      className="text-xl font-bold text-charcoal dark:text-white flex-1"
+                      dangerouslySetInnerHTML={{ __html: highlightText(result.title, query) }}
+                    />
                     {result.mood && (
                       <span className="px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium">
                         {result.mood}
@@ -330,11 +423,21 @@ export default function SearchPage() {
                     )}
                   </div>
 
-                  <p className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3">
-                    {extractTextPreview(result.content, 250)}
-                  </p>
+                  <p 
+                    className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3"
+                    dangerouslySetInnerHTML={{ __html: highlightText(extractTextPreview(result.content, 250), query) }}
+                  />
 
                   <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60">
+                    {result.folder_name && (
+                      <>
+                        <span className="flex items-center gap-1">
+                          <span>{result.folder_icon || '📁'}</span>
+                          <span>{result.folder_name}</span>
+                        </span>
+                        <span>•</span>
+                      </>
+                    )}
                     <span>
                       {new Date(result.entry_date).toLocaleDateString('en-US', {
                         year: 'numeric',

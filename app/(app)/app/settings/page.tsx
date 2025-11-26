@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
 import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft, Mail, Lock } from 'lucide-react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import ReauthModal from '@/components/auth/ReauthModal'
 
 export default function SettingsPage() {
+  const toastNotify = useToast()
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
@@ -94,10 +95,10 @@ export default function SettingsPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Data exported successfully!')
+      toastNotify.success('Export Complete', 'Your data has been exported successfully')
     } catch (error) {
       console.error('Error exporting data:', error)
-      toast.error('Failed to export data. Please try again.')
+      toastNotify.error('Export Failed', 'Could not export data. Please try again')
     }
   }
 
@@ -140,11 +141,11 @@ export default function SettingsPage() {
 
       // Sign out
       await supabase.auth.signOut()
-      toast.success('Account deleted successfully')
+      toastNotify.success('Account Deleted', 'Your account has been permanently deleted')
       router.push('/')
     } catch (error) {
       console.error('Error deleting account:', error)
-      toast.error('Failed to delete account. Please contact support.')
+      toastNotify.error('Delete Failed', 'Could not delete account. Please contact support')
     }
   }
 
@@ -157,7 +158,7 @@ export default function SettingsPage() {
 
   const handleSendEmailOtp = () => {
     if (!newEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      toast.error('Please enter a valid email address')
+      toastNotify.error('Invalid Email', 'Please enter a valid email address')
       return
     }
     // Require reauthentication before sending OTP
@@ -178,9 +179,9 @@ export default function SettingsPage() {
       if (error) throw error
 
       setEmailOtpSent(true)
-      toast.success('Verification email sent! Check your new email inbox.')
+      toastNotify.success('Verification Sent', 'Check your new email inbox for verification link')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send verification email')
+      toastNotify.error('Send Failed', error.message || 'Could not send verification email')
     } finally {
       setChangingEmail(false)
     }
@@ -194,11 +195,11 @@ export default function SettingsPage() {
 
   const handleChangePassword = () => {
     if (!newPassword || newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters long')
+      toastNotify.error('Password Too Short', 'Password must be at least 8 characters long')
       return
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match')
+      toastNotify.error('Passwords Mismatch', 'The passwords you entered do not match')
       return
     }
     // Require reauthentication before changing password
@@ -215,12 +216,12 @@ export default function SettingsPage() {
 
       if (error) throw error
 
-      toast.success('Password updated successfully!')
+      toastNotify.success('Password Updated', 'Your password has been changed successfully')
       setShowChangePassword(false)
       setNewPassword('')
       setConfirmPassword('')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update password')
+      toastNotify.error('Update Failed', error.message || 'Could not update password')
     } finally {
       setChangingPassword(false)
     }

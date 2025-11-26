@@ -7,7 +7,8 @@ import Link from 'next/link'
 import { ArrowLeft, Bell, Plus, Check, X, Calendar, Repeat, Trash2 } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
-import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 type Reminder = {
   id: string
@@ -23,10 +24,14 @@ type Reminder = {
 export default function RemindersPage() {
   const { user, loading: authLoading } = useAuth()
   const supabase = createClient()
+  const toastNotify = useToast()
   const [loading, setLoading] = useState(true)
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [reminderToDelete, setReminderToDelete] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,7 +58,7 @@ export default function RemindersPage() {
       setReminders(data || [])
     } catch (err) {
       console.error('Error fetching reminders:', err)
-      toast.error('Failed to load reminders')
+      toastNotify.error('Load Failed', 'Could not load your reminders')
     } finally {
       setLoading(false)
     }
@@ -63,7 +68,7 @@ export default function RemindersPage() {
     e.preventDefault()
 
     if (!formData.title.trim() || !formData.reminder_date) {
-      toast.error('Please fill in all required fields')
+      toastNotify.error('Missing Fields', 'Please fill in all required fields')
       return
     }
 
@@ -80,7 +85,7 @@ export default function RemindersPage() {
           .eq('id', editingId)
 
         if (error) throw error
-        toast.success('Reminder updated!')
+        toastNotify.success('Reminder Updated', 'Your reminder has been updated successfully')
       } else {
         const { error } = await supabase
           .from('reminders')
@@ -93,7 +98,7 @@ export default function RemindersPage() {
           })
 
         if (error) throw error
-        toast.success('Reminder created!')
+        toastNotify.success('Reminder Created', 'Your new reminder has been added')
       }
 
       setFormData({ title: '', description: '', reminder_date: '', frequency: 'once' })
@@ -102,7 +107,7 @@ export default function RemindersPage() {
       fetchReminders()
     } catch (err: any) {
       console.error('Error saving reminder:', err)
-      toast.error(err.message || 'Failed to save reminder')
+      toastNotify.error('Save Failed', err.message || 'Could not save reminder')
     }
   }
 
@@ -117,29 +122,39 @@ export default function RemindersPage() {
         .eq('id', id)
 
       if (error) throw error
-      toast.success(isCompleted ? 'Marked as incomplete' : 'Marked as complete!')
+      toastNotify.success('Reminder Updated', isCompleted ? 'Marked as incomplete' : 'Marked as complete! ✓')
       fetchReminders()
     } catch (err) {
       console.error('Error toggling reminder:', err)
-      toast.error('Failed to update reminder')
+      toastNotify.error('Update Failed', 'Could not update reminder')
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this reminder?')) return
+  const handleDelete = (id: string) => {
+    setReminderToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!reminderToDelete) return
+    setDeleting(true)
 
     try {
       const { error } = await supabase
         .from('reminders')
         .delete()
-        .eq('id', id)
+        .eq('id', reminderToDelete)
 
       if (error) throw error
-      toast.success('Reminder deleted!')
+      toastNotify.success('Reminder Deleted', 'Your reminder has been removed')
       fetchReminders()
+      setShowDeleteDialog(false)
+      setReminderToDelete(null)
     } catch (err) {
       console.error('Error deleting reminder:', err)
-      toast.error('Failed to delete reminder')
+      toastNotify.error('Delete Failed', 'Could not delete reminder')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -383,6 +398,19 @@ export default function RemindersPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false)
+          setReminderToDelete(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Reminder?"
+        message="This will permanently delete this reminder. This action cannot be undone."
+        type="danger"
+        loading={deleting}
+      />
     </div>
   )
 }

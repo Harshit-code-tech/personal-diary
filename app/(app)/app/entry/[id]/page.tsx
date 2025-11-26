@@ -5,11 +5,26 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus, Target, Star, Folder } from 'lucide-react'
-import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import MultiFolderSelector from '@/components/folders/MultiFolderSelector'
+import FolderBreadcrumbs from '@/components/folders/FolderBreadcrumbs'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
+
+// Lazy load editor
+const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="border border-charcoal/10 dark:border-white/10 rounded-lg overflow-hidden">
+      <div className="p-6 text-center text-charcoal/60 dark:text-white/60">
+        Loading editor...
+      </div>
+    </div>
+  )
+})
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 
@@ -36,9 +51,11 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const [allEvents, setAllEvents] = useState<any[]>([])
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
+  const toastNotify = useToast()
 
   useEffect(() => {
     if (user) {
@@ -202,20 +219,20 @@ export default function EntryPage({ params }: { params: { id: string } }) {
 
       setEditing(false)
       fetchEntry()
-      toast.success('Entry updated successfully!')
+      toastNotify.success('Entry Saved', 'Your changes have been saved successfully')
     } catch (error) {
       console.error('Error updating entry:', error)
-      toast.error('Failed to update entry. Please try again.')
+      toastNotify.error('Save Failed', 'Could not save your entry. Please try again.')
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
-      return
-    }
-
+    setShowDeleteDialog(true)
+  }
+  
+  const handleConfirmDelete = async () => {
     setDeleting(true)
     try {
       const { error } = await supabase
@@ -225,12 +242,13 @@ export default function EntryPage({ params }: { params: { id: string } }) {
 
       if (error) throw error
 
-      toast.success('Entry deleted successfully!')
+      toastNotify.success('Entry Deleted', 'Your entry has been permanently removed')
       router.push('/app')
     } catch (error) {
       console.error('Error deleting entry:', error)
-      toast.error('Failed to delete entry. Please try again.')
+      toastNotify.error('Delete Failed', 'Could not delete entry. Please try again.')
       setDeleting(false)
+      setShowDeleteDialog(false)
     }
   }
 
@@ -438,6 +456,14 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       <main className="max-w-4xl mx-auto px-6 py-8">
         {!editing ? (
           <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 space-y-6">
+            {/* Breadcrumbs */}
+            {entry.folder_id && (
+              <FolderBreadcrumbs 
+                folderId={entry.folder_id} 
+                className="mb-4 pb-4 border-b border-charcoal/10 dark:border-white/10"
+              />
+            )}
+
             {/* Title */}
             <h1 className="text-4xl font-serif font-bold text-charcoal dark:text-teal">
               {entry.title}
@@ -1032,6 +1058,19 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       )}
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Entry?"
+        message="This will permanently delete this entry. This action cannot be undone."
+        confirmText="Delete Entry"
+        cancelText="Cancel"
+        type="danger"
+        loading={deleting}
+      />
     </div>
   )
 }

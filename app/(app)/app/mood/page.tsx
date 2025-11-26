@@ -4,10 +4,35 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { ArrowLeft, Smile, TrendingUp, Calendar, BarChart3 } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
-import { MoodBarChart, MoodTimeline, MoodPieChart } from '@/components/charts/MoodCharts'
+
+// Lazy load chart components
+const MoodBarChart = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodBarChart })), {
+  loading: () => (
+    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+      <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading chart...</div>
+    </div>
+  )
+})
+
+const MoodTimeline = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodTimeline })), {
+  loading: () => (
+    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+      <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading timeline...</div>
+    </div>
+  )
+})
+
+const MoodPieChart = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodPieChart })), {
+  loading: () => (
+    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+      <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading chart...</div>
+    </div>
+  )
+})
 
 type MoodEntry = {
   id: string

@@ -5,13 +5,29 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
 import { entrySchema, formatZodErrors } from '@/lib/validation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, ChevronRight, ChevronDown } from 'lucide-react'
-import WYSIWYGEditor from '@/components/editor/WYSIWYGEditor'
-import TemplateModal from '@/components/templates/TemplateModal'
 import TagInput from '@/components/tags/TagInput'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+
+// Lazy load heavy components
+const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="border-2 border-charcoal/10 dark:border-white/10 rounded-xl overflow-hidden">
+      <div className="p-6 text-center text-charcoal/60 dark:text-white/60">
+        Loading editor...
+      </div>
+    </div>
+  )
+})
+
+const TemplateModal = dynamic(() => import('@/components/templates/TemplateModal'), {
+  ssr: false
+})
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
 

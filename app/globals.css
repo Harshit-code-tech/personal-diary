@@ -86,120 +86,135 @@ button, a {
 
 /* Grey mode (tired mode) - warm taupe palette for tired eyes */
 html.theme-grey {
-  --paper: #C5B8A8;          /* Warm beige - main background */
-  --cream: #D4C9BC;          /* Lighter warm grey - elevated surfaces */
-  --charcoal: #3A3632;       /* Warm dark grey - primary text */
-  --gold: #8B7E6F;           /* Muted taupe - accents */
-  --midnight: #5C5550;       /* Medium warm grey - dark surfaces */
-  --graphite: #6F6660;       /* Lighter medium grey - cards */
-  --teal: #8B8278;           /* Warm stone - secondary accents */
-  --navy: #7A6F66;           /* Hover states */
+  --paper: #B5A89A;          /* Darker warm beige - main background */
+  --cream: #C5B8A8;          /* Medium warm grey - elevated surfaces */
+  --charcoal: #2D2925;       /* Very dark warm grey - primary text */
+  --gold: #9B8B7A;           /* Warmer taupe - accents */
+  --midnight: #B5A89A;       /* Match paper for consistency */
+  --graphite: #C5B8A8;       /* Match cream for cards */
+  --teal: #9B8B7A;           /* Match gold accent */
+  --navy: #8B7E6F;           /* Darker hover states */
 }
 
-/* Apply grey background to entire page */
-html.theme-grey,
+/* Apply grey theme like dark mode - comprehensive coverage */
 html.theme-grey body {
-  background-color: #C5B8A8 !important;
-  color: #3A3632 !important;
+  background-color: #B5A89A !important;
+  color: #2D2925 !important;
 }
 
-html.theme-grey main,
-html.theme-grey #__next,
+/* Main content area */
+html.theme-grey main {
+  background-color: #B5A89A !important;
+}
+
+/* Sidebar and navigation - slightly lighter for differentiation */
 html.theme-grey aside,
-html.theme-grey nav,
-html.theme-grey header,
-html.theme-grey section,
-html.theme-grey article {
-  background-color: transparent !important;
+html.theme-grey nav {
+  background-color: #ADA095 !important;
 }
 
-/* Override card/component backgrounds - lighter elevated surfaces */
+/* Cards and content boxes - lighter elevated surface */
 html.theme-grey .bg-white,
-html.theme-grey .bg-paper,
 html.theme-grey .bg-cream,
-html.theme-grey [class*="bg-[#FFF5E6]"],
-html.theme-grey [class*="bg-\\[#FFF5E6\\]"],
-html.theme-grey [class*="bg-paper"],
-html.theme-grey [class*="bg-cream"] {
-  background-color: #D4C9BC !important;
+html.theme-grey [class*="bg-white"],
+html.theme-grey [class*="bg-cream"],
+html.theme-grey [class*="bg-\\[#FFF5E6\\]"] {
+  background-color: #C5B8A8 !important;
+  color: #2D2925 !important;
 }
 
+/* Dark mode equivalents in grey theme */
 html.theme-grey .bg-midnight,
 html.theme-grey .bg-graphite,
 html.theme-grey [class*="bg-midnight"],
-html.theme-grey [class*="bg-graphite"] {
-  background-color: #6F6660 !important;
+html.theme-grey [class*="bg-graphite"],
+html.theme-grey .dark\:bg-midnight,
+html.theme-grey .dark\:bg-graphite {
+  background-color: #8B7E6F !important;
+  color: #F5F0E8 !important;
 }
 
 /* Backdrop filters */
 html.theme-grey [class*="backdrop-blur"] {
-  background-color: rgba(197, 184, 168, 0.9) !important;
+  background-color: rgba(181, 168, 154, 0.95) !important;
 }
 
-/* Text colors - better contrast */
+/* Text colors - darker for better contrast on warm background */
 html.theme-grey .text-charcoal,
-html.theme-grey .text-white,
 html.theme-grey [class*="text-charcoal"],
-html.theme-grey [class*="text-white"] {
-  color: #3A3632 !important;
+html.theme-grey .text-white,
+html.theme-grey [class*="text-white"],
+html.theme-grey .dark\:text-white,
+html.theme-grey .dark\:text-teal {
+  color: #2D2925 !important;
 }
 
 html.theme-grey .text-gold,
 html.theme-grey .text-teal,
 html.theme-grey [class*="text-gold"],
-html.theme-grey [class*="text-teal"] {
-  color: #5C5550 !important;
+html.theme-grey [class*="text-teal"],
+html.theme-grey .dark\:text-teal {
+  color: #5C4F3E !important;
 }
 
-/* Secondary text - muted but readable */
+/* Secondary text - darker but still readable */
 html.theme-grey [class*="text-charcoal/60"],
 html.theme-grey [class*="text-white/60"],
 html.theme-grey [class*="text-charcoal/70"],
-html.theme-grey [class*="text-white/70"] {
-  color: #5C5550 !important;
+html.theme-grey [class*="text-white/70"],
+html.theme-grey .dark\:text-white\/60 {
+  color: #5C4F3E !important;
 }
 
 html.theme-grey [class*="text-charcoal/40"],
-html.theme-grey [class*="text-white/40"] {
+html.theme-grey [class*="text-white/40"],
+html.theme-grey .dark\:text-white\/40 {
   color: #7A6F66 !important;
 }
 
-/* Accent colors muted but visible */
+/* Accent backgrounds */
 html.theme-grey .bg-gold,
-html.theme-grey [class*="bg-gold"] {
-  background-color: #8B7E6F !important;
+html.theme-grey [class*="bg-gold"],
+html.theme-grey .dark\:bg-teal {
+  background-color: #9B8B7A !important;
+  color: #2D2925 !important;
 }
 
 html.theme-grey .bg-teal,
 html.theme-grey [class*="bg-teal"] {
-  background-color: #8B8278 !important;
+  background-color: #9B8B7A !important;
+  color: #2D2925 !important;
 }
 
 /* Gold/teal with opacity */
 html.theme-grey [class*="bg-gold/10"],
-html.theme-grey [class*="bg-teal/10"] {
-  background-color: rgba(139, 126, 111, 0.15) !important;
+html.theme-grey [class*="bg-teal/10"],
+html.theme-grey .dark\:bg-teal\/10 {
+  background-color: rgba(155, 139, 122, 0.15) !important;
 }
 
 html.theme-grey [class*="bg-gold/30"],
 html.theme-grey [class*="bg-teal/30"] {
-  background-color: rgba(139, 126, 111, 0.3) !important;
+  background-color: rgba(155, 139, 122, 0.3) !important;
 }
 
-/* Borders - subtle but visible */
+/* Borders - darker for better definition */
 html.theme-grey [class*="border-charcoal/10"],
-html.theme-grey [class*="border-white/10"] {
-  border-color: rgba(58, 54, 50, 0.2) !important;
+html.theme-grey [class*="border-white/10"],
+html.theme-grey .dark\:border-white\/10 {
+  border-color: rgba(45, 41, 37, 0.25) !important;
 }
 
 html.theme-grey [class*="border-charcoal/20"],
-html.theme-grey [class*="border-white/20"] {
-  border-color: rgba(58, 54, 50, 0.25) !important;
+html.theme-grey [class*="border-white/20"],
+html.theme-grey .dark\:border-white\/20 {
+  border-color: rgba(45, 41, 37, 0.3) !important;
 }
 
 html.theme-grey [class*="border-gold"],
-html.theme-grey [class*="border-teal"] {
-  border-color: #8B7E6F !important;
+html.theme-grey [class*="border-teal"],
+html.theme-grey .dark\:border-teal {
+  border-color: #9B8B7A !important;
 }
 
 /* Headers with proper contrast */
@@ -209,37 +224,50 @@ html.theme-grey h3,
 html.theme-grey h4,
 html.theme-grey h5,
 html.theme-grey h6 {
-  color: #3A3632 !important;
+  color: #2D2925 !important;
 }
 
-/* Soften shadows with warm tones */
+/* Soften shadows */
 html.theme-grey [class*="shadow"] {
-  box-shadow: 0 2px 8px rgba(58, 54, 50, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(45, 41, 37, 0.2) !important;
 }
 
 /* Hover states */
 html.theme-grey [class*="hover:bg-charcoal/5"]:hover,
-html.theme-grey [class*="hover:bg-white/5"]:hover {
-  background-color: rgba(58, 54, 50, 0.08) !important;
+html.theme-grey [class*="hover:bg-white/5"]:hover,
+html.theme-grey .dark\:hover\:bg-white\/5:hover {
+  background-color: rgba(45, 41, 37, 0.1) !important;
 }
 
 html.theme-grey [class*="hover:bg-gold"]:hover,
-html.theme-grey [class*="hover:bg-teal"]:hover {
-  background-color: #7A6F66 !important;
+html.theme-grey [class*="hover:bg-teal"]:hover,
+html.theme-grey .dark\:hover\:bg-teal:hover {
+  background-color: #8B7E6F !important;
 }
 
 /* Input fields */
 html.theme-grey input,
 html.theme-grey textarea,
 html.theme-grey select {
-  background-color: #D4C9BC !important;
-  color: #3A3632 !important;
-  border-color: rgba(58, 54, 50, 0.25) !important;
+  background-color: #C5B8A8 !important;
+  color: #2D2925 !important;
+  border-color: rgba(45, 41, 37, 0.3) !important;
 }
 
 html.theme-grey input::placeholder,
 html.theme-grey textarea::placeholder {
   color: #7A6F66 !important;
+}
+
+/* Buttons - ensure visibility */
+html.theme-grey button {
+  color: #2D2925 !important;
+}
+
+html.theme-grey .bg-gold.text-white,
+html.theme-grey .dark\:bg-teal.dark\:text-midnight {
+  background-color: #9B8B7A !important;
+  color: #F5F0E8 !important;
 }
 
 /* Calendar Heatmap Styling */

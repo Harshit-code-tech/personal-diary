@@ -39,24 +39,34 @@ export default function PeoplePage() {
 
   const fetchPeople = async () => {
     try {
-      // Fetch people with counts
-      const { data, error } = await supabase
+      // Fetch people
+      const { data: peopleData, error } = await supabase
         .from('people')
-        .select(`
-          *,
-          entries:entries(count),
-          memories:memories(count)
-        `)
+        .select('*')
         .order('name')
 
       if (error) throw error
 
-      // Transform data to include counts
-      const peopleWithCounts = data?.map(person => ({
-        ...person,
-        entry_count: person.entries?.[0]?.count || 0,
-        memory_count: person.memories?.[0]?.count || 0,
-      })) || []
+      // Fetch entry counts using entry_people junction table
+      const peopleWithCounts = await Promise.all(
+        (peopleData || []).map(async (person) => {
+          const { count: entryCount } = await supabase
+            .from('entry_people')
+            .select('*', { count: 'exact', head: true })
+            .eq('person_id', person.id)
+
+          const { count: memoryCount } = await supabase
+            .from('memories')
+            .select('*', { count: 'exact', head: true })
+            .eq('person_id', person.id)
+
+          return {
+            ...person,
+            entry_count: entryCount || 0,
+            memory_count: memoryCount || 0,
+          }
+        })
+      )
 
       setPeople(peopleWithCounts)
       setFilteredPeople(peopleWithCounts)

@@ -12,11 +12,26 @@ type Entry = {
 }
 
 /**
- * Strip HTML tags and return plain text
+ * Strip HTML tags and return plain text with proper formatting
  */
 export function stripHtml(html: string): string {
+  // First sanitize to remove all HTML tags
   const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] })
-  return clean.replace(/&nbsp;/g, ' ').trim()
+  
+  // Replace common HTML entities
+  return clean
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&hellip;/g, '...')
+    // Remove excessive whitespace
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /**
@@ -213,4 +228,94 @@ export function exportSingleEntryToMarkdown(entry: Entry): string {
   markdown += `${plainText}\n`
 
   return markdown
+}
+
+/**
+ * Export entries to JSON format
+ */
+export function exportToJSON(entries: Entry[]): string {
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    totalEntries: entries.length,
+    entries: entries.map(entry => ({
+      ...entry,
+      content: stripHtml(entry.content) // Convert HTML to plain text
+    }))
+  }
+  return JSON.stringify(exportData, null, 2)
+}
+
+/**
+ * Download JSON file
+ */
+export function downloadJSON(json: string): void {
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `diary-export-${new Date().toISOString().split('T')[0]}.json`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+/**
+ * Export entries to CSV format
+ */
+export function exportToCSV(entries: Entry[]): string {
+  // CSV Headers
+  const headers = ['Date', 'Title', 'Content', 'Mood', 'Word Count', 'Tags']
+  
+  // Escape CSV values
+  const escapeCSV = (value: any): string => {
+    if (value === null || value === undefined) return ''
+    const str = String(value)
+    // Escape quotes and wrap in quotes if contains comma, quote, or newline
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`
+    }
+    return str
+  }
+  
+  // Build CSV rows
+  const rows = entries.map(entry => {
+    const date = new Date(entry.entry_date).toLocaleDateString('en-US')
+    // Strip HTML and clean up content thoroughly
+    let content = stripHtml(entry.content)
+    // Remove multiple spaces and newlines
+    content = content.replace(/\s+/g, ' ').trim()
+    const tags = entry.tags ? entry.tags.join('; ') : ''
+    
+    return [
+      escapeCSV(date),
+      escapeCSV(entry.title),
+      escapeCSV(content),
+      escapeCSV(entry.mood || ''),
+      escapeCSV(entry.word_count || ''),
+      escapeCSV(tags)
+    ].join(',')
+  })
+  
+  // Combine headers and rows
+  return [headers.join(','), ...rows].join('\n')
+}
+
+/**
+ * Download CSV file with UTF-8 BOM for proper emoji support
+ */
+export function downloadCSV(csv: string): void {
+  // Add UTF-8 BOM (Byte Order Mark) to ensure proper encoding
+  const BOM = '\uFEFF'
+  const csvWithBOM = BOM + csv
+  
+  const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `diary-export-${new Date().toISOString().split('T')[0]}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }

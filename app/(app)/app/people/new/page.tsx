@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
 import Link from 'next/link'
 import { ArrowLeft, User, Upload, Save, X } from 'lucide-react'
 
@@ -19,6 +19,7 @@ const relationships = [
 ]
 
 export default function NewPersonPage() {
+  const toastNotify = useToast()
   const [name, setName] = useState('')
   const [relationship, setRelationship] = useState('Friend')
   const [birthday, setBirthday] = useState('')
@@ -85,11 +86,11 @@ export default function NewPersonPage() {
 
       if (error) throw error
 
-      toast.success('Person added successfully!')
+      toastNotify.success('Person Added', `${name} has been added to your people`)
       router.push('/app/people')
     } catch (error) {
       console.error('Error creating person:', error)
-      toast.error('Failed to add person. Please try again.')
+      toastNotify.error('Save Failed', 'Could not add person. Please try again')
     } finally {
       setSaving(false)
     }

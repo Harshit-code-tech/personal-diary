@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Command, Keyboard } from 'lucide-react'
 import { useGlobalShortcuts } from '@/lib/hooks/useKeyboardShortcuts'
 
@@ -9,17 +9,25 @@ export default function KeyboardShortcutsHelp() {
   const shortcuts = useGlobalShortcuts()
 
   // Listen for ? key to toggle help
-  if (typeof window !== 'undefined') {
-    window.addEventListener('keydown', (e) => {
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault()
         setIsOpen(true)
       }
       if (e.key === 'Escape' && isOpen) {
         setIsOpen(false)
       }
-    })
-  }
+      // Also listen for Ctrl+/ or Cmd+/
+      if (e.key === '/' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault()
+        setIsOpen(prev => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [isOpen])
 
   if (!isOpen) {
     return (
@@ -96,11 +104,23 @@ export default function KeyboardShortcutsHelp() {
           {/* Help Toggle */}
           <div className="flex items-center justify-between p-3 rounded-lg bg-gold/10 dark:bg-teal/10 border border-gold/20 dark:border-teal/20">
             <span className="text-charcoal dark:text-white font-medium">
-              Show this help
+              Toggle this help
             </span>
-            <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
-              ?
-            </kbd>
+            <div className="flex items-center gap-2">
+              <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
+                ?
+              </kbd>
+              <span className="text-charcoal/40 dark:text-white/40">or</span>
+              <div className="flex items-center gap-1">
+                <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
+                  Ctrl
+                </kbd>
+                <span className="text-charcoal/40 dark:text-white/40">+</span>
+                <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
+                  /
+                </kbd>
+              </div>
+            </div>
           </div>
         </div>
 

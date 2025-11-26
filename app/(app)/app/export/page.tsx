@@ -4,10 +4,18 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { ArrowLeft, Download, FileText, FileDown, Calendar, Filter, Check } from 'lucide-react'
+import { ArrowLeft, Download, FileText, FileDown, Calendar, Filter, Check, FileJson, FileSpreadsheet } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
-import { exportToMarkdown, exportToPDF, downloadMarkdown } from '@/lib/export-utils'
+import { 
+  exportToMarkdown, 
+  exportToPDF, 
+  downloadMarkdown,
+  exportToJSON,
+  downloadJSON,
+  exportToCSV,
+  downloadCSV
+} from '@/lib/export-utils'
 import toast from 'react-hot-toast'
 
 export default function ExportPage() {
@@ -82,7 +90,7 @@ export default function ExportPage() {
     setSelectedEntries(new Set())
   }
 
-  const handleExport = async (format: 'markdown' | 'pdf') => {
+  const handleExport = async (format: 'markdown' | 'pdf' | 'json' | 'csv') => {
     if (selectedEntries.size === 0) {
       toast.error('Please select at least one entry to export')
       return
@@ -98,9 +106,17 @@ export default function ExportPage() {
         const markdown = exportToMarkdown(entriesToExport)
         downloadMarkdown(markdown)
         toast.success('Exported to Markdown successfully!')
-      } else {
+      } else if (format === 'pdf') {
         await exportToPDF(entriesToExport)
         toast.success('Exported to PDF successfully!')
+      } else if (format === 'json') {
+        const json = exportToJSON(entriesToExport)
+        downloadJSON(json)
+        toast.success('Exported to JSON successfully!')
+      } else if (format === 'csv') {
+        const csv = exportToCSV(entriesToExport)
+        downloadCSV(csv)
+        toast.success('Exported to CSV successfully!')
       }
     } catch (err) {
       console.error('Export error:', err)
@@ -304,6 +320,36 @@ export default function ExportPage() {
               <h3 className="text-2xl font-bold mb-2">Export as PDF</h3>
               <p className="text-white/80 text-sm">
                 Professional format ideal for printing and archiving
+              </p>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={() => handleExport('json')}
+            disabled={selectedEntries.size === 0 || exporting}
+            className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            <div className="relative z-10">
+              <FileJson className="w-12 h-12 mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Export as JSON</h3>
+              <p className="text-white/80 text-sm">
+                Structured data format for backups and data portability
+              </p>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={selectedEntries.size === 0 || exporting}
+            className="group relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 text-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            <div className="relative z-10">
+              <FileSpreadsheet className="w-12 h-12 mb-4" />
+              <h3 className="text-2xl font-bold mb-2">Export as CSV</h3>
+              <p className="text-white/80 text-sm">
+                Spreadsheet format for data analysis in Excel or Google Sheets
               </p>
             </div>
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />

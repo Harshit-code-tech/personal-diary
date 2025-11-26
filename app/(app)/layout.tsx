@@ -4,6 +4,7 @@ import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import KeyboardShortcutsHelp from '@/components/ui/KeyboardShortcutsHelp'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
 import { ToastProvider } from '@/components/ui/ToastContainer'
+import KeyboardShortcutsProvider from '@/components/providers/KeyboardShortcutsProvider'
 
 export default async function AppLayout({
   children,
@@ -20,6 +21,7 @@ export default async function AppLayout({
   return (
     <ErrorBoundary>
       <ToastProvider>
+        <KeyboardShortcutsProvider />
         {children}
         <KeyboardShortcutsHelp />
         <OfflineIndicator />

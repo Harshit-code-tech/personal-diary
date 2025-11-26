@@ -41,7 +41,7 @@ export function useGlobalShortcuts() {
 
   const shortcuts: KeyboardShortcut[] = [
     {
-      key: 'n',
+      key: 'e',
       ctrl: true,
       meta: true,
       action: () => router.push('/app/new'),

@@ -7,7 +7,8 @@ import Link from 'next/link'
 import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
-import toast from 'react-hot-toast'
+import { useToast } from '@/components/ui/ToastContainer'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 type Milestone = {
   id: string
@@ -40,12 +41,16 @@ const categories = [
 export default function GoalsPage() {
   const { user, loading: authLoading } = useAuth()
   const supabase = createClient()
+  const toastNotify = useToast()
   const [loading, setLoading] = useState(true)
   const [goals, setGoals] = useState<Goal[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [showCompleted, setShowCompleted] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -90,7 +95,7 @@ export default function GoalsPage() {
       setGoals(goalsWithMilestones)
     } catch (err) {
       console.error('Error fetching goals:', err)
-      toast.error('Failed to load goals')
+      toastNotify.error('Load Failed', 'Could not load your goals')
     } finally {
       setLoading(false)
     }
@@ -100,7 +105,7 @@ export default function GoalsPage() {
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      toast.error('Please enter a goal title')
+      toastNotify.error('Missing Title', 'Please enter a goal title')
       return
     }
 
@@ -155,7 +160,7 @@ export default function GoalsPage() {
             })
         )
 
-        toast.success('Goal updated!')
+        toastNotify.success('Goal Updated', 'Your goal has been updated successfully')
       } else {
         // Create goal
         const { data: goalData, error: goalError } = await supabase
@@ -190,14 +195,14 @@ export default function GoalsPage() {
           if (milestonesError) throw milestonesError
         }
 
-        toast.success('Goal created!')
+        toastNotify.success('Goal Created', 'Your new goal has been added')
       }
 
       resetForm()
       fetchGoals()
     } catch (err: any) {
       console.error('Error saving goal:', err)
-      toast.error(err.message || 'Failed to save goal')
+      toastNotify.error('Save Failed', err.message || 'Could not save goal')
     }
   }
 
@@ -209,11 +214,11 @@ export default function GoalsPage() {
         .eq('id', milestoneId)
 
       if (error) throw error
-      toast.success(currentStatus ? 'Milestone unchecked' : 'Milestone completed!')
+      toastNotify.success('Milestone Updated', currentStatus ? 'Milestone marked as incomplete' : 'Milestone completed! 🎉')
       fetchGoals()
     } catch (err) {
       console.error('Error toggling milestone:', err)
-      toast.error('Failed to update milestone')
+      toastNotify.error('Update Failed', 'Could not update milestone')
     }
   }
 
@@ -228,29 +233,39 @@ export default function GoalsPage() {
         .eq('id', goalId)
 
       if (error) throw error
-      toast.success(currentStatus ? 'Goal reopened' : 'Goal completed! 🎉')
+      toastNotify.success(currentStatus ? 'Goal Reopened' : 'Goal Completed', currentStatus ? 'Your goal has been reopened' : 'Congratulations on completing your goal! 🎉')
       fetchGoals()
     } catch (err) {
       console.error('Error toggling goal:', err)
-      toast.error('Failed to update goal')
+      toastNotify.error('Update Failed', 'Could not update goal status')
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this goal?')) return
+  const handleDelete = (id: string) => {
+    setGoalToDelete(id)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!goalToDelete) return
+    setDeleting(true)
 
     try {
       const { error } = await supabase
         .from('goals')
         .delete()
-        .eq('id', id)
+        .eq('id', goalToDelete)
 
       if (error) throw error
-      toast.success('Goal deleted!')
+      toastNotify.success('Goal Deleted', 'Your goal has been permanently removed')
       fetchGoals()
+      setShowDeleteDialog(false)
+      setGoalToDelete(null)
     } catch (err) {
       console.error('Error deleting goal:', err)
-      toast.error('Failed to delete goal')
+      toastNotify.error('Delete Failed', 'Could not delete goal')
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -685,6 +700,19 @@ export default function GoalsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => {
+          setShowDeleteDialog(false)
+          setGoalToDelete(null)
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Goal?"
+        message="This will permanently delete this goal and all its milestones. This action cannot be undone."
+        type="danger"
+        loading={deleting}
+      />
     </div>
   )
 }
