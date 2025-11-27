@@ -69,6 +69,6 @@ test.describe('Responsive Design', () => {
     await page.goto('/')
     
     // Use text locator for "My Diary" or "Personal Diary"
-    await expect(page.locator('text=/my diary|personal diary/i')).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('© 2025 My Personal Diary. Your thoughts, forever …')).toBeVisible({ timeout: 10_000 })
   })
 })
