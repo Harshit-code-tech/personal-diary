@@ -3,9 +3,8 @@ import { test, expect } from '@playwright/test'
 test.describe('Landing Page', () => {
   test('should display main heading', async ({ page }) => {
     await page.goto('/')
-    
-    // Use text locator for "Personal Diary" or "My Diary"
-    await expect(page.locator('text=/my diary|personal diary/i')).toBeVisible({ timeout: 10_000 })
+    // Use role-based locator for heading to avoid ambiguity
+    await expect(page.getByRole('heading', { name: 'My Diary' })).toBeVisible();
   })
 
   test('should have login and signup links', async ({ page }) => {
@@ -67,8 +66,7 @@ test.describe('Responsive Design', () => {
   test('should be mobile responsive', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/')
-    
-    // Use text locator for "My Diary" or "Personal Diary"
-    await expect(page.getByText('© 2025 My Personal Diary. Your thoughts, forever …')).toBeVisible({ timeout: 10_000 })
+    // Use partial text match for footer
+    await expect(page.getByText(/My Personal Diary/)).toBeVisible({ timeout: 10000 });
   })
 })
