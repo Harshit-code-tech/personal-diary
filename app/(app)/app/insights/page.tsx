@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -50,13 +50,7 @@ export default function InsightsPage() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
 
-  useEffect(() => {
-    if (user) {
-      fetchAnalytics()
-    }
-  }, [user, timeRange, customStartDate, customEndDate])
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true)
     try {
       const now = new Date()
@@ -244,7 +238,13 @@ export default function InsightsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, timeRange, customStartDate, customEndDate, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalytics()
+    }
+  }, [user, timeRange, customStartDate, customEndDate, fetchAnalytics])
 
   if (authLoading || loading) {
     return <PageLoadingSkeleton />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Shield, 
@@ -72,13 +72,7 @@ export default function AdminDashboardPage() {
     }
   }, [isAdmin, authLoading, router])
 
-  useEffect(() => {
-    if (isAdmin) {
-      loadDashboardData()
-    }
-  }, [isAdmin])
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     setLoading(true)
     try {
       const [statsData, logsData, profilesData] = await Promise.all([
@@ -95,7 +89,13 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadDashboardData()
+    }
+  }, [isAdmin, loadDashboardData])
 
   if (authLoading || !isAdmin) {
     return <PageLoadingSkeleton />

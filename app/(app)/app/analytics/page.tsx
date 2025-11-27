@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -54,13 +54,7 @@ export default function AnalyticsPage() {
   const [dailyStats, setDailyStats] = useState<DailyStats[]>([])
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('month')
 
-  useEffect(() => {
-    if (user) {
-      fetchAnalytics()
-    }
-  }, [user, timeRange])
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true)
     try {
       // Calculate date range
@@ -235,7 +229,13 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, timeRange, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchAnalytics()
+    }
+  }, [user, timeRange, fetchAnalytics])
 
   if (authLoading || loading) {
     return <PageLoadingSkeleton />
@@ -481,10 +481,10 @@ export default function AnalyticsPage() {
                     Keep up the great work!
                   </h3>
                   <p className="text-charcoal/70 dark:text-white/70 mb-3">
-                    You've written <span className="font-bold text-gold dark:text-teal">{stats.totalWords.toLocaleString()}</span> words 
+                    You&apos;ve written <span className="font-bold text-gold dark:text-teal">{stats.totalWords.toLocaleString()}</span> words 
                     across <span className="font-bold text-gold dark:text-teal">{stats.totalEntries}</span> entries.
                     {stats.currentStreak > 0 && (
-                      <> You're on a <span className="font-bold text-orange-500">({stats.currentStreak} day streak!</span></>
+                      <> You&apos;re on a <span className="font-bold text-orange-500">({stats.currentStreak} day streak!</span></>
                     )}
                   </p>
                   {stats.currentStreak === 0 && (

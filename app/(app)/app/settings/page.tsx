@@ -333,7 +333,7 @@ export default function SettingsPage() {
                         Please check your inbox and click the link to confirm your new email address.
                       </p>
                       <p className="text-xs text-charcoal/60 dark:text-white/60">
-                        You'll need to verify both your old and new email addresses.
+                        You&apos;ll need to verify both your old and new email addresses.
                       </p>
                     </div>
                   )}
@@ -556,7 +556,7 @@ export default function SettingsPage() {
               {showDeleteConfirm && (
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                   <p className="text-sm text-red-800 dark:text-red-200">
-                    ⚠️ This action cannot be undone. All your entries, people, stories, and data will be permanently deleted. Click "Confirm Delete" again to proceed.
+                    ⚠️ This action cannot be undone. All your entries, people, stories, and data will be permanently deleted. Click &quot;Confirm Delete&quot; again to proceed.
                   </p>
                   <button
                     onClick={() => setShowDeleteConfirm(false)}
