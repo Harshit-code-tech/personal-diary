@@ -5,10 +5,11 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/ToastContainer'
-import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft, Mail, Lock } from 'lucide-react'
+import { User, Moon, Sun, Download, LogOut, Trash2, Shield, ArrowLeft, Mail, Lock, Bell } from 'lucide-react'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import ReauthModal from '@/components/auth/ReauthModal'
+import NotificationSettings from '@/components/settings/NotificationSettings'
 
 export default function SettingsPage() {
   const toastNotify = useToast()
@@ -501,6 +502,11 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Notification Settings Section */}
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+            <NotificationSettings />
           </div>
 
           {/* Account Actions Section */}

@@ -59,14 +59,15 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const toastNotify = useToast()
 
   // Auto-save functionality
-  const { saving: autoSaving, wordCount } = useAutoSave({
+  const { isSaving: autoSaving } = useAutoSave({
     entryId: params.id,
     title,
     content,
-    mood,
-    entryDate,
     enabled: editing,
   })
+
+  // Calculate word count from content
+  const wordCount = content ? content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word.length > 0).length : 0
 
   useEffect(() => {
     if (user) {

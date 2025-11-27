@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useSavedSearches } from '@/lib/hooks/useSavedSearches'
 import Link from 'next/link'
-import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile } from 'lucide-react'
+import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile, Save, Star, Trash2, FolderOpen } from 'lucide-react'
 import { ListSkeleton } from '@/components/ui/LoadingSkeleton'
 import DOMPurify from 'isomorphic-dompurify'
+import { useSearchParams } from 'next/navigation'
+import confetti from 'canvas-confetti'
 
 interface SearchResult {
   id: string
@@ -42,14 +45,31 @@ export default function SearchPage() {
   const [searchHistory, setSearchHistory] = useState<string[]>([])
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showSavedSearches, setShowSavedSearches] = useState(false)
+  const [saveSearchName, setSaveSearchName] = useState('')
+  const [currentFolderName, setCurrentFolderName] = useState<string | null>(null)
   const { user } = useAuth()
   const supabase = createClient()
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchParams = useSearchParams()
+  const { savedSearches, saveSearch, deleteSearch } = useSavedSearches()
 
   // Auto-focus search input on mount
   useEffect(() => {
     searchInputRef.current?.focus()
   }, [])
+
+  // Load folder context from URL
+  useEffect(() => {
+    const folderId = searchParams?.get('folder')
+    if (folderId && folders.length > 0) {
+      const folder = folders.find(f => f.id === folderId)
+      if (folder) {
+        setCurrentFolderName(folder.name)
+        setFilters(prev => ({ ...prev, folderId }))
+      }
+    }
+  }, [searchParams, folders])
 
   // Load search history from localStorage
   useEffect(() => {
@@ -186,6 +206,28 @@ export default function SearchPage() {
       personId: '',
       storyId: ''
     })
+    setCurrentFolderName(null)
+  }
+
+  const handleSaveSearch = () => {
+    if (!saveSearchName.trim()) return
+    
+    saveSearch(saveSearchName, query, filters)
+    setSaveSearchName('')
+    setShowSavedSearches(false)
+    
+    // Show success with confetti
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    })
+  }
+
+  const loadSavedSearch = (search: any) => {
+    setQuery(search.query)
+    setFilters(search.filters)
+    handleSearch(search.query)
   }
 
   const hasActiveFilters = Object.values(filters).some(v => v !== '')
@@ -256,6 +298,33 @@ export default function SearchPage() {
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
+            
+            {/* Save Search Button */}
+            {query && (
+              <button
+                onClick={() => setShowSavedSearches(!showSavedSearches)}
+                aria-label="Save this search"
+                className="p-3 rounded-xl border-2 border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+                title="Save this search"
+              >
+                <Save className="w-5 h-5" />
+              </button>
+            )}
+            
+            {/* Saved Searches Button */}
+            <button
+              onClick={() => setShowSavedSearches(!showSavedSearches)}
+              aria-label="View saved searches"
+              className={`p-3 rounded-xl border-2 transition-colors ${
+                savedSearches.length > 0
+                  ? 'border-gold dark:border-teal text-gold dark:text-teal'
+                  : 'border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white'
+              } hover:bg-charcoal/5 dark:hover:bg-white/5`}
+              title={`${savedSearches.length} saved searches`}
+            >
+              <Star className={savedSearches.length > 0 ? 'w-5 h-5 fill-current' : 'w-5 h-5'} />
+            </button>
+            
             <button
               onClick={() => setShowFilters(!showFilters)}
               aria-label={showFilters ? 'Hide search filters' : 'Show search filters'}
@@ -270,6 +339,81 @@ export default function SearchPage() {
               <Filter className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
+          
+          {/* Save Search Modal */}
+          {showSavedSearches && query && (
+            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+              <h3 className="font-semibold text-charcoal dark:text-white mb-3">Save This Search</h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={saveSearchName}
+                  onChange={(e) => setSaveSearchName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSaveSearch()}
+                  placeholder="Enter a name for this search..."
+                  className="flex-1 px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveSearch}
+                  disabled={!saveSearchName.trim()}
+                  className="px-4 py-2 bg-gold dark:bg-teal text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setShowSavedSearches(false)}
+                  className="px-4 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Saved Searches List */}
+          {showSavedSearches && !query && savedSearches.length > 0 && (
+            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+              <h3 className="font-semibold text-charcoal dark:text-white mb-3 flex items-center gap-2">
+                <Star className="w-5 h-5 fill-gold dark:fill-teal text-gold dark:text-teal" />
+                Saved Searches
+              </h3>
+              <div className="space-y-2">
+                {savedSearches.map((search) => (
+                  <div
+                    key={search.id}
+                    className="flex items-center gap-3 p-3 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg group"
+                  >
+                    <button
+                      onClick={() => loadSavedSearch(search)}
+                      className="flex-1 text-left"
+                    >
+                      <div className="font-medium text-charcoal dark:text-white">{search.name}</div>
+                      <div className="text-sm text-charcoal/60 dark:text-white/60">
+                        {search.query}
+                        {Object.values(search.filters).some(v => v) && ' • With filters'}
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => deleteSearch(search.id)}
+                      className="opacity-0 group-hover:opacity-100 p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                      aria-label={`Delete ${search.name}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Folder Context */}
+          {currentFolderName && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-charcoal/60 dark:text-white/60">
+              <FolderOpen className="w-4 h-4" />
+              <span>Searching in: <span className="font-semibold text-charcoal dark:text-white">{currentFolderName}</span></span>
+            </div>
+          )}
 
           {/* Filters Panel */}
           {showFilters && (

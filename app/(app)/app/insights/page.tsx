@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import DateRangePicker from '@/components/analytics/DateRangePicker'
 
 interface AnalyticsData {
   totalEntries: number
@@ -45,21 +46,27 @@ export default function InsightsPage() {
   const { user, loading: authLoading } = useAuth()
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState<'all' | '30' | '90' | '365'>('all')
+  const [timeRange, setTimeRange] = useState<'all' | '30' | '90' | '365' | 'custom'>('all')
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
 
   useEffect(() => {
     if (user) {
       fetchAnalytics()
     }
-  }, [user, timeRange])
+  }, [user, timeRange, customStartDate, customEndDate])
 
   const fetchAnalytics = async () => {
     setLoading(true)
     try {
       const now = new Date()
       let dateFilter = null
+      let endDateFilter = null
 
-      if (timeRange !== 'all') {
+      if (timeRange === 'custom' && customStartDate && customEndDate) {
+        dateFilter = customStartDate
+        endDateFilter = customEndDate
+      } else if (timeRange !== 'all') {
         const daysAgo = new Date()
         daysAgo.setDate(now.getDate() - parseInt(timeRange))
         dateFilter = daysAgo.toISOString().split('T')[0]
@@ -74,6 +81,10 @@ export default function InsightsPage() {
 
       if (dateFilter) {
         query = query.gte('entry_date', dateFilter)
+      }
+      
+      if (endDateFilter) {
+        query = query.lte('entry_date', endDateFilter)
       }
 
       const { data: entries, error } = await query
@@ -286,7 +297,13 @@ export default function InsightsPage() {
             ].map((range) => (
               <button
                 key={range.value}
-                onClick={() => setTimeRange(range.value as any)}
+                onClick={() => {
+                  setTimeRange(range.value as any)
+                  if (range.value !== 'custom') {
+                    setCustomStartDate('')
+                    setCustomEndDate('')
+                  }
+                }}
                 className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   timeRange === range.value
                     ? 'bg-gold dark:bg-teal text-white'
@@ -296,6 +313,22 @@ export default function InsightsPage() {
                 {range.label}
               </button>
             ))}
+            
+            {/* Custom Date Range Picker */}
+            <DateRangePicker
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onDateRangeChange={(start, end) => {
+                setCustomStartDate(start)
+                setCustomEndDate(end)
+                setTimeRange('custom')
+              }}
+              onClear={() => {
+                setCustomStartDate('')
+                setCustomEndDate('')
+                setTimeRange('all')
+              }}
+            />
           </div>
         </div>
       </header>

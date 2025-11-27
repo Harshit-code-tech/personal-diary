@@ -186,6 +186,7 @@ export default function AppHeader() {
                   aria-label={`Navigate to ${link.label}`}
                   aria-current={active ? 'page' : undefined}
                   title={link.label}
+                  data-tour={link.href === '/app/insights' ? 'insights' : link.href === '/app/calendar' ? 'calendar' : undefined}
                 >
                   <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span className="hidden xl:inline">{link.label}</span>
@@ -204,6 +205,7 @@ export default function AppHeader() {
                   menuOpen ? 'hidden sm:flex' : 'flex'
                 }`}
                 aria-label="Search entries"
+                data-tour="search"
               >
                 <Search className="w-5 h-5" aria-hidden="true" />
               </Link>

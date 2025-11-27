@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import KeyboardShortcutsHelp from '@/components/ui/KeyboardShortcutsHelp'
 import OfflineIndicator from '@/components/ui/OfflineIndicator'
+import OnboardingTour from '@/components/ui/OnboardingTour'
 import { ToastProvider } from '@/components/ui/ToastContainer'
 import KeyboardShortcutsProvider from '@/components/providers/KeyboardShortcutsProvider'
 
@@ -22,6 +23,7 @@ export default async function AppLayout({
     <ErrorBoundary>
       <ToastProvider>
         <KeyboardShortcutsProvider />
+        <OnboardingTour />
         {children}
         <KeyboardShortcutsHelp />
         <OfflineIndicator />

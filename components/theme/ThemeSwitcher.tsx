@@ -72,6 +72,7 @@ export default function ThemeSwitcher() {
           onClick={() => setIsOpen(!isOpen)}
           className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-charcoal/20 dark:border-white/20 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors active:scale-95"
           aria-label={`Current theme: ${themes[currentTheme].name}. Click to change theme`}
+          data-tour="theme-switcher"
         >
           <CurrentIcon className="w-5 h-5" />
         </button>

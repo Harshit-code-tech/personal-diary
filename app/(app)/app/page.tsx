@@ -318,6 +318,7 @@ export default function AppPage() {
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] bg-gradient-to-b from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
+          data-tour="folders"
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-4 lg:hidden">
@@ -355,6 +356,7 @@ export default function AppPage() {
               <Link
                 href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
                 className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 w-full sm:w-auto justify-center"
+                data-tour="new-entry"
               >
                 <Plus className="w-5 sm:w-6 h-5 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
                 <span className="text-sm sm:text-base">New Entry</span>

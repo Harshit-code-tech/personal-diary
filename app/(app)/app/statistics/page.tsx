@@ -17,6 +17,7 @@ type Statistics = {
   days_journaling?: number
   entries_this_month?: number
   entries_last_month?: number
+  first_entry_date?: string
 }
 
 export default function StatisticsPage() {

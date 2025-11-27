@@ -59,9 +59,9 @@ export default function NewEntryPage() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  // Auto-save draft system
+  // Auto-save draft system (user-specific key)
   const { saveDraft, clearDraft, hasDraft, lastSaved, isDirty } = useAutoSaveDraft({
-    key: 'new-entry',
+    key: user?.id ? `new-entry-${user.id}` : 'new-entry',
     autoSaveDelay: 3000, // Auto-save after 3 seconds of inactivity
     onRestore: (draft) => {
       // Restore draft data on mount
