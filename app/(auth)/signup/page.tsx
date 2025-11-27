@@ -269,7 +269,7 @@ export default function SignupPage() {
         {/* Footer Note */}
         <div className="mt-6 text-center">
           <p className="text-xs text-charcoal/50 dark:text-white/50">
-            By signing up, you'll receive a confirmation email to verify your account
+            By signing up, you&apos;ll receive a confirmation email to verify your account
           </p>
         </div>
       </div>

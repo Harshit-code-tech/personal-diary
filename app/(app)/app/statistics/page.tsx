@@ -349,7 +349,7 @@ export default function StatisticsPage() {
                 })}
               </div>
               <div className="text-xs sm:text-sm text-charcoal/70 dark:text-white/70 font-medium">
-                That's {stats.days_journaling} days of capturing your thoughts and memories!
+                That&apos;s {stats.days_journaling} days of capturing your thoughts and memories!
               </div>
             </div>
           </div>

@@ -632,7 +632,7 @@ export default function NewEntryPage() {
             </button>
             
             <p className="text-xs text-charcoal/50 dark:text-white/50 mt-3">
-              💡 Entry will automatically be saved to its date folder (e.g., "2025 → November → 23")
+              💡 Entry will automatically be saved to its date folder (e.g., &quot;2025 → November → 23&quot;)
             </p>
           </div>
 

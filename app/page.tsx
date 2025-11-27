@@ -151,7 +151,7 @@ export default function Home() {
               Begin Your Journey Today
             </h2>
             <p className="text-charcoal/70 dark:text-white/70 mb-6 sm:mb-8 text-base sm:text-lg">
-              Join others who've made journaling a daily habit.
+              Join others who&apos;ve made journaling a daily habit.
             </p>
             <Link 
               href="/signup"

@@ -655,7 +655,7 @@ export default function AppPage() {
             {/* End of results message */}
             {!fetchingEntries && !hasMore && entries.length > 0 && (
               <div className="text-center mt-6 sm:mt-8 text-charcoal/60 dark:text-white/60">
-                <p className="text-sm sm:text-base">You've reached the end of your entries</p>
+                <p className="text-sm sm:text-base">You&apos;ve reached the end of your entries</p>
                 <p className="text-xs sm:text-sm mt-1">Total: {totalCount} {totalCount === 1 ? 'entry' : 'entries'}</p>
               </div>
             )}

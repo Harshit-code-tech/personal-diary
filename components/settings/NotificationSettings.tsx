@@ -214,7 +214,7 @@ export default function NotificationSettings() {
                 Streak Notifications
               </h3>
               <p className="text-sm text-charcoal/60 dark:text-white/60">
-                Get notified about your writing streaks and when they're about to break
+                Get notified about your writing streaks and when they&apos;re about to break
               </p>
             </div>
           </div>

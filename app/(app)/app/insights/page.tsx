@@ -545,7 +545,7 @@ export default function InsightsPage() {
                 {analytics.longestEntry.word_count.toLocaleString()} words
               </p>
               <p className="text-sm text-charcoal/80 dark:text-white/80 truncate">
-                "{analytics.longestEntry.title}"
+                &quot;{analytics.longestEntry.title}&quot;
               </p>
             </Link>
           )}

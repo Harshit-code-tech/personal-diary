@@ -75,7 +75,7 @@ export default function VerifyEmailPage() {
             Check Your Email
           </h1>
           <p className="text-charcoal/70 dark:text-white/70">
-            We've sent a verification link to
+            We&apos;ve sent a verification link to
           </p>
           <p className="text-gold dark:text-teal font-semibold mt-1">
             {email}
@@ -91,17 +91,17 @@ export default function VerifyEmailPage() {
             </div>
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal rounded-full flex items-center justify-center text-xs font-bold">2</span>
-              <p>Click the <strong>"Confirm your email"</strong> button in the email</p>
+              <p>Click the <strong>&quot;Confirm your email&quot;</strong> button in the email</p>
             </div>
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal rounded-full flex items-center justify-center text-xs font-bold">3</span>
-              <p>You'll be redirected back to start your journaling journey</p>
+              <p>You&apos;ll be redirected back to start your journaling journey</p>
             </div>
           </div>
 
           <div className="pt-4 border-t border-charcoal/10 dark:border-white/10">
             <p className="text-sm text-charcoal/60 dark:text-white/60 mb-3">
-              Didn't receive the email?
+              Didn&apos;t receive the email?
             </p>
             <ul className="text-xs text-charcoal/50 dark:text-white/50 space-y-1 mb-4">
               <li>• Check your spam or junk folder</li>
