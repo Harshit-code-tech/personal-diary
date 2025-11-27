@@ -7,6 +7,9 @@ import OnboardingTour from '@/components/ui/OnboardingTour'
 import { ToastProvider } from '@/components/ui/ToastContainer'
 import KeyboardShortcutsProvider from '@/components/providers/KeyboardShortcutsProvider'
 
+// Force dynamic rendering for all /app routes (they use authentication/cookies)
+export const dynamic = 'force-dynamic'
+
 export default async function AppLayout({
   children,
 }: {

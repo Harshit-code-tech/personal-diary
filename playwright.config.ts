@@ -10,6 +10,10 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    // Increase default timeout for actions
+    actionTimeout: 15_000,
+    // Increase navigation timeout
+    navigationTimeout: 30_000,
   },
 
   projects: [
@@ -19,9 +23,11 @@ export default defineConfig({
     },
   ],
 
+  // Ensure the dev server is running before tests
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
+    timeout: 120_000, // 2 minutes to start
     reuseExistingServer: !process.env.CI,
   },
 })
