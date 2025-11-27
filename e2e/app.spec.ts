@@ -4,16 +4,16 @@ test.describe('Landing Page', () => {
   test('should display main heading', async ({ page }) => {
     await page.goto('/')
     
-    // Use text locator instead of heading role for better flexibility
-    await expect(page.locator('text=/personal diary/i')).toBeVisible({ timeout: 10_000 })
+    // Use text locator for "Personal Diary" or "My Diary"
+    await expect(page.locator('text=/my diary|personal diary/i')).toBeVisible({ timeout: 10_000 })
   })
 
   test('should have login and signup links', async ({ page }) => {
     await page.goto('/')
     
-    // Use .first() to handle multiple matching links (header + mobile menu)
-    const loginLink = page.getByRole('link', { name: /log ?in/i }).first()
-    const signupLink = page.getByRole('link', { name: /sign up|get started/i }).first()
+    // The actual text on the landing page is "Sign In" and "Start Writing Today"/"Create Your Diary"
+    const loginLink = page.getByRole('link', { name: /sign in/i }).first()
+    const signupLink = page.getByRole('link', { name: /start writing today|create your diary/i }).first()
     
     await expect(loginLink).toBeVisible({ timeout: 10_000 })
     await expect(signupLink).toBeVisible({ timeout: 10_000 })
@@ -24,23 +24,23 @@ test.describe('Authentication Flow', () => {
   test('should navigate to login page', async ({ page }) => {
     await page.goto('/')
     
-    // Click first login link and wait for navigation
-    await page.getByRole('link', { name: /log ?in/i }).first().click()
+    // Click "Sign In" link (actual text on the page)
+    await page.getByRole('link', { name: /sign in/i }).first().click()
     
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 })
     
-    // Target the submit button within the form to avoid ambiguity
+    // Target the submit button within the form
     await expect(page.locator('form').getByRole('button', { name: /sign in/i })).toBeVisible({ timeout: 10_000 })
   })
 
   test('should show validation errors on empty login', async ({ page }) => {
     await page.goto('/login')
     
-    // Click the form's submit button specifically (not any header tab)
+    // Click the form's submit button
     await page.locator('form').getByRole('button', { name: /sign in/i }).click()
     
-    // Should show validation or error message with increased timeout
-    await expect(page.locator('text=/email|password|required/i')).toBeVisible({ timeout: 5_000 })
+    // Wait for validation error to appear - errors have role="alert" and specific IDs
+    await expect(page.locator('[role="alert"]').first()).toBeVisible({ timeout: 5_000 })
   })
 })
 
@@ -68,7 +68,7 @@ test.describe('Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/')
     
-    // Use text locator instead of heading role (heading might be hidden/rearranged on mobile)
-    await expect(page.locator('text=/personal diary/i')).toBeVisible({ timeout: 10_000 })
+    // Use text locator for "My Diary" or "Personal Diary"
+    await expect(page.locator('text=/my diary|personal diary/i')).toBeVisible({ timeout: 10_000 })
   })
 })
