@@ -352,7 +352,7 @@ export default function RemindersPage() {
                   Date & Time *
                 </label>
                 <input
-                  type="date"
+                  type="datetime-local"
                   value={formData.reminder_date}
                   onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
                   className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"

@@ -48,10 +48,6 @@ export default async function FolderPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  console.log('Folder page params:', params)
-  console.log('Folder ID:', params.id)
-  console.log('Link will be:', `/app/new?folder=${params.id}`)
-
   const data = await getFolderData(params.id)
 
   if (!data) {

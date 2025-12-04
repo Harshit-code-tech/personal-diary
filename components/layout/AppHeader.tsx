@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import NotificationBell from '@/components/notifications/NotificationBell'
+import StreakBadge from '@/components/analytics/StreakBadge'
 import Tooltip from '@/components/ui/Tooltip'
 import {
   BookOpen,
@@ -183,6 +184,11 @@ export default function AppHeader() {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Streak Badge - Show writing streak */}
+            <div className={menuOpen ? 'hidden sm:block' : 'block'}>
+              <StreakBadge />
+            </div>
+
             {/* Search - Always visible on desktop, hidden on mobile when menu open */}
             <Tooltip content="Search entries">
               <Link

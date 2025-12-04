@@ -91,8 +91,32 @@ export default function AnalyticsPage() {
 
       if (error) throw error
 
+      // Handle case where no entries exist
+      if (!entries || entries.length === 0) {
+        setAnalytics({
+          totalEntries: 0,
+          totalWords: 0,
+          avgWordsPerEntry: 0,
+          longestEntry: null,
+          currentStreak: 0,
+          longestStreak: 0,
+          moodDistribution: [],
+          writingByMonth: [],
+          writingByDayOfWeek: [],
+          topTags: [],
+          peopleCount: 0,
+          storiesCount: 0,
+          goalsCount: 0,
+          mostProductiveHour: 0,
+          firstEntryDate: null,
+          daysSinceFirstEntry: 0
+        })
+        setLoading(false)
+        return
+      }
+
       // Calculate statistics
-      const totalEntries = entries?.length || 0
+      const totalEntries = entries.length
       const totalWords = entries?.reduce((sum, e) => sum + (e.word_count || 0), 0) || 0
       const avgWordsPerEntry = totalEntries > 0 ? Math.round(totalWords / totalEntries) : 0
 
@@ -176,22 +200,49 @@ export default function AnalyticsPage() {
       }
       longestStreak = Math.max(longestStreak, tempStreak)
 
-      // Current streak (from today)
+      // Current streak (from today or yesterday - allow 1 day grace period)
+      // FIX: Use local date string instead of ISO to avoid timezone issues
       const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const todayStr = today.toLocaleDateString('en-CA') // Format: YYYY-MM-DD in local timezone
+      
+      // Debug logging for streak calculation
+      console.log('=== STREAK CALCULATION DEBUG ===')
+      console.log('Today (local):', todayStr)
+      console.log('Total entries in range:', entries?.length || 0)
+      console.log('Recent entries (first 5):', entries?.slice(0, 5).map(e => e.entry_date))
+      console.log('Has entry today:', entries?.some((e) => e.entry_date === todayStr))
+      
+      // Check if there's an entry today
+      const hasEntryToday = entries?.some((e) => e.entry_date === todayStr)
+      
+      // Start from today if entry exists, otherwise start from yesterday
       let checkDate = new Date(today)
+      if (!hasEntryToday) {
+        checkDate.setDate(checkDate.getDate() - 1)
+      }
+      
       currentStreak = 0
+      const streakDates: string[] = []
 
       while (true) {
-        const dateStr = checkDate.toISOString().split('T')[0]
+        const dateStr = checkDate.toLocaleDateString('en-CA') // Use local timezone
         const hasEntry = entries?.some((e) => e.entry_date === dateStr)
         if (hasEntry) {
           currentStreak++
+          streakDates.push(dateStr)
           checkDate.setDate(checkDate.getDate() - 1)
         } else {
           break
         }
       }
+      
+      console.log('Streak calculation:', {
+        currentStreak,
+        longestStreak,
+        streakDates,
+        gracePeriodApplied: !hasEntryToday
+      })
+      console.log('===================================')
 
       // Fetch counts from other tables
       const [peopleRes, storiesRes, goalsRes] = await Promise.all([

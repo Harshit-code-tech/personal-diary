@@ -21,6 +21,7 @@ import {
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import DateRangePicker from '@/components/analytics/DateRangePicker'
+import StreakDashboard from '@/components/analytics/StreakDashboard'
 
 interface AnalyticsData {
   totalEntries: number
@@ -334,8 +335,11 @@ export default function InsightsPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Streak Dashboard - Shows writing consistency */}
+        <StreakDashboard />
+
         {/* Key Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 mt-8">
           <StatCard
             icon={<FileText className="w-6 h-6" />}
             title="Total Entries"

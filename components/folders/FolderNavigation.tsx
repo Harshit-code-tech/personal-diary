@@ -33,8 +33,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
   const [editingFolder, setEditingFolder] = useState<FolderItem | null>(null)
   const [folderName, setFolderName] = useState('')
   const [folderIcon, setFolderIcon] = useState('📁')
-  const [folderColor, setFolderColor] = useState('#D4AF37')
-  const [useCustomColor, setUseCustomColor] = useState(true)
   const [useCustomIcon, setUseCustomIcon] = useState(true)
   const [parentFolderId, setParentFolderId] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, folder: FolderItem} | null>(null)
@@ -125,7 +123,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
           name: folderName.trim(),
           folder_type: 'custom',
           icon: useCustomIcon ? folderIcon : '📁',
-          color: useCustomColor ? folderColor : '#D4AF37',
           parent_id: parentFolderId
         })
 
@@ -134,8 +131,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       setShowNewFolder(false)
       setFolderName('')
       setFolderIcon('📁')
-      setFolderColor('#D4AF37')
-      setUseCustomColor(true)
       setUseCustomIcon(true)
       setParentFolderId(null)
       fetchFolders()
@@ -154,8 +149,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
         .from('folders')
         .update({
           name: folderName.trim(),
-          icon: useCustomIcon ? folderIcon : '📁',
-          color: useCustomColor ? folderColor : '#D4AF37'
+          icon: useCustomIcon ? folderIcon : '📁'
         })
         .eq('id', editingFolder.id)
 
@@ -164,7 +158,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       setShowEditFolder(false)
       setEditingFolder(null)
       setFolderName('')
-      setUseCustomColor(true)
       setUseCustomIcon(true)
       fetchFolders()
       toast.success('Folder updated successfully!')
@@ -406,8 +399,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   onChange={(e) => setParentFolderId(e.target.value || null)}
                   className="w-full px-4 py-3 bg-charcoal/5 dark:bg-white/5 border-2 border-charcoal/10 dark:border-white/10 rounded-xl text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal font-medium transition-all [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
                 >
-                  className="w-full px-6 py-4 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
-                >
                   <option value="">No parent (root folder)</option>
                   {getAllCustomFolders().map(folder => (
                     <option key={folder.id} value={folder.id}>
@@ -451,41 +442,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                 ) : (
                   <div className="text-6xl p-8 bg-charcoal/5 dark:bg-white/5 rounded-xl text-center">
                     📁
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <label className="block text-base font-bold text-charcoal dark:text-white">
-                    Color
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={useCustomColor}
-                      onChange={(e) => setUseCustomColor(e.target.checked)}
-                      className="w-5 h-5 rounded border-2 border-charcoal/20 dark:border-white/20 text-gold dark:text-teal focus:ring-gold dark:focus:ring-teal"
-                    />
-                    <span className="text-sm font-medium text-charcoal dark:text-white">Use custom color</span>
-                  </label>
-                </div>
-                {useCustomColor ? (
-                  <div className="grid grid-cols-4 gap-4">
-                    {['#D4AF37', '#20B2AA', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'].map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setFolderColor(color)}
-                        className={`w-full h-16 rounded-xl transition-all duration-300 shadow-md hover:shadow-2xl hover:scale-105 ${
-                          folderColor === color ? 'ring-4 ring-offset-4 ring-charcoal/30 dark:ring-white/30 scale-105' : ''
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="w-full h-16 rounded-xl bg-charcoal/5 dark:bg-white/5 flex items-center justify-center text-sm text-charcoal/50 dark:text-white/50">
-                    Default gold color will be used
                   </div>
                 )}
               </div>
@@ -627,41 +583,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                 ) : (
                   <div className="text-6xl p-8 bg-charcoal/5 dark:bg-white/5 rounded-xl text-center">
                     📁
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <label className="block text-base font-bold text-charcoal dark:text-white">
-                    Color
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={useCustomColor}
-                      onChange={(e) => setUseCustomColor(e.target.checked)}
-                      className="w-5 h-5 rounded border-2 border-charcoal/20 dark:border-white/20 text-gold dark:text-teal focus:ring-gold dark:focus:ring-teal"
-                    />
-                    <span className="text-sm font-medium text-charcoal dark:text-white">Use custom color</span>
-                  </label>
-                </div>
-                {useCustomColor ? (
-                  <div className="grid grid-cols-4 gap-4">
-                    {['#D4AF37', '#20B2AA', '#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'].map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setFolderColor(color)}
-                        className={`w-full h-16 rounded-xl transition-all duration-300 shadow-md hover:shadow-2xl hover:scale-105 ${
-                          folderColor === color ? 'ring-4 ring-offset-4 ring-charcoal/30 dark:ring-white/30 scale-105' : ''
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="w-full h-16 rounded-xl bg-charcoal/5 dark:bg-white/5 flex items-center justify-center text-sm text-charcoal/50 dark:text-white/50">
-                    Default gold color will be used
                   </div>
                 )}
               </div>

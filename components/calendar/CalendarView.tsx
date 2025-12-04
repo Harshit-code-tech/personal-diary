@@ -134,12 +134,6 @@ export default function CalendarView() {
             Visualize your writing habits over the past year
           </p>
         </div>
-        <Link
-          href="/app"
-          className="px-4 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors text-charcoal dark:text-white"
-        >
-          ← Back
-        </Link>
       </div>
 
       {/* Calendar Heatmap */}

@@ -60,9 +60,17 @@ export default function NewEntryPage() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  // Auto-save draft system (user-specific key)
+  // Get folder parameter early for draft key
+  const folderParam = searchParams.get('folder')
+  const draftKey = user?.id 
+    ? folderParam 
+      ? `new-entry-${user.id}-folder-${folderParam}` 
+      : `new-entry-${user.id}`
+    : 'new-entry'
+
+  // Auto-save draft system (user-specific + folder-specific key)
   const { saveDraft, clearDraft, hasDraft, lastSaved, isDirty } = useAutoSaveDraft({
-    key: user?.id ? `new-entry-${user.id}` : 'new-entry',
+    key: draftKey,
     autoSaveDelay: 3000, // Auto-save after 3 seconds of inactivity
     onRestore: (draft) => {
       // Restore draft data on mount
@@ -92,26 +100,16 @@ export default function NewEntryPage() {
   }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders])
 
   useEffect(() => {
-    // Debug: Log full URL
-    console.log('Current URL:', window.location.href)
-    console.log('Search params:', searchParams.toString())
-    
     // Pre-fill date from URL parameter (from calendar)
     const dateParam = searchParams.get('date')
     if (dateParam) {
-      console.log('Setting entry date from URL:', dateParam)
       setEntryDate(dateParam)
     }
     
     // Pre-select folder from URL (when clicking from folder view)
-    const folderParam = searchParams.get('folder')
-    console.log('Folder parameter from URL:', folderParam)
-    console.log('All search params keys:', Array.from(searchParams.keys()))
+    // folderParam already defined at component level
     if (folderParam) {
-      console.log('Pre-selecting folder from URL:', folderParam)
       setSelectedFolders([folderParam])
-    } else {
-      console.log('No folder parameter in URL')
     }
   }, [searchParams])
 
@@ -147,7 +145,6 @@ export default function NewEntryPage() {
         .order('sort_order')
 
       if (error) throw error
-      console.log('Fetched folders:', data?.length || 0, 'folders')
       setFolders(data || [])
     } catch (err) {
       console.error('Error fetching folders:', err)
@@ -621,7 +618,6 @@ export default function NewEntryPage() {
               <div className="flex flex-wrap gap-2 mb-3">
                 {selectedFolders.map(folderId => {
                   const folder = folders.find(f => f.id === folderId)
-                  console.log('Rendering selected folder:', folderId, 'Found:', folder)
                   if (!folder) return null
                   return (
                     <div

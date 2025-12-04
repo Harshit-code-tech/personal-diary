@@ -20,6 +20,11 @@ export default function SettingsPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
   
+  // Username states
+  const [username, setUsername] = useState('')
+  const [usernameLoading, setUsernameLoading] = useState(false)
+  const [usernameError, setUsernameError] = useState('')
+  
   // Change email states
   const [showChangeEmail, setShowChangeEmail] = useState(false)
   const [newEmail, setNewEmail] = useState('')
@@ -55,9 +60,69 @@ export default function SettingsPage() {
         setTheme(isDark ? 'dark' : 'light')
       }
       
+      // Fetch username
+      fetchUsername()
+      
       setLoading(false)
     }
   }, [user])
+
+  const fetchUsername = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('username')
+        .eq('user_id', user?.id)
+        .single()
+      
+      if (error) throw error
+      setUsername(data?.username || '')
+    } catch (error) {
+      console.error('Error fetching username:', error)
+    }
+  }
+
+  const handleUpdateUsername = async () => {
+    if (!username) {
+      setUsernameError('Username is required')
+      return
+    }
+    
+    if (username.length < 3 || username.length > 30) {
+      setUsernameError('Username must be 3-30 characters')
+      return
+    }
+    
+    if (!/^[a-z0-9_-]+$/.test(username)) {
+      setUsernameError('Only lowercase letters, numbers, hyphens, and underscores allowed')
+      return
+    }
+    
+    setUsernameLoading(true)
+    setUsernameError('')
+    
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ username })
+        .eq('user_id', user?.id)
+      
+      if (error) {
+        if (error.code === '23505') {
+          setUsernameError('Username already taken')
+        } else {
+          throw error
+        }
+        return
+      }
+      
+      toastNotify.success('Username Updated', 'Your username has been saved')
+    } catch (error: any) {
+      toastNotify.error('Update Failed', error.message || 'Could not update username')
+    } finally {
+      setUsernameLoading(false)
+    }
+  }
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -213,13 +278,18 @@ export default function SettingsPage() {
   const executeChangePassword = async () => {
     setChangingPassword(true)
     try {
+      // Note: Supabase will send a confirmation email if "Secure password change" is enabled
+      // in your project settings (Authentication > Settings)
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       })
 
       if (error) throw error
 
-      toastNotify.success('Password Updated', 'Your password has been changed successfully')
+      toastNotify.success(
+        'Confirmation Email Sent', 
+        'Please check your email to confirm the password change'
+      )
       setShowChangePassword(false)
       setNewPassword('')
       setConfirmPassword('')
@@ -271,6 +341,40 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-6">
+              {/* Username Section */}
+              <div>
+                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                  Username
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value.toLowerCase())
+                      setUsernameError('')
+                    }}
+                    placeholder="your-username"
+                    className="flex-1 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                  />
+                  <button
+                    onClick={handleUpdateUsername}
+                    disabled={usernameLoading}
+                    className="flex items-center gap-2 px-4 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                  >
+                    {usernameLoading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+                <p className="mt-2 text-sm text-charcoal/60 dark:text-white/60">
+                  3-30 characters, lowercase letters, numbers, hyphens, and underscores only
+                </p>
+                {usernameError && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {usernameError}
+                  </p>
+                )}
+              </div>
+
               {/* Email Section */}
               <div>
                 <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
