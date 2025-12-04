@@ -66,7 +66,7 @@ test.describe('Responsive Design', () => {
   test('should be mobile responsive', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/')
-    // Use partial text match for footer
-    await expect(page.getByText(/My Personal Diary/)).toBeVisible({ timeout: 10000 });
+    // Check that the footer text is visible on mobile
+    await expect(page.getByText(/Noted.*forever private/)).toBeVisible({ timeout: 10000 });
   })
 })
