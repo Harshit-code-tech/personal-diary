@@ -22,7 +22,6 @@ export async function GET(request: Request) {
     const cachedEntries = await cacheUtils.get(cacheKey)
     
     if (cachedEntries) {
-      console.log('✅ Cache hit for entries')
       return NextResponse.json({ 
         data: cachedEntries, 
         cached: true 
@@ -30,7 +29,6 @@ export async function GET(request: Request) {
     }
 
     // Cache miss - fetch from database
-    console.log('❌ Cache miss - fetching from database')
     const { data: entries, error } = await supabase
       .from('entries')
       .select('*')

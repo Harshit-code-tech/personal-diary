@@ -205,13 +205,6 @@ export default function AnalyticsPage() {
       const today = new Date()
       const todayStr = today.toLocaleDateString('en-CA') // Format: YYYY-MM-DD in local timezone
       
-      // Debug logging for streak calculation
-      console.log('=== STREAK CALCULATION DEBUG ===')
-      console.log('Today (local):', todayStr)
-      console.log('Total entries in range:', entries?.length || 0)
-      console.log('Recent entries (first 5):', entries?.slice(0, 5).map(e => e.entry_date))
-      console.log('Has entry today:', entries?.some((e) => e.entry_date === todayStr))
-      
       // Check if there's an entry today
       const hasEntryToday = entries?.some((e) => e.entry_date === todayStr)
       
@@ -236,14 +229,6 @@ export default function AnalyticsPage() {
         }
       }
       
-      console.log('Streak calculation:', {
-        currentStreak,
-        longestStreak,
-        streakDates,
-        gracePeriodApplied: !hasEntryToday
-      })
-      console.log('===================================')
-
       // Fetch counts from other tables
       const [peopleRes, storiesRes, goalsRes] = await Promise.all([
         supabase.from('people').select('id', { count: 'exact', head: true }).eq('user_id', user!.id),

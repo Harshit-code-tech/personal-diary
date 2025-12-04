@@ -110,11 +110,12 @@ export const smartInvalidation = {
 export const cacheMonitoring = {
   logCacheStats: () => {
     const cache = queryClient.getQueryCache()
-    console.log('Cache Stats:', {
+    // Cache stats available for monitoring (removed console.log)
+    return {
       totalQueries: cache.getAll().length,
       activeQueries: cache.getAll().filter(q => q.state.fetchStatus === 'fetching').length,
       staleQueries: cache.getAll().filter(q => q.isStale()).length,
-    })
+    }
   },
   
   clearStaleQueries: () => {

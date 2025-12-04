@@ -17,12 +17,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Try cache first (analytics is expensive!)
+    // Try to get from Redis cache first
     const cacheKey = CACHE_KEYS.ANALYTICS(user.id)
     const cachedAnalytics = await cacheUtils.get(cacheKey)
     
     if (cachedAnalytics) {
-      console.log('✅ Cache hit for analytics')
       return NextResponse.json({ 
         data: cachedAnalytics, 
         cached: true 
@@ -30,7 +29,6 @@ export async function GET(request: Request) {
     }
 
     // Cache miss - calculate analytics
-    console.log('❌ Cache miss - calculating analytics')
     
     // Fetch all entries
     const { data: entries, error } = await supabase
