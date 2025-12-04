@@ -4,7 +4,7 @@ test.describe('Landing Page', () => {
   test('should display main heading', async ({ page }) => {
     await page.goto('/')
     // Use role-based locator for heading to avoid ambiguity
-    await expect(page.getByRole('heading', { name: 'My Diary' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Noted' })).toBeVisible();
   })
 
   test('should have login and signup links', async ({ page }) => {

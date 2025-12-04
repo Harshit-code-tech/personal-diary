@@ -205,7 +205,7 @@ export default function NewPersonPage() {
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white [&>option]:bg-[#FFF5E6] [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
             >
               {relationships.map((rel) => (
                 <option key={rel} value={rel}>

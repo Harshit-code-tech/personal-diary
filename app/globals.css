@@ -31,11 +31,15 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
   @apply bg-paper dark:bg-midnight text-charcoal dark:text-white transition-colors;
   overscroll-behavior: none;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Performance optimizations */
@@ -82,192 +86,6 @@ button, a {
 
 .dark * {
   scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
-}
-
-/* Grey mode (tired mode) - warm taupe palette for tired eyes */
-html.theme-grey {
-  --paper: #B5A89A;          /* Darker warm beige - main background */
-  --cream: #C5B8A8;          /* Medium warm grey - elevated surfaces */
-  --charcoal: #2D2925;       /* Very dark warm grey - primary text */
-  --gold: #9B8B7A;           /* Warmer taupe - accents */
-  --midnight: #B5A89A;       /* Match paper for consistency */
-  --graphite: #C5B8A8;       /* Match cream for cards */
-  --teal: #9B8B7A;           /* Match gold accent */
-  --navy: #8B7E6F;           /* Darker hover states */
-}
-
-/* Apply grey theme like dark mode - comprehensive coverage */
-html.theme-grey body {
-  background-color: #B5A89A !important;
-  color: #2D2925 !important;
-}
-
-/* Main content area */
-html.theme-grey main {
-  background-color: #B5A89A !important;
-}
-
-/* Sidebar and navigation - slightly lighter for differentiation */
-html.theme-grey aside,
-html.theme-grey nav {
-  background-color: #ADA095 !important;
-}
-
-/* Cards and content boxes - lighter elevated surface */
-html.theme-grey .bg-white,
-html.theme-grey .bg-cream,
-html.theme-grey [class*="bg-white"],
-html.theme-grey [class*="bg-cream"],
-html.theme-grey [class*="bg-\\[#FFF5E6\\]"] {
-  background-color: #C5B8A8 !important;
-  color: #2D2925 !important;
-}
-
-/* Dark mode equivalents in grey theme */
-html.theme-grey .bg-midnight,
-html.theme-grey .bg-graphite,
-html.theme-grey [class*="bg-midnight"],
-html.theme-grey [class*="bg-graphite"],
-html.theme-grey .dark\:bg-midnight,
-html.theme-grey .dark\:bg-graphite {
-  background-color: #8B7E6F !important;
-  color: #F5F0E8 !important;
-}
-
-/* Backdrop filters */
-html.theme-grey [class*="backdrop-blur"] {
-  background-color: rgba(181, 168, 154, 0.95) !important;
-}
-
-/* Text colors - darker for better contrast on warm background */
-html.theme-grey .text-charcoal,
-html.theme-grey [class*="text-charcoal"],
-html.theme-grey .text-white,
-html.theme-grey [class*="text-white"],
-html.theme-grey .dark\:text-white,
-html.theme-grey .dark\:text-teal {
-  color: #2D2925 !important;
-}
-
-html.theme-grey .text-gold,
-html.theme-grey .text-teal,
-html.theme-grey [class*="text-gold"],
-html.theme-grey [class*="text-teal"],
-html.theme-grey .dark\:text-teal {
-  color: #5C4F3E !important;
-}
-
-/* Secondary text - darker but still readable */
-html.theme-grey [class*="text-charcoal/60"],
-html.theme-grey [class*="text-white/60"],
-html.theme-grey [class*="text-charcoal/70"],
-html.theme-grey [class*="text-white/70"],
-html.theme-grey .dark\:text-white\/60 {
-  color: #5C4F3E !important;
-}
-
-html.theme-grey [class*="text-charcoal/40"],
-html.theme-grey [class*="text-white/40"],
-html.theme-grey .dark\:text-white\/40 {
-  color: #7A6F66 !important;
-}
-
-/* Accent backgrounds */
-html.theme-grey .bg-gold,
-html.theme-grey [class*="bg-gold"],
-html.theme-grey .dark\:bg-teal {
-  background-color: #9B8B7A !important;
-  color: #2D2925 !important;
-}
-
-html.theme-grey .bg-teal,
-html.theme-grey [class*="bg-teal"] {
-  background-color: #9B8B7A !important;
-  color: #2D2925 !important;
-}
-
-/* Gold/teal with opacity */
-html.theme-grey [class*="bg-gold/10"],
-html.theme-grey [class*="bg-teal/10"],
-html.theme-grey .dark\:bg-teal\/10 {
-  background-color: rgba(155, 139, 122, 0.15) !important;
-}
-
-html.theme-grey [class*="bg-gold/30"],
-html.theme-grey [class*="bg-teal/30"] {
-  background-color: rgba(155, 139, 122, 0.3) !important;
-}
-
-/* Borders - darker for better definition */
-html.theme-grey [class*="border-charcoal/10"],
-html.theme-grey [class*="border-white/10"],
-html.theme-grey .dark\:border-white\/10 {
-  border-color: rgba(45, 41, 37, 0.25) !important;
-}
-
-html.theme-grey [class*="border-charcoal/20"],
-html.theme-grey [class*="border-white/20"],
-html.theme-grey .dark\:border-white\/20 {
-  border-color: rgba(45, 41, 37, 0.3) !important;
-}
-
-html.theme-grey [class*="border-gold"],
-html.theme-grey [class*="border-teal"],
-html.theme-grey .dark\:border-teal {
-  border-color: #9B8B7A !important;
-}
-
-/* Headers with proper contrast */
-html.theme-grey h1,
-html.theme-grey h2,
-html.theme-grey h3,
-html.theme-grey h4,
-html.theme-grey h5,
-html.theme-grey h6 {
-  color: #2D2925 !important;
-}
-
-/* Soften shadows */
-html.theme-grey [class*="shadow"] {
-  box-shadow: 0 2px 8px rgba(45, 41, 37, 0.2) !important;
-}
-
-/* Hover states */
-html.theme-grey [class*="hover:bg-charcoal/5"]:hover,
-html.theme-grey [class*="hover:bg-white/5"]:hover,
-html.theme-grey .dark\:hover\:bg-white\/5:hover {
-  background-color: rgba(45, 41, 37, 0.1) !important;
-}
-
-html.theme-grey [class*="hover:bg-gold"]:hover,
-html.theme-grey [class*="hover:bg-teal"]:hover,
-html.theme-grey .dark\:hover\:bg-teal:hover {
-  background-color: #8B7E6F !important;
-}
-
-/* Input fields */
-html.theme-grey input,
-html.theme-grey textarea,
-html.theme-grey select {
-  background-color: #C5B8A8 !important;
-  color: #2D2925 !important;
-  border-color: rgba(45, 41, 37, 0.3) !important;
-}
-
-html.theme-grey input::placeholder,
-html.theme-grey textarea::placeholder {
-  color: #7A6F66 !important;
-}
-
-/* Buttons - ensure visibility */
-html.theme-grey button {
-  color: #2D2925 !important;
-}
-
-html.theme-grey .bg-gold.text-white,
-html.theme-grey .dark\:bg-teal.dark\:text-midnight {
-  background-color: #9B8B7A !important;
-  color: #F5F0E8 !important;
 }
 
 /* Calendar Heatmap Styling */
@@ -507,14 +325,14 @@ button:active:not(:disabled) {
   animation: shake 0.5s ease-in-out;
 }
 
-/* Success bounce animation */
+/* Success bounce animation - toned down for less jarring effect */
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-4px); }
 }
 
 .animate-bounce-subtle {
-  animation: bounce-subtle 0.6s ease-in-out;
+  animation: bounce-subtle 0.4s ease-in-out;
 }
 
 /* Loading pulse for skeleton screens */

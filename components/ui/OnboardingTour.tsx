@@ -6,7 +6,7 @@ import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride'
 const steps: Step[] = [
   {
     target: 'body',
-    content: '👋 Welcome to Personal Diary! Let me show you around.',
+    content: '👋 Welcome to Noted.! Let me show you around.',
     placement: 'center',
     disableBeacon: true,
   },
@@ -20,7 +20,7 @@ const steps: Step[] = [
   },
   {
     target: '[data-tour="theme-switcher"]',
-    content: '🎨 Switch between three beautiful themes: Light, Dark, and Grey.',
+    content: '🎨 Switch between Light and Dark themes to match your preference.',
   },
   {
     target: '[data-tour="folders"]',

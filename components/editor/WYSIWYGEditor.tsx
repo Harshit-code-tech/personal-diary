@@ -2,6 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Underline from '@tiptap/extension-underline'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -14,7 +15,7 @@ import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { 
-  Bold, Italic, Underline as UnderlineIcon, List, ListOrdered, 
+  Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, 
   Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo,
   Table as TableIcon, Code
 } from 'lucide-react'
@@ -40,6 +41,7 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         codeBlock: false, // Disable default code block
         link: false, // Exclude link from StarterKit to avoid duplication
       }),
+      Underline,
       CodeBlockLowlight.configure({
         lowlight,
         HTMLAttributes: {
@@ -158,13 +160,23 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         </button>
 
         <button
+          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          className={`p-2 rounded hover:bg-gold/10 dark:hover:bg-teal/10 transition-colors ${
+            editor.isActive('underline') ? 'bg-gold/20 dark:bg-teal/20' : ''
+          }`}
+          title="Underline (Ctrl+U)"
+        >
+          <UnderlineIcon className="w-4 h-4 text-charcoal dark:text-white" />
+        </button>
+
+        <button
           onClick={() => editor.chain().focus().toggleStrike().run()}
           className={`p-2 rounded hover:bg-gold/10 dark:hover:bg-teal/10 transition-colors ${
             editor.isActive('strike') ? 'bg-gold/20 dark:bg-teal/20' : ''
           }`}
           title="Strikethrough"
         >
-          <UnderlineIcon className="w-4 h-4 text-charcoal dark:text-white" />
+          <Strikethrough className="w-4 h-4 text-charcoal dark:text-white" />
         </button>
 
         <div className="w-px h-6 bg-charcoal/10 dark:bg-white/10 mx-1"></div>

@@ -350,7 +350,7 @@ export default function AppPage() {
                   {folderName}
                 </h1>
                 <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 font-medium">
-                  Welcome back, <span className="text-gold dark:text-teal font-bold">{user?.email?.split('@')[0]}</span> ✨
+                  Welcome back ✨
                 </p>
               </div>
               <Link
@@ -510,7 +510,7 @@ export default function AppPage() {
               </div>
             ) : entries.length === 0 ? (
               <div className="bg-gradient-to-br from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight rounded-xl sm:rounded-2xl shadow-xl p-8 sm:p-12 lg:p-16 text-center border border-gold/20 dark:border-teal/20">
-                <div className="text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6 animate-bounce">📝</div>
+                <div className="text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6">📝</div>
                 <h3 className="font-serif text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-charcoal dark:text-teal bg-gradient-to-r from-gold to-gold/60 dark:from-teal dark:to-teal/60 bg-clip-text text-transparent">
                   Your Journal Awaits
                 </h3>

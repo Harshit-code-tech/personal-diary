@@ -194,7 +194,7 @@ export default function PeoplePage() {
               <select
                 value={selectedRelationship}
                 onChange={(e) => setSelectedRelationship(e.target.value)}
-                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
               >
                 {relationships.map(rel => (
                   <option key={rel} value={rel}>
@@ -210,7 +210,7 @@ export default function PeoplePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'recent' | 'entries')}
-                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                className="px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
               >
                 <option value="name">Sort by Name</option>
                 <option value="recent">Recently Added</option>

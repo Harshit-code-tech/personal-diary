@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
             <Book className="w-6 h-6" />
-            <span>My Diary</span>
+            <span>Noted.</span>
           </Link>
           <ThemeSwitcher />
         </div>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
           <Book className="w-6 h-6" />
-          <span>My Diary</span>
+          <span>Noted</span>
         </Link>
         <ThemeSwitcher />
       </div>

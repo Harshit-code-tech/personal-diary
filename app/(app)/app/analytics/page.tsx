@@ -4,80 +4,87 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { ArrowLeft, BarChart3, TrendingUp, Calendar, Zap, Award, Target, Clock } from 'lucide-react'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import dynamic from 'next/dynamic'
+import {
+  TrendingUp,
+  Calendar,
+  FileText,
+  Heart,
+  Users,
+  BookMarked,
+  Target,
+  Zap,
+  ArrowLeft,
+  Award,
+  Clock,
+  BarChart3
+} from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import DateRangePicker from '@/components/analytics/DateRangePicker'
 
-type WritingStats = {
+const CalendarView = dynamic(() => import('@/components/calendar/CalendarView'), {
+  ssr: false,
+  loading: () => <div className="h-64 bg-white/50 dark:bg-graphite/50 rounded-xl animate-pulse" />
+})
+
+interface AnalyticsData {
   totalEntries: number
   totalWords: number
   avgWordsPerEntry: number
-  longestEntry: number
-  shortestEntry: number
-  totalDays: number
-  entriesThisWeek: number
-  entriesThisMonth: number
-  wordsThisWeek: number
-  wordsThisMonth: number
+  longestEntry: { id: string; title: string; word_count: number } | null
   currentStreak: number
   longestStreak: number
-  mostProductiveDay: string
+  moodDistribution: { mood: string; count: number }[]
+  writingByMonth: { month: string; entries: number; words: number }[]
+  writingByDayOfWeek: { day: string; count: number }[]
+  topTags: { tag: string; count: number }[]
+  peopleCount: number
+  storiesCount: number
+  goalsCount: number
   mostProductiveHour: number
-}
-
-type DailyStats = {
-  date: string
-  entries: number
-  words: number
+  firstEntryDate: string | null
+  daysSinceFirstEntry: number
 }
 
 export default function AnalyticsPage() {
-  const { user, loading: authLoading } = useAuth()
   const supabase = createClient()
+  const { user, loading: authLoading } = useAuth()
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<WritingStats>({
-    totalEntries: 0,
-    totalWords: 0,
-    avgWordsPerEntry: 0,
-    longestEntry: 0,
-    shortestEntry: 0,
-    totalDays: 0,
-    entriesThisWeek: 0,
-    entriesThisMonth: 0,
-    wordsThisWeek: 0,
-    wordsThisMonth: 0,
-    currentStreak: 0,
-    longestStreak: 0,
-    mostProductiveDay: 'Monday',
-    mostProductiveHour: 20
-  })
-  const [dailyStats, setDailyStats] = useState<DailyStats[]>([])
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('month')
+  const [timeRange, setTimeRange] = useState<'all' | '30' | '90' | '365' | 'custom'>('all')
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true)
     try {
-      // Calculate date range
-      let startDate = new Date()
-      if (timeRange === 'week') {
-        startDate.setDate(startDate.getDate() - 7)
-      } else if (timeRange === 'month') {
-        startDate.setMonth(startDate.getMonth() - 1)
-      } else if (timeRange === 'year') {
-        startDate.setFullYear(startDate.getFullYear() - 1)
-      } else {
-        startDate = new Date('2000-01-01')
+      const now = new Date()
+      let dateFilter = null
+      let endDateFilter = null
+
+      if (timeRange === 'custom' && customStartDate && customEndDate) {
+        dateFilter = customStartDate
+        endDateFilter = customEndDate
+      } else if (timeRange !== 'all') {
+        const daysAgo = new Date()
+        daysAgo.setDate(now.getDate() - parseInt(timeRange))
+        dateFilter = daysAgo.toISOString().split('T')[0]
       }
 
-      // Fetch all entries
+      // Fetch entries
       let query = supabase
         .from('entries')
-        .select('id, title, word_count, entry_date, created_at')
-        .eq('user_id', user?.id)
+        .select('id, title, content, entry_date, word_count, mood, created_at, tags')
+        .eq('user_id', user!.id)
         .order('entry_date', { ascending: false })
 
-      if (timeRange !== 'all') {
-        query = query.gte('entry_date', startDate.toISOString().split('T')[0])
+      if (dateFilter) {
+        query = query.gte('entry_date', dateFilter)
+      }
+      
+      if (endDateFilter) {
+        query = query.lte('entry_date', endDateFilter)
       }
 
       const { data: entries, error } = await query
@@ -88,419 +95,511 @@ export default function AnalyticsPage() {
       const totalEntries = entries?.length || 0
       const totalWords = entries?.reduce((sum, e) => sum + (e.word_count || 0), 0) || 0
       const avgWordsPerEntry = totalEntries > 0 ? Math.round(totalWords / totalEntries) : 0
-      
-      const wordCounts = entries?.map(e => e.word_count || 0) || []
-      const longestEntry = wordCounts.length > 0 ? Math.max(...wordCounts) : 0
-      const shortestEntry = wordCounts.length > 0 ? Math.min(...wordCounts.filter(w => w > 0)) : 0
 
-      // Calculate unique days written
-      const uniqueDates = new Set(entries?.map(e => e.entry_date) || [])
-      const totalDays = uniqueDates.size
+      // Longest entry
+      const longestEntry =
+        entries && entries.length > 0
+          ? entries.reduce((max, e) => (e.word_count > (max?.word_count || 0) ? e : max))
+          : null
 
-      // This week/month stats
-      const weekAgo = new Date()
-      weekAgo.setDate(weekAgo.getDate() - 7)
-      const monthAgo = new Date()
-      monthAgo.setMonth(monthAgo.getMonth() - 1)
-
-      const entriesThisWeek = entries?.filter(e => 
-        new Date(e.entry_date) >= weekAgo
-      ).length || 0
-
-      const entriesThisMonth = entries?.filter(e => 
-        new Date(e.entry_date) >= monthAgo
-      ).length || 0
-
-      const wordsThisWeek = entries?.filter(e => 
-        new Date(e.entry_date) >= weekAgo
-      ).reduce((sum, e) => sum + (e.word_count || 0), 0) || 0
-
-      const wordsThisMonth = entries?.filter(e => 
-        new Date(e.entry_date) >= monthAgo
-      ).reduce((sum, e) => sum + (e.word_count || 0), 0) || 0
-
-      // Calculate streaks
-      const sortedDates = Array.from(uniqueDates).sort()
-      let currentStreak = 0
-      let longestStreak = 0
-      let tempStreak = 1
-
-      const today = new Date().toISOString().split('T')[0]
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-      // Current streak
-      if (sortedDates.includes(today) || sortedDates.includes(yesterdayStr)) {
-        currentStreak = 1
-        let checkDate = sortedDates.includes(today) 
-          ? new Date() 
-          : yesterday
-        
-        for (let i = sortedDates.length - 1; i >= 0; i--) {
-          checkDate.setDate(checkDate.getDate() - 1)
-          const dateStr = checkDate.toISOString().split('T')[0]
-          if (sortedDates.includes(dateStr)) {
-            currentStreak++
-          } else {
-            break
-          }
+      // Mood distribution
+      const moodCounts = entries?.reduce((acc: any, e) => {
+        if (e.mood) {
+          acc[e.mood] = (acc[e.mood] || 0) + 1
         }
+        return acc
+      }, {})
+      const moodDistribution = Object.entries(moodCounts || {})
+        .map(([mood, count]) => ({ mood, count: count as number }))
+        .sort((a, b) => b.count - a.count)
+
+      // Writing by month (last 12 months)
+      const writingByMonth = []
+      for (let i = 11; i >= 0; i--) {
+        const date = new Date()
+        date.setMonth(date.getMonth() - i)
+        const monthKey = date.toISOString().slice(0, 7) // YYYY-MM
+
+        const monthEntries = entries?.filter((e) => e.entry_date.startsWith(monthKey)) || []
+        writingByMonth.push({
+          month: date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          entries: monthEntries.length,
+          words: monthEntries.reduce((sum, e) => sum + (e.word_count || 0), 0)
+        })
       }
 
-      // Longest streak
-      for (let i = 1; i < sortedDates.length; i++) {
-        const prevDate = new Date(sortedDates[i - 1])
-        const currDate = new Date(sortedDates[i])
-        const diffDays = Math.floor((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24))
-        
-        if (diffDays === 1) {
-          tempStreak++
-          longestStreak = Math.max(longestStreak, tempStreak)
+      // Writing by day of week
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      const dayCounts = entries?.reduce((acc: any, e) => {
+        const day = new Date(e.entry_date).getDay()
+        acc[day] = (acc[day] || 0) + 1
+        return acc
+      }, {})
+      const writingByDayOfWeek = dayNames.map((day, i) => ({
+        day: day.slice(0, 3),
+        count: dayCounts?.[i] || 0
+      }))
+
+      // Top tags
+      const allTags = entries?.flatMap((e) => e.tags || []) || []
+      const tagCounts = allTags.reduce((acc: any, tag) => {
+        acc[tag] = (acc[tag] || 0) + 1
+        return acc
+      }, {})
+      const topTags = Object.entries(tagCounts)
+        .map(([tag, count]) => ({ tag, count: count as number }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+
+      // Streaks
+      const dates = entries?.map((e) => new Date(e.entry_date)) || []
+      dates.sort((a, b) => b.getTime() - a.getTime())
+
+      let currentStreak = 0
+      let longestStreak = 0
+      let tempStreak = 0
+      let prevDate: Date | null = null
+
+      for (const date of dates) {
+        if (prevDate) {
+          const diffDays = Math.floor((prevDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
+          if (diffDays === 1) {
+            tempStreak++
+          } else {
+            longestStreak = Math.max(longestStreak, tempStreak)
+            tempStreak = 1
+          }
         } else {
           tempStreak = 1
         }
+        prevDate = date
       }
       longestStreak = Math.max(longestStreak, tempStreak)
 
-      // Most productive day of week
-      const dayOfWeekCounts: Record<number, number> = {}
-      entries?.forEach(e => {
-        const dayOfWeek = new Date(e.entry_date).getDay()
-        dayOfWeekCounts[dayOfWeek] = (dayOfWeekCounts[dayOfWeek] || 0) + 1
-      })
-      const mostProductiveDayNum = Object.entries(dayOfWeekCounts)
-        .sort(([, a], [, b]) => b - a)[0]?.[0] || '0'
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      const mostProductiveDay = dayNames[parseInt(mostProductiveDayNum)]
+      // Current streak (from today)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      let checkDate = new Date(today)
+      currentStreak = 0
+
+      while (true) {
+        const dateStr = checkDate.toISOString().split('T')[0]
+        const hasEntry = entries?.some((e) => e.entry_date === dateStr)
+        if (hasEntry) {
+          currentStreak++
+          checkDate.setDate(checkDate.getDate() - 1)
+        } else {
+          break
+        }
+      }
+
+      // Fetch counts from other tables
+      const [peopleRes, storiesRes, goalsRes] = await Promise.all([
+        supabase.from('people').select('id', { count: 'exact', head: true }).eq('user_id', user!.id),
+        supabase.from('stories').select('id', { count: 'exact', head: true }).eq('user_id', user!.id),
+        supabase.from('goals').select('id', { count: 'exact', head: true }).eq('user_id', user!.id)
+      ])
+
+      const peopleCount = peopleRes.count || 0
+      const storiesCount = storiesRes.count || 0
+      const goalsCount = goalsRes.count || 0
 
       // Most productive hour
-      const hourCounts: Record<number, number> = {}
-      entries?.forEach(e => {
+      const hours = entries?.reduce((acc: any, e) => {
         const hour = new Date(e.created_at).getHours()
-        hourCounts[hour] = (hourCounts[hour] || 0) + 1
-      })
-      const mostProductiveHour = parseInt(
-        Object.entries(hourCounts)
-          .sort(([, a], [, b]) => b - a)[0]?.[0] || '20'
-      )
+        acc[hour] = (acc[hour] || 0) + 1
+        return acc
+      }, {})
+      const mostProductiveHour = Object.entries(hours || {}).reduce(
+        (max: any, [hour, count]: any) => (count > max.count ? { hour: parseInt(hour), count } : max),
+        { hour: 0, count: 0 }
+      ).hour
 
-      // Daily stats for chart
-      const dailyMap = new Map<string, { entries: number; words: number }>()
-      entries?.forEach(e => {
-        const date = e.entry_date
-        if (!dailyMap.has(date)) {
-          dailyMap.set(date, { entries: 0, words: 0 })
-        }
-        const stats = dailyMap.get(date)!
-        stats.entries++
-        stats.words += e.word_count || 0
-      })
+      // First entry date
+      const firstEntryDate = entries && entries.length > 0 ? entries[entries.length - 1].entry_date : null
+      const daysSinceFirstEntry = firstEntryDate
+        ? Math.floor((now.getTime() - new Date(firstEntryDate).getTime()) / (1000 * 60 * 60 * 24))
+        : 0
 
-      const dailyStatsArray: DailyStats[] = Array.from(dailyMap.entries())
-        .map(([date, stats]) => ({
-          date,
-          entries: stats.entries,
-          words: stats.words
-        }))
-        .sort((a, b) => a.date.localeCompare(b.date))
-        .slice(-30) // Last 30 days
-
-      setStats({
+      setAnalytics({
         totalEntries,
         totalWords,
         avgWordsPerEntry,
         longestEntry,
-        shortestEntry,
-        totalDays,
-        entriesThisWeek,
-        entriesThisMonth,
-        wordsThisWeek,
-        wordsThisMonth,
         currentStreak,
         longestStreak,
-        mostProductiveDay,
-        mostProductiveHour
+        moodDistribution,
+        writingByMonth,
+        writingByDayOfWeek,
+        topTags,
+        peopleCount,
+        storiesCount,
+        goalsCount,
+        mostProductiveHour,
+        firstEntryDate,
+        daysSinceFirstEntry
       })
-
-      setDailyStats(dailyStatsArray)
-    } catch (err) {
-      console.error('Error fetching analytics:', err)
+    } catch (error: any) {
+      console.error('Error fetching analytics:', error)
     } finally {
       setLoading(false)
     }
-  }, [user, timeRange, supabase])
+  }, [user, timeRange, customStartDate, customEndDate, supabase])
 
   useEffect(() => {
     if (user) {
       fetchAnalytics()
     }
-  }, [user, timeRange, fetchAnalytics])
+  }, [user, timeRange, customStartDate, customEndDate, fetchAnalytics])
 
   if (authLoading || loading) {
     return <PageLoadingSkeleton />
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
-          <Link
-            href="/app"
-            className="group flex items-center gap-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300"
-          >
-            <div className="p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </div>
-            <span className="font-bold text-lg">Back</span>
-          </Link>
+  if (!analytics) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-cream dark:bg-charcoal">
+        <p className="text-charcoal dark:text-white">No data available</p>
+      </div>
+    )
+  }
 
-          <div className="flex items-center gap-4">
-            <ThemeSwitcher />
+  const maxMoodCount = Math.max(...analytics.moodDistribution.map((m) => m.count), 1)
+  const maxMonthEntries = Math.max(...analytics.writingByMonth.map((m) => m.entries), 1)
+  const maxDayCount = Math.max(...analytics.writingByDayOfWeek.map((d) => d.count), 1)
+
+  return (
+    <div className="min-h-screen bg-cream dark:bg-charcoal pb-16">{/* Header */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/80 dark:bg-charcoal/80 border-b border-charcoal/10 dark:border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+              <Link
+                href="/app"
+                className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <TrendingUp className="w-6 h-6 text-gold dark:text-teal shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Analytics & Insights</h1>
+                <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 hidden xs:block">
+                  Discover patterns and celebrate your journey
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0">
+              <ThemeSwitcher />
+            </div>
+          </div>
+
+          {/* Time Range Filter */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {[
+              { value: 'all', label: 'All Time' },
+              { value: '30', label: 'Last 30 Days' },
+              { value: '90', label: 'Last 90 Days' },
+              { value: '365', label: 'This Year' }
+            ].map((range) => (
+              <button
+                key={range.value}
+                onClick={() => {
+                  setTimeRange(range.value as any)
+                  if (range.value !== 'custom') {
+                    setCustomStartDate('')
+                    setCustomEndDate('')
+                  }
+                }}
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                  timeRange === range.value
+                    ? 'bg-gold dark:bg-teal text-white'
+                    : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10'
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+            
+            {/* Custom Date Range Picker */}
+            <DateRangePicker
+              startDate={customStartDate}
+              endDate={customEndDate}
+              onDateRangeChange={(start, end) => {
+                setCustomStartDate(start)
+                setCustomEndDate(end)
+                setTimeRange('custom')
+              }}
+              onClear={() => {
+                setCustomStartDate('')
+                setCustomEndDate('')
+                setTimeRange('all')
+              }}
+            />
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="font-serif text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-3 leading-tight flex items-center gap-4">
-            <BarChart3 className="w-12 h-12 text-gold dark:text-teal" />
-            Analytics & Insights
-          </h1>
-          <p className="text-lg text-charcoal/70 dark:text-white/70 font-medium">
-            Understand your writing patterns and progress over time
-          </p>
-        </div>
-
-        {/* Time Range Selector */}
-        <div className="mb-8 flex gap-3">
-          {(['week', 'month', 'year', 'all'] as const).map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                timeRange === range
-                  ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-lg scale-105'
-                  : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
-              }`}
-            >
-              {range === 'week' && 'Past Week'}
-              {range === 'month' && 'Past Month'}
-              {range === 'year' && 'Past Year'}
-              {range === 'all' && 'All Time'}
-            </button>
-          ))}
-        </div>
-
-        {stats.totalEntries === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
-            <div className="text-8xl mb-6">📊</div>
-            <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal">
-              No Data Yet
-            </h3>
-            <p className="text-lg text-charcoal/70 dark:text-white/70 mb-8">
-              Start writing entries to see your analytics and insights
-            </p>
-            <Link
-              href="/app/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all"
-            >
-              Create Entry
-            </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Calendar Heatmap */}
+        <div className="mb-6 sm:mb-8 bg-white dark:bg-graphite rounded-2xl p-4 sm:p-6 shadow-xl border border-charcoal/10 dark:border-white/10">
+          <div className="flex items-center gap-3 mb-4">
+            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal" />
+            <h2 className="text-lg sm:text-2xl font-bold text-charcoal dark:text-white">
+              Your Writing Activity
+            </h2>
           </div>
-        ) : (
-          <>
-            {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Total Entries */}
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 text-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <Calendar className="w-8 h-8 opacity-80" />
-                  <TrendingUp className="w-5 h-5 opacity-60" />
-                </div>
-                <div className="text-4xl font-bold mb-1">{stats.totalEntries}</div>
-                <div className="text-sm opacity-90">Total Entries</div>
-                <div className="text-xs opacity-75 mt-2">{stats.totalDays} unique days</div>
-              </div>
+          <CalendarView />
+        </div>
 
-              {/* Total Words */}
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-400 dark:to-purple-500 text-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <BarChart3 className="w-8 h-8 opacity-80" />
-                  <TrendingUp className="w-5 h-5 opacity-60" />
-                </div>
-                <div className="text-4xl font-bold mb-1">{stats.totalWords.toLocaleString()}</div>
-                <div className="text-sm opacity-90">Total Words</div>
-                <div className="text-xs opacity-75 mt-2">Avg. {stats.avgWordsPerEntry} per entry</div>
-              </div>
+        {/* Key Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <StatCard
+            icon={<FileText className="w-6 h-6" />}
+            title="Total Entries"
+            value={analytics.totalEntries.toLocaleString()}
+            color="blue"
+          />
+          <StatCard
+            icon={<TrendingUp className="w-6 h-6" />}
+            title="Total Words"
+            value={analytics.totalWords.toLocaleString()}
+            color="green"
+          />
+          <StatCard
+            icon={<Zap className="w-6 h-6" />}
+            title="Current Streak"
+            value={`${analytics.currentStreak} days`}
+            color="gold"
+          />
+          <StatCard
+            icon={<Award className="w-6 h-6" />}
+            title="Longest Streak"
+            value={`${analytics.longestStreak} days`}
+            color="purple"
+          />
+        </div>
 
-              {/* Current Streak */}
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-400 dark:to-orange-500 text-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <Zap className="w-8 h-8 opacity-80" />
-                  <Award className="w-5 h-5 opacity-60" />
-                </div>
-                <div className="text-4xl font-bold mb-1">{stats.currentStreak}</div>
-                <div className="text-sm opacity-90">Day Streak 🔥</div>
-                <div className="text-xs opacity-75 mt-2">Best: {stats.longestStreak} days</div>
-              </div>
+        {/* Secondary Stats */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <StatCard
+            icon={<FileText className="w-5 h-5" />}
+            title="Avg Words/Entry"
+            value={analytics.avgWordsPerEntry.toLocaleString()}
+            color="teal"
+            size="sm"
+          />
+          <StatCard
+            icon={<Users className="w-5 h-5" />}
+            title="People"
+            value={analytics.peopleCount.toLocaleString()}
+            color="pink"
+            size="sm"
+          />
+          <StatCard
+            icon={<BookMarked className="w-5 h-5" />}
+            title="Stories"
+            value={analytics.storiesCount.toLocaleString()}
+            color="indigo"
+            size="sm"
+          />
+        </div>
 
-              {/* This Week */}
-              <div className="bg-gradient-to-br from-green-500 to-green-600 dark:from-green-400 dark:to-green-500 text-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <Target className="w-8 h-8 opacity-80" />
-                  <TrendingUp className="w-5 h-5 opacity-60" />
-                </div>
-                <div className="text-4xl font-bold mb-1">{stats.entriesThisWeek}</div>
-                <div className="text-sm opacity-90">This Week</div>
-                <div className="text-xs opacity-75 mt-2">{stats.wordsThisWeek.toLocaleString()} words</div>
-              </div>
+        {/* Journey Info */}
+        {analytics.firstEntryDate && (
+          <div className="bg-gradient-to-r from-gold/10 to-teal/10 dark:from-gold/5 dark:to-teal/5 p-6 rounded-xl mb-8 border border-gold/20 dark:border-teal/20">
+            <div className="flex items-center gap-3 mb-2">
+              <Calendar className="w-5 h-5 text-gold dark:text-teal" />
+              <h3 className="font-semibold text-charcoal dark:text-white">Your Writing Journey</h3>
             </div>
-
-            {/* Additional Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {/* This Month */}
-              <div className="bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
-                <h3 className="text-lg font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-gold dark:text-teal" />
-                  This Month
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Entries</span>
-                    <span className="text-2xl font-bold text-charcoal dark:text-white">
-                      {stats.entriesThisMonth}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Words</span>
-                    <span className="text-2xl font-bold text-gold dark:text-teal">
-                      {stats.wordsThisMonth.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Entry Lengths */}
-              <div className="bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
-                <h3 className="text-lg font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-gold dark:text-teal" />
-                  Entry Lengths
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Longest</span>
-                    <span className="text-2xl font-bold text-charcoal dark:text-white">
-                      {stats.longestEntry}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Shortest</span>
-                    <span className="text-2xl font-bold text-gold dark:text-teal">
-                      {stats.shortestEntry}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Writing Habits */}
-              <div className="bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
-                <h3 className="text-lg font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-gold dark:text-teal" />
-                  Writing Habits
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Most Active Day</span>
-                    <div className="text-xl font-bold text-charcoal dark:text-white">
-                      {stats.mostProductiveDay}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-charcoal/60 dark:text-white/60">Favorite Hour</span>
-                    <div className="text-xl font-bold text-gold dark:text-teal">
-                      {stats.mostProductiveHour}:00
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Simple Line Chart - Words per Day */}
-            {dailyStats.length > 0 && (
-              <div className="bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20 mb-8">
-                <h3 className="text-xl font-bold text-charcoal dark:text-white mb-6 flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6 text-gold dark:text-teal" />
-                  Writing Activity (Last 30 Days)
-                </h3>
-                
-                <div className="h-64 flex items-end justify-between gap-2">
-                  {dailyStats.map((day, index) => {
-                    const maxWords = Math.max(...dailyStats.map(d => d.words), 1)
-                    const height = (day.words / maxWords) * 100
-                    const date = new Date(day.date)
-
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center group">
-                        <div
-                          className="w-full bg-gradient-to-t from-gold to-gold/80 dark:from-teal dark:to-teal/80 rounded-t-lg transition-all duration-300 hover:from-gold/80 hover:to-gold dark:hover:from-teal/80 dark:hover:to-teal cursor-pointer relative"
-                          style={{ height: `${height}%`, minHeight: day.words > 0 ? '4px' : '0' }}
-                        >
-                          {/* Tooltip */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            <div className="bg-charcoal dark:bg-white text-white dark:text-midnight px-3 py-2 rounded-lg shadow-xl text-xs font-bold whitespace-nowrap">
-                              <div>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                              <div>{day.words} words</div>
-                              <div>{day.entries} {day.entries === 1 ? 'entry' : 'entries'}</div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Date label (show every 5th) */}
-                        {index % 5 === 0 && (
-                          <div className="text-[8px] text-charcoal/50 dark:text-white/50 mt-2 rotate-45 origin-top-left">
-                            {date.getDate()}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Motivational Message */}
-            <div className="bg-gradient-to-br from-gold/10 to-transparent dark:from-teal/10 dark:to-transparent rounded-xl p-8 border border-gold/20 dark:border-teal/20">
-              <div className="flex items-start gap-4">
-                <div className="text-5xl">🎉</div>
-                <div>
-                  <h3 className="text-2xl font-bold text-charcoal dark:text-white mb-2">
-                    Keep up the great work!
-                  </h3>
-                  <p className="text-charcoal/70 dark:text-white/70 mb-3">
-                    You&apos;ve written <span className="font-bold text-gold dark:text-teal">{stats.totalWords.toLocaleString()}</span> words 
-                    across <span className="font-bold text-gold dark:text-teal">{stats.totalEntries}</span> entries.
-                    {stats.currentStreak > 0 && (
-                      <> You&apos;re on a <span className="font-bold text-orange-500">({stats.currentStreak} day streak!</span></>
-                    )}
-                  </p>
-                  {stats.currentStreak === 0 && (
-                    <Link
-                      href="/app/new"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-bold hover:shadow-lg transition-all"
-                    >
-                      Start Your Streak Today
-                    </Link>
-                  )}
-                </div>
-              </div>
-            </div>
-          </>
+            <p className="text-charcoal/80 dark:text-white/80">
+              You started writing on{' '}
+              <span className="font-semibold">
+                {new Date(analytics.firstEntryDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+              {" - that's "}
+              <span className="font-semibold">{analytics.daysSinceFirstEntry} days</span> of documenting your
+              life! 🎉
+            </p>
+          </div>
         )}
-      </main>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {/* Mood Distribution */}
+          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+            <div className="flex items-center gap-2 mb-4">
+              <Heart className="w-5 h-5 text-pink-500" />
+              <h3 className="text-lg font-bold text-charcoal dark:text-white">Mood Distribution</h3>
+            </div>
+            <div className="space-y-3">
+              {analytics.moodDistribution.slice(0, 5).map((mood) => (
+                <div key={mood.mood}>
+                  <div className="flex justify-between mb-1 text-sm">
+                    <span className="text-charcoal dark:text-white">{mood.mood}</span>
+                    <span className="text-charcoal/60 dark:text-white/60">{mood.count} entries</span>
+                  </div>
+                  <div className="h-2 bg-charcoal/10 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-gold to-teal rounded-full"
+                      style={{ width: `${(mood.count / maxMoodCount) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+              {analytics.moodDistribution.length === 0 && (
+                <p className="text-center text-charcoal/60 dark:text-white/60 py-4">
+                  No mood data yet. Start adding moods to your entries!
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Writing by Day of Week */}
+          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-5 h-5 text-blue-500" />
+              <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing by Day</h3>
+            </div>
+            <div className="flex justify-between items-end h-40">
+              {analytics.writingByDayOfWeek.map((day) => (
+                <div key={day.day} className="flex flex-col items-center gap-2 flex-1">
+                  <div className="w-full flex items-end justify-center" style={{ height: '120px' }}>
+                    <div
+                      className="w-8 bg-gradient-to-t from-gold to-teal rounded-t-lg"
+                      style={{ height: `${(day.count / maxDayCount) * 100}%`, minHeight: '4px' }}
+                    />
+                  </div>
+                  <span className="text-xs text-charcoal/60 dark:text-white/60">{day.day}</span>
+                  <span className="text-xs font-semibold text-charcoal dark:text-white">{day.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Writing Trend (Last 12 Months) */}
+        <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-5 h-5 text-green-500" />
+            <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing Trend (Last 12 Months)</h3>
+          </div>
+          <div className="flex justify-between items-end h-48 gap-1">
+            {analytics.writingByMonth.map((month) => (
+              <div key={month.month} className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                <div className="w-full flex items-end justify-center h-32">
+                  <div
+                    className="w-full max-w-8 bg-gradient-to-t from-gold to-teal rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer"
+                    style={{ height: `${(month.entries / maxMonthEntries) * 100}%`, minHeight: '4px' }}
+                    title={`${month.month}: ${month.entries} entries, ${month.words.toLocaleString()} words`}
+                  />
+                </div>
+                <span className="text-xs text-charcoal/60 dark:text-white/60 truncate w-full text-center">
+                  {month.month.split(' ')[0]}
+                </span>
+                <span className="text-xs font-semibold text-charcoal dark:text-white">{month.entries}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Tags */}
+        {analytics.topTags.length > 0 && (
+          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Target className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-lg font-bold text-charcoal dark:text-white">Most Used Tags</h3>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {analytics.topTags.map((tag) => (
+                <span
+                  key={tag.tag}
+                  className="px-3 py-2 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal border border-gold/20 dark:border-teal/20 rounded-lg text-sm font-medium"
+                >
+                  #{tag.tag}{' '}
+                  <span className="text-charcoal/60 dark:text-white/60">({tag.count})</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Insights */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Most Productive Time */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h3 className="font-bold text-charcoal dark:text-white">Most Productive Hour</h3>
+            </div>
+            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              {analytics.mostProductiveHour === 0
+                ? '12 AM'
+                : analytics.mostProductiveHour < 12
+                ? `${analytics.mostProductiveHour} AM`
+                : analytics.mostProductiveHour === 12
+                ? '12 PM'
+                : `${analytics.mostProductiveHour - 12} PM`}
+            </p>
+            <p className="text-sm text-charcoal/60 dark:text-white/60 mt-1">
+              You write most at this time
+            </p>
+          </div>
+
+          {/* Longest Entry */}
+          {analytics.longestEntry && (
+            <Link
+              href={`/app/entry/${analytics.longestEntry.id}`}
+              className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-700 hover:scale-105 transition-transform"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <h3 className="font-bold text-charcoal dark:text-white">Longest Entry</h3>
+              </div>
+              <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 mb-1">
+                {analytics.longestEntry.word_count.toLocaleString()} words
+              </p>
+              <p className="text-sm text-charcoal/80 dark:text-white/80 truncate">
+                &quot;{analytics.longestEntry.title}&quot;
+              </p>
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface StatCardProps {
+  icon: React.ReactNode
+  title: string
+  value: string | number
+  color: string
+  size?: 'sm' | 'md'
+}
+
+function StatCard({ icon, title, value, color, size = 'md' }: StatCardProps) {
+  const colors: any = {
+    blue: 'from-blue-500 to-blue-600',
+    green: 'from-green-500 to-green-600',
+    gold: 'from-gold to-amber-500',
+    purple: 'from-purple-500 to-purple-600',
+    teal: 'from-teal to-cyan-500',
+    pink: 'from-pink-500 to-pink-600',
+    indigo: 'from-indigo-500 to-indigo-600'
+  }
+
+  return (
+    <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+      <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${colors[color]} text-white mb-3`}>
+        {icon}
+      </div>
+      <p className="text-sm text-charcoal/60 dark:text-white/60 mb-1">{title}</p>
+      <p className={`font-bold text-charcoal dark:text-white ${size === 'sm' ? 'text-2xl' : 'text-3xl'}`}>
+        {value}
+      </p>
     </div>
   )
 }

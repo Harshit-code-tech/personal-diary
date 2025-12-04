@@ -10,6 +10,7 @@ import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import ReauthModal from '@/components/auth/ReauthModal'
 import NotificationSettings from '@/components/settings/NotificationSettings'
+import ImportModal from '@/components/import/ImportModal'
 
 export default function SettingsPage() {
   const toastNotify = useToast()
@@ -17,6 +18,7 @@ export default function SettingsPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   
   // Change email states
   const [showChangeEmail, setShowChangeEmail] = useState(false)
@@ -460,6 +462,22 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
                 <div>
+                  <p className="font-medium text-charcoal dark:text-white">Import Entries</p>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+                    Import entries from a JSON backup file
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-green-500 dark:bg-green-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                >
+                  <Download className="w-5 h-5 rotate-180" />
+                  Import
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div>
                   <p className="font-medium text-charcoal dark:text-white">Export Entries</p>
                   <p className="text-sm text-charcoal/60 dark:text-white/60">
                     Download your entries as Markdown or PDF
@@ -572,7 +590,7 @@ export default function SettingsPage() {
           {/* App Info */}
           <div className="text-center py-6">
             <p className="text-sm text-charcoal/60 dark:text-white/60">
-              Personal Diary v1.0.0
+              Noted. v1.0.0
             </p>
             <p className="text-xs text-charcoal/40 dark:text-white/40 mt-1">
               Made with ❤️ for your memories
@@ -591,6 +609,15 @@ export default function SettingsPage() {
         onSuccess={handleReauthSuccess}
         title="Confirm Your Identity"
         description="For your security, please re-enter your password to continue"
+      />
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          toastNotify.success('Import Complete', 'Your entries have been imported successfully')
+        }}
       />
     </div>
   )

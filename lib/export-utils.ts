@@ -38,7 +38,7 @@ export function stripHtml(html: string): string {
  * Export entries to Markdown format
  */
 export function exportToMarkdown(entries: Entry[]): string {
-  let markdown = '# My Diary Entries\n\n'
+  let markdown = '# Noted. - My Journal Entries\n\n'
   markdown += `> Exported on ${new Date().toLocaleDateString()}\n\n`
   markdown += `Total Entries: ${entries.length}\n\n`
   markdown += '---\n\n'
@@ -102,7 +102,7 @@ export async function exportToPDF(entries: Entry[]): Promise<void> {
   // Title page
   pdf.setFontSize(24)
   pdf.setFont('helvetica', 'bold')
-  pdf.text('My Diary Entries', pageWidth / 2, yPosition, { align: 'center' })
+  pdf.text('Noted. - Journal Entries', pageWidth / 2, yPosition, { align: 'center' })
   yPosition += 15
 
   pdf.setFontSize(12)

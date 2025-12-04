@@ -88,7 +88,7 @@ export type StoryFormData = z.infer<typeof storySchema>
 // Settings validation
 export const settingsSchema = z.object({
   email: z.string().email('Invalid email address'),
-  theme: z.enum(['light', 'dark', 'grey']),
+  theme: z.enum(['light', 'dark']),
 })
 
 export type SettingsFormData = z.infer<typeof settingsSchema>

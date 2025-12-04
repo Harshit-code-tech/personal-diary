@@ -30,7 +30,7 @@ const TemplateModal = dynamic(() => import('@/components/templates/TemplateModal
   ssr: false
 })
 
-const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
+const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful', '🤔 Others']
 
 interface Person {
   id: string
@@ -42,6 +42,7 @@ export default function NewEntryPage() {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [mood, setMood] = useState('')
+  const [customMood, setCustomMood] = useState('')
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -332,6 +333,20 @@ export default function NewEntryPage() {
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
 
+    // Validate file size (max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+    if (file.size > MAX_SIZE) {
+      toast.error('Image must be less than 5MB')
+      throw new Error('Image too large')
+    }
+
+    // Count existing images in content
+    const imageCount = (content.match(/<img/g) || []).length
+    if (imageCount >= 5) {
+      toast.error('Maximum 5 images per entry')
+      throw new Error('Too many images')
+    }
+
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}/${Date.now()}.${fileExt}`
 
@@ -378,6 +393,11 @@ export default function NewEntryPage() {
 
     try {
       const wordCount = calculateWordCount(content)
+      
+      // Use custom mood if "Others" is selected and custom mood is provided
+      const finalMood = mood === '🤔 Others' && customMood.trim() 
+        ? `🤔 ${customMood.trim()}` 
+        : mood || null
 
       // Entry will be auto-assigned to date folder by trigger
       const { data, error: insertError } = await supabase
@@ -386,7 +406,7 @@ export default function NewEntryPage() {
           user_id: user.id,
           title: title.trim(),
           content: content,
-          mood: mood || null,
+          mood: finalMood,
           entry_date: entryDate,
           word_count: wordCount,
           tags: tags.length > 0 ? tags : null,
@@ -659,11 +679,16 @@ export default function NewEntryPage() {
               {moods.map((m) => (
                 <button
                   key={m}
-                  onClick={() => setMood(m)}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  onClick={() => {
+                    setMood(m)
+                    if (m !== '🤔 Others') {
+                      setCustomMood('')
+                    }
+                  }}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
                     mood === m
-                      ? 'bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight shadow-xl scale-110'
-                      : 'bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-white hover:bg-charcoal/10 dark:hover:bg-white/10 hover:scale-105 shadow-sm hover:shadow-md'
+                      ? 'bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight shadow-xl'
+                      : 'bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-white hover:bg-charcoal/10 dark:hover:bg-white/10 shadow-sm hover:shadow-md'
                   }`}
                 >
                   {m}
@@ -671,13 +696,33 @@ export default function NewEntryPage() {
               ))}
               {mood && (
                 <button
-                  onClick={() => setMood('')}
-                  className="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all hover:scale-105"
+                  onClick={() => {
+                    setMood('')
+                    setCustomMood('')
+                  }}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 hover:opacity-90"
                 >
                   Clear
                 </button>
               )}
             </div>
+            
+            {/* Custom Mood Input */}
+            {mood === '🤔 Others' && (
+              <div className="mt-4 animate-slide-down">
+                <input
+                  type="text"
+                  value={customMood}
+                  onChange={(e) => setCustomMood(e.target.value)}
+                  placeholder="Describe your mood..."
+                  className="w-full px-4 py-3 bg-charcoal/5 dark:bg-white/5 border-2 border-gold/20 dark:border-teal/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal transition-all"
+                  maxLength={50}
+                />
+                <p className="mt-2 text-xs text-charcoal/50 dark:text-white/50">
+                  {customMood.length}/50 characters
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Tags */}

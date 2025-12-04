@@ -1,7 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter, Lora, Cormorant_Garamond } from 'next/font/google'
-// import { Toaster } from 'react-hot-toast'
+import { Analytics } from '@vercel/analytics/react'
 import QueryProvider from '@/components/providers/QueryProvider'
 
 const inter = Inter({ 
@@ -22,14 +22,14 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Personal Diary - Your Private Journaling Space',
-    template: '%s | Personal Diary'
+    default: 'Noted. - Your Private Journaling Space',
+    template: '%s | Noted.'
   },
   description: 'A secure, private journaling platform built with Next.js and Supabase. Write, organize, and reflect on your thoughts with rich text editing, folders, mood tracking, and more.',
-  keywords: ['diary', 'journal', 'personal journal', 'digital diary', 'private notes', 'journaling app', 'mood tracker', 'daily journal'],
-  authors: [{ name: 'Personal Diary' }],
-  creator: 'Personal Diary',
-  publisher: 'Personal Diary',
+  keywords: ['diary', 'journal', 'personal journal', 'digital diary', 'private notes', 'journaling app', 'mood tracker', 'daily journal', 'noted'],
+  authors: [{ name: 'Noted.' }],
+  creator: 'Noted.',
+  publisher: 'Noted.',
   formatDetection: {
     email: false,
     address: false,
@@ -39,18 +39,18 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Personal Diary',
+    title: 'Noted.',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    title: 'Personal Diary - Your Private Journaling Space',
+    title: 'Noted. - Your Private Journaling Space',
     description: 'A secure, private journaling platform for your thoughts, memories, and reflections.',
-    siteName: 'Personal Diary',
+    siteName: 'Noted.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personal Diary - Your Private Journaling Space',
+    title: 'Noted. - Your Private Journaling Space',
     description: 'A secure, private journaling platform for your thoughts, memories, and reflections.',
   },
   robots: {
@@ -84,6 +84,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   )

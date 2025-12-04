@@ -61,7 +61,7 @@ export default async function FolderPage({ params }: PageProps) {
   const { folder, entries } = data
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-midnight dark:via-midnight-light dark:to-midnight">
+    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight transition-colors duration-500">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

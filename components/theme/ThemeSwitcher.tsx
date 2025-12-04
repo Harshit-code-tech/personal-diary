@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sun, Moon, Cloud } from 'lucide-react'
+import { Sun, Moon } from 'lucide-react'
 import Tooltip from '@/components/ui/Tooltip'
 
-type Theme = 'light' | 'dark' | 'grey'
+type Theme = 'light' | 'dark'
 
 const themes = {
   light: {
@@ -18,12 +18,6 @@ const themes = {
     icon: Moon,
     description: 'Easy on the eyes',
     classes: 'bg-midnight text-white'
-  },
-  grey: {
-    name: "I'm Tired...",
-    icon: Cloud,
-    description: 'Neutral and calm',
-    classes: 'bg-stone-600 text-stone-100'
   }
 }
 
@@ -42,13 +36,8 @@ export default function ThemeSwitcher() {
 
   const applyTheme = (theme: Theme) => {
     const html = document.documentElement
-    html.classList.remove('light', 'dark', 'grey', 'theme-grey')
-    
-    if (theme === 'grey') {
-      html.classList.add('theme-grey')
-    } else {
-      html.classList.add(theme)
-    }
+    html.classList.remove('light', 'dark')
+    html.classList.add(theme)
     
     // Set data attribute for CSS
     html.setAttribute('data-theme', theme)

@@ -44,8 +44,8 @@ const navLinks: NavLink[] = [
     hoverColor: 'hover:text-gold dark:hover:text-teal hover:bg-gold/10 dark:hover:bg-teal/10',
   },
   {
-    href: '/app/insights',
-    label: 'Insights',
+    href: '/app/analytics',
+    label: 'Analytics',
     icon: BarChart3,
     color: 'text-purple-500 dark:text-purple-400',
     hoverColor: 'hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-purple-400/10',
@@ -91,20 +91,6 @@ const navLinks: NavLink[] = [
     icon: BookMarked,
     color: 'text-orange-500 dark:text-orange-400',
     hoverColor: 'hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-500/10 dark:hover:bg-orange-400/10',
-  },
-  {
-    href: '/app/calendar',
-    label: 'Calendar',
-    icon: Calendar,
-    color: 'text-purple-500 dark:text-purple-400',
-    hoverColor: 'hover:text-purple-500 dark:hover:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-purple-400/10',
-  },
-  {
-    href: '/app/statistics',
-    label: 'Stats',
-    icon: TrendingUp,
-    color: 'text-blue-500 dark:text-blue-400',
-    hoverColor: 'hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-500/10 dark:hover:bg-blue-400/10',
   },
 ]
 
@@ -162,7 +148,7 @@ export default function AppHeader() {
               <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-gold dark:text-teal" />
             </div>
             <span className="hidden sm:block font-serif text-2xl lg:text-3xl font-black bg-gradient-to-r from-charcoal to-charcoal/70 dark:from-teal dark:to-teal/70 bg-clip-text text-transparent">
-              My Diary
+              Noted.
             </span>
           </Link>
 
@@ -186,7 +172,7 @@ export default function AppHeader() {
                   aria-label={`Navigate to ${link.label}`}
                   aria-current={active ? 'page' : undefined}
                   title={link.label}
-                  data-tour={link.href === '/app/insights' ? 'insights' : link.href === '/app/calendar' ? 'calendar' : undefined}
+                  data-tour={link.href === '/app/analytics' ? 'analytics' : undefined}
                 >
                   <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span className="hidden xl:inline">{link.label}</span>

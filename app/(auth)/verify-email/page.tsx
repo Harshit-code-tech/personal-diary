@@ -87,7 +87,7 @@ export default function VerifyEmailPage() {
           <div className="space-y-4 text-sm text-charcoal/70 dark:text-white/70">
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal rounded-full flex items-center justify-center text-xs font-bold">1</span>
-              <p>Open your email inbox and look for a message from <strong>Personal Diary</strong></p>
+              <p>Open your email inbox and look for a message from <strong>Noted.</strong></p>
             </div>
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal rounded-full flex items-center justify-center text-xs font-bold">2</span>

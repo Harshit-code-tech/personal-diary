@@ -41,20 +41,10 @@ serve(async (req) => {
     tomorrow.setDate(tomorrow.getDate() + 1)
 
     // Fetch reminders due today that are not completed
+    // First get reminders, then fetch user emails separately to avoid join issues
     const { data: reminders, error } = await supabaseClient
       .from('reminders')
-      .select(`
-        id,
-        user_id,
-        title,
-        description,
-        reminder_date,
-        frequency,
-        is_completed,
-        users!inner (
-          email
-        )
-      `)
+      .select('id, user_id, title, description, reminder_date, frequency, is_completed')
       .eq('is_completed', false)
       .gte('reminder_date', today.toISOString())
       .lt('reminder_date', tomorrow.toISOString())
@@ -63,16 +53,50 @@ serve(async (req) => {
       throw error
     }
 
-    const typedReminders = reminders as unknown as Reminder[]
+    if (!reminders || reminders.length === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'No reminders due today',
+          processed: 0 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Fetch user emails for all reminders
+    const userIds = [...new Set(reminders.map(r => r.user_id))]
+    const { data: users, error: userError } = await supabaseClient
+      .auth.admin.listUsers()
+    
+    if (userError) {
+      console.error('Error fetching users:', userError)
+      throw userError
+    }
+
+    const userEmailMap = new Map(
+      users.users.map(u => [u.id, u.email])
+    )
 
     // Send notifications for each reminder
     const notifications = await Promise.all(
-      typedReminders.map(async (reminder) => {
+      reminders.map(async (reminder: any) => {
         try {
+          const userEmail = userEmailMap.get(reminder.user_id)
+          
+          if (!userEmail) {
+            console.error(`No email found for user ${reminder.user_id}`)
+            return {
+              success: false,
+              reminderId: reminder.id,
+              error: 'User email not found'
+            }
+          }
+          
           // Here you would integrate with your email service (e.g., SendGrid, Resend, etc.)
           // For now, we'll just log and create an in-app notification
           
-          console.log(`Sending reminder notification to ${reminder.users.email}:`, {
+          console.log(`Sending reminder notification to ${userEmail}:`, {
             title: reminder.title,
             description: reminder.description,
             date: reminder.reminder_date,
@@ -119,14 +143,14 @@ serve(async (req) => {
           return {
             success: true,
             reminderId: reminder.id,
-            email: reminder.users.email,
+            email: userEmail,
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error(`Failed to send notification for reminder ${reminder.id}:`, err)
           return {
             success: false,
             reminderId: reminder.id,
-            error: err.message,
+            error: err?.message || 'Unknown error',
           }
         }
       })

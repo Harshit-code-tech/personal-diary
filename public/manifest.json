@@ -1,6 +1,6 @@
 {
-  "name": "Personal Diary",
-  "short_name": "Diary",
+  "name": "Noted. - Your Private Journal",
+  "short_name": "Noted.",
   "description": "Your private, secure personal journaling space",
   "start_url": "/app",
   "display": "standalone",

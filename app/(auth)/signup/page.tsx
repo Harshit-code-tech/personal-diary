@@ -11,6 +11,7 @@ import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 
 export default function SignupPage() {
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -21,6 +22,16 @@ export default function SignupPage() {
   const { csrfFetch, hasToken } = useCSRFToken()
   
   const { errors, touched, handleBlur, handleChange, validateAll } = useFormValidation({
+    username: [
+      {
+        required: true,
+        message: 'Username is required',
+      },
+      {
+        minLength: 3,
+        message: 'Username must be at least 3 characters',
+      },
+    ],
     email: commonRules.email,
     password: commonRules.passwordWithStrength,
     confirmPassword: [
@@ -40,7 +51,7 @@ export default function SignupPage() {
     setError('')
 
     // Validate all fields
-    if (!validateAll({ email, password, confirmPassword })) {
+    if (!validateAll({ username, email, password, confirmPassword })) {
       return
     }
 
@@ -52,6 +63,10 @@ export default function SignupPage() {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            username: username,
+            display_name: username,
+          },
         },
       })
 
@@ -95,7 +110,7 @@ export default function SignupPage() {
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
           <Book className="w-6 h-6" />
-          <span>My Diary</span>
+          <span>Noted.</span>
         </Link>
         <ThemeSwitcher />
       </div>
@@ -124,6 +139,36 @@ export default function SignupPage() {
 
           {/* Form */}
           <form onSubmit={handleSignup} className="space-y-5">
+            {/* Username Field */}
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
+                Username <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value)
+                  handleChange('username', e.target.value)
+                }}
+                onBlur={(e) => handleBlur('username', e.target.value)}
+                placeholder="Your username"
+                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                  touched.username && errors.username
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                    : touched.username && !errors.username && username
+                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                }`}
+                disabled={loading}
+                required
+              />
+              {touched.username && errors.username && (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400">{errors.username}</p>
+              )}
+            </div>
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">

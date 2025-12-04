@@ -27,7 +27,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <Book className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal" />
             <h1 className="font-serif text-xl sm:text-2xl font-bold text-charcoal dark:text-teal">
-              My Diary
+              Noted
             </h1>
           </div>
           
@@ -163,7 +163,7 @@ export default function Home() {
 
           {/* Footer */}
           <p className="mt-12 sm:mt-16 lg:mt-20 text-xs sm:text-sm text-charcoal/50 dark:text-white/50">
-            © 2025 My Personal Diary. Your thoughts, forever private.
+            © 2025 Noted. Your thoughts, forever private.
           </p>
         </div>
       </div>

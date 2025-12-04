@@ -27,7 +27,7 @@ const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'),
   )
 })
 
-const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful']
+const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful', '🤔 Others']
 
 export default function EntryPage({ params }: { params: { id: string } }) {
   const [entry, setEntry] = useState<any>(null)
@@ -36,6 +36,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [mood, setMood] = useState('')
+  const [customMood, setCustomMood] = useState('')
   const [entryDate, setEntryDate] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -191,6 +192,20 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
 
+    // Validate file size (max 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024
+    if (file.size > MAX_SIZE) {
+      toast.error('Image must be less than 5MB')
+      throw new Error('Image too large')
+    }
+
+    // Count existing images
+    const imageCount = (content.match(/<img/g) || []).length
+    if (imageCount >= 5) {
+      toast.error('Maximum 5 images per entry')
+      throw new Error('Too many images')
+    }
+
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}/${Date.now()}.${fileExt}`
 
@@ -215,13 +230,18 @@ export default function EntryPage({ params }: { params: { id: string } }) {
     setSaving(true)
     try {
       const wordCount = calculateWordCount(content)
+      
+      // Use custom mood if "Others" is selected and custom mood is provided
+      const finalMood = mood === '🤔 Others' && customMood.trim() 
+        ? `🤔 ${customMood.trim()}` 
+        : mood || null
 
       const { error } = await supabase
         .from('entries')
         .update({
           title: title.trim(),
           content: content,
-          mood: mood || null,
+          mood: finalMood,
           entry_date: entryDate,
           word_count: wordCount,
         })
@@ -724,7 +744,12 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                 {moods.map((m) => (
                   <button
                     key={m}
-                    onClick={() => setMood(m)}
+                    onClick={() => {
+                      setMood(m)
+                      if (m !== '🤔 Others') {
+                        setCustomMood('')
+                      }
+                    }}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       mood === m
                         ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-md'
@@ -736,13 +761,33 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                 ))}
                 {mood && (
                   <button
-                    onClick={() => setMood('')}
+                    onClick={() => {
+                      setMood('')
+                      setCustomMood('')
+                    }}
                     className="px-4 py-2 rounded-full text-sm font-medium bg-charcoal/5 dark:bg-white/5 text-charcoal/60 dark:text-white/60 hover:bg-charcoal/10 dark:hover:bg-white/10"
                   >
                     Clear
                   </button>
                 )}
               </div>
+              
+              {/* Custom Mood Input */}
+              {mood === '🤔 Others' && (
+                <div className="mt-3 animate-slide-down">
+                  <input
+                    type="text"
+                    value={customMood}
+                    onChange={(e) => setCustomMood(e.target.value)}
+                    placeholder="Describe your mood..."
+                    className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border-2 border-gold/20 dark:border-teal/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal transition-all"
+                    maxLength={50}
+                  />
+                  <p className="mt-1.5 text-xs text-charcoal/50 dark:text-white/50">
+                    {customMood.length}/50 characters
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Entry Date */}

@@ -473,7 +473,7 @@ export default function SearchPage() {
                   <select
                     value={filters.mood}
                     onChange={(e) => setFilters({ ...filters, mood: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
                   >
                     <option value="">All Moods</option>
                     <option value="😊 Happy">😊 Happy</option>
@@ -496,7 +496,7 @@ export default function SearchPage() {
                   <select
                     value={filters.personId}
                     onChange={(e) => setFilters({ ...filters, personId: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
                   >
                     <option value="">All People</option>
                     {people.map((person) => (
@@ -516,7 +516,7 @@ export default function SearchPage() {
                   <select
                     value={filters.storyId}
                     onChange={(e) => setFilters({ ...filters, storyId: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
                   >
                     <option value="">All Stories</option>
                     {stories.map((story) => (
@@ -535,7 +535,7 @@ export default function SearchPage() {
                   <select
                     value={filters.folderId}
                     onChange={(e) => setFilters({ ...filters, folderId: e.target.value })}
-                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                    className="w-full px-3 py-2 bg-white dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
                   >
                     <option value="">All Folders</option>
                     {folders.map((folder) => (

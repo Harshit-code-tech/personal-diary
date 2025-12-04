@@ -5,7 +5,7 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          theme: 'light' | 'dark' | 'grey'
+          theme: 'light' | 'dark'
           timezone: string
           date_format: string
           time_format: '12h' | '24h'
