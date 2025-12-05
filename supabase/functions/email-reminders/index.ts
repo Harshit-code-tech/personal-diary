@@ -43,9 +43,7 @@ serve(async (req) => {
         id,
         user_id,
         email_type,
-        users:user_id (
-          email
-        )
+        email
       `)
       .eq('status', 'pending')
       .lte('scheduled_for', now.toISOString())
@@ -113,7 +111,7 @@ serve(async (req) => {
           // Send email via Gmail SMTP
           await smtpClient.send({
             from: GMAIL_USER,
-            to: emailJob.users?.email || '',
+            to: emailJob.email || '',
             subject: emailSubject,
             html: emailHtml,
           })
@@ -124,7 +122,7 @@ serve(async (req) => {
             .update({ status: 'sent', sent_at: now.toISOString() })
             .eq('id', emailJob.id)
 
-          return { success: true, email: emailJob.users?.email }
+          return { success: true, email: emailJob.email }
         } catch (error: any) {
           // Mark as failed
           await supabase

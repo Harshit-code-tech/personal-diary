@@ -14,12 +14,9 @@ interface Reminder {
   user_id: string
   title: string
   description: string | null
-  reminder_date: string
-  frequency: 'once' | 'daily' | 'weekly' | 'monthly'
-  is_completed: boolean
-  users: {
-    email: string
-  }
+  next_reminder_at: string
+  reminder_type: 'once' | 'daily' | 'weekly' | 'custom'
+  is_active: boolean
 }
 
 serve(async (req) => {
@@ -44,10 +41,10 @@ serve(async (req) => {
     // First get reminders, then fetch user emails separately to avoid join issues
     const { data: reminders, error } = await supabaseClient
       .from('reminders')
-      .select('id, user_id, title, description, reminder_date, frequency, is_completed')
-      .eq('is_completed', false)
-      .gte('reminder_date', today.toISOString())
-      .lt('reminder_date', tomorrow.toISOString())
+      .select('id, user_id, title, description, next_reminder_at, reminder_type, is_active')
+      .eq('is_active', true)
+      .lte('next_reminder_at', tomorrow.toISOString())
+      .gte('next_reminder_at', today.toISOString())
 
     if (error) {
       throw error
@@ -99,45 +96,33 @@ serve(async (req) => {
           console.log(`Sending reminder notification to ${userEmail}:`, {
             title: reminder.title,
             description: reminder.description,
-            date: reminder.reminder_date,
+            date: reminder.next_reminder_at,
           })
 
           // Optional: Create an in-app notification record
           // You could add a 'notifications' table to store these
           
-          // For recurring reminders, create the next occurrence
-          if (reminder.frequency !== 'once') {
-            const nextDate = new Date(reminder.reminder_date)
+          // For recurring reminders, calculate next occurrence
+          if (reminder.reminder_type !== 'custom') {
+            const nextDate = new Date(reminder.next_reminder_at)
             
-            switch (reminder.frequency) {
+            switch (reminder.reminder_type) {
               case 'daily':
                 nextDate.setDate(nextDate.getDate() + 1)
                 break
               case 'weekly':
                 nextDate.setDate(nextDate.getDate() + 7)
                 break
-              case 'monthly':
-                nextDate.setMonth(nextDate.getMonth() + 1)
-                break
             }
 
-            // Create next occurrence
+            // Update next occurrence
             await supabaseClient
               .from('reminders')
-              .insert({
-                user_id: reminder.user_id,
-                title: reminder.title,
-                description: reminder.description,
-                reminder_date: nextDate.toISOString(),
-                frequency: reminder.frequency,
-                is_completed: false,
+              .update({ 
+                next_reminder_at: nextDate.toISOString(),
               })
-
-            // Mark current reminder as completed
-            await supabaseClient
-              .from('reminders')
-              .update({ is_completed: true })
               .eq('id', reminder.id)
+          }
           }
 
           return {
