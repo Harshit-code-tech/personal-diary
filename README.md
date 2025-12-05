@@ -295,36 +295,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 CRON_SECRET=
 ```
-
-### Vercel Cron Jobs
-Automated reminders are configured via Vercel Cron. See [VERCEL_CRON_SETUP.md](docs/VERCEL_CRON_SETUP.md) for detailed setup.
-
-## 🔧 Configuration
-
-### Supabase Setup
-1. **Database**: All migrations applied (64 migrations total)
-2. **Edge Functions**: 4 functions deployed
-   - `email-reminders` - Send scheduled emails
-   - `detect-inactive-users` - Find inactive users
-   - `process-email-queue` - Process email queue
-   - `send-reminder-notifications` - Send reminders
-3. **Secrets**: Gmail SMTP configured for emails
-4. **RLS**: All policies active and optimized
-
-See [PRE_AI_READINESS_ASSESSMENT.md](docs/PRE_AI_READINESS_ASSESSMENT.md) for complete setup status.
-
-### Vercel Cron Jobs
-See [VERCEL_CRON_SETUP.md](docs/VERCEL_CRON_SETUP.md) for cron configuration.s
-- Email templates
-- Edge function environment variables
-- Storage bucket policies
-
-### Email Notifications
-1. Sign up at [Resend](https://resend.com)
-2. Get API key
-3. Add to environment variables
-4. Configure edge functions
-
 ---
 
 ## 🤝 Contributing
@@ -366,41 +336,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **GitHub Issues**: [Report bugs or request features](https://github.com/Harshit-code-tech/personal-diary/issues)
 - **Discussions**: [Join community discussions](https://github.com/Harshit-code-tech/personal-diary/discussions)
-
----
-
-## 🗺️ Roadmap
-
-### Coming Soon 🚀
-- [ ] **AI-Powered Prompts** - Daily writing prompts based on your history
-- [ ] **Sentiment Analysis** - Auto-detect emotions and patterns
-- [ ] **Semantic Search** - Find entries by meaning, not just keywords
-- [ ] **AI Chat** - Ask questions about your journal entries
-- [ ] **Writing Assistant** - Grammar and style suggestions
-- [ ] **Weekly AI Summaries** - Intelligent insights from your week
-
-See [AI_FEATURES_PLAN.md](docs/AI_FEATURES_PLAN.md) for detailed AI roadmap.
-
-### Planned Features
-- [ ] **Voice Journaling** - Record audio entries
-- [ ] **Collaborative Journals** - Share with trusted people
-- [ ] **Mobile Apps** - Native iOS and Android apps
-- [ ] **End-to-End Encryption** - Additional privacy layer
-- [ ] **Template Library** - Pre-made journaling templates
-- [ ] **Habit Tracking** - Track daily habits
-- [ ] **Photo Albums** - Dedicated photo management
-
-### Recently Completed ✅
-- ✅ Calendar heatmap visualization
-- ✅ Full analytics dashboard
-- ✅ Export in multiple formats (JSON, MD, PDF, HTML, Obsidian)
-- ✅ Image upload with limits
-- ✅ PWA support with offline functionality
-- ✅ Mood tracking with custom options
-- ✅ Smart reminders with Vercel Cron automation
-- ✅ Edge Functions for email notifications
-- ✅ Login page responsive design
-- ✅ Complete reminder system with proper schema
 
 ---
 
