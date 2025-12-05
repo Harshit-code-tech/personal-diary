@@ -3,11 +3,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 import { generateDailyReminderEmail, generateWeeklySummaryEmail, generateStreakMilestoneEmail } from './templates.ts'
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') 
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-const GMAIL_USER = Deno.env.get('GMAIL_USER') ?? ''
-const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') ?? ''
-const APP_URL = Deno.env.get('APP_URL') ?? 'https://yourapp.com'
+const GMAIL_USER = Deno.env.get('GMAIL_USER') 
+const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') 
+const APP_URL = Deno.env.get('APP_URL') 
 
 interface EmailJob {
   user_id: string

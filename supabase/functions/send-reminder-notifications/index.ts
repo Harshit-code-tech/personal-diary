@@ -123,7 +123,6 @@ serve(async (req) => {
               })
               .eq('id', reminder.id)
           }
-          }
 
           return {
             success: true,
@@ -152,12 +151,12 @@ serve(async (req) => {
         status: 200,
       }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-reminder-notifications:', error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error?.message || 'Unknown error',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
