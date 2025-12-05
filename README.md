@@ -31,7 +31,6 @@
 - **🔒 Privacy First** - Your data is encrypted and secure with Supabase
 - **📤 Export/Import** - Backup your journal in JSON, Markdown, or PDF formats
 - **⚡ Blazing Fast** - Built on Next.js 14 with App Router and Server Components
-- **🤖 AI-Ready** - Foundation for AI-powered features (sentiment analysis, smart prompts)
 
 ---
 
@@ -241,12 +240,11 @@ npm run test:all
 
 ### Folder System
 - **Nested Folders**: Create unlimited folder hierarchies
-- **Custom Icons**: Choose from 30+ emoji icons
-- **Drag & Drop**: Organize folders easily
+- **Custom Icons**: Choose from 30 emoji icons
 - **Multi-Select**: Assign entries to multiple folders
 
 ### Mood Tracking
-- 10+ mood options with emojis
+- 8 mood options with emojis
 - "Others" option with custom text input
 - Mood distribution analytics
 - Emotional journey visualization
