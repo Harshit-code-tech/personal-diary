@@ -73,11 +73,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4 pt-20 sm:pt-0">
       {/* Logo/Brand with Theme Switcher */}
-      <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
-          <Book className="w-6 h-6" />
+      <div className="absolute top-4 sm:top-8 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-10">
+        <Link href="/" className="flex items-center gap-2 font-serif text-xl sm:text-2xl font-bold text-charcoal dark:text-teal hover:opacity-80 transition-opacity">
+          <Book className="w-5 h-5 sm:w-6 sm:h-6" />
           <span>Noted.</span>
         </Link>
         <ThemeSwitcher />

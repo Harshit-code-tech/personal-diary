@@ -14,11 +14,12 @@ type Reminder = {
   id: string
   title: string
   description: string | null
-  reminder_date: string
-  frequency: string
-  is_completed: boolean
-  completed_at: string | null
-  entry_id: string | null
+  next_reminder_at: string
+  reminder_type: 'once' | 'daily' | 'weekly' | 'custom'
+  is_active: boolean
+  created_at?: string
+  updated_at?: string
+  user_id?: string
 }
 
 export default function RemindersPage() {
@@ -35,8 +36,8 @@ export default function RemindersPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    reminder_date: '',
-    frequency: 'once'
+    next_reminder_at: '',
+    reminder_type: 'once' as 'once' | 'daily' | 'weekly' | 'custom'
   })
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function RemindersPage() {
         .from('reminders')
         .select('*')
         .eq('user_id', user?.id)
-        .order('reminder_date', { ascending: true })
+        .order('next_reminder_at', { ascending: true })
 
       if (error) throw error
       setReminders(data || [])
@@ -67,7 +68,7 @@ export default function RemindersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.title.trim() || !formData.reminder_date) {
+    if (!formData.title.trim() || !formData.next_reminder_at) {
       toastNotify.error('Missing Fields', 'Please fill in all required fields')
       return
     }
@@ -79,8 +80,8 @@ export default function RemindersPage() {
           .update({
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            reminder_date: formData.reminder_date,
-            frequency: formData.frequency
+            next_reminder_at: formData.next_reminder_at,
+            reminder_type: formData.reminder_type
           })
           .eq('id', editingId)
 
@@ -93,15 +94,16 @@ export default function RemindersPage() {
             user_id: user?.id,
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            reminder_date: formData.reminder_date,
-            frequency: formData.frequency
+            next_reminder_at: formData.next_reminder_at,
+            reminder_type: formData.reminder_type,
+            is_active: true
           })
 
         if (error) throw error
         toastNotify.success('Reminder Created', 'Your new reminder has been added')
       }
 
-      setFormData({ title: '', description: '', reminder_date: '', frequency: 'once' })
+      setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
       setEditingId(null)
       setShowAddModal(false)
       fetchReminders()
@@ -111,18 +113,17 @@ export default function RemindersPage() {
     }
   }
 
-  const toggleComplete = async (id: string, isCompleted: boolean) => {
+  const toggleComplete = async (id: string, isActive: boolean) => {
     try {
       const { error } = await supabase
         .from('reminders')
         .update({
-          is_completed: !isCompleted,
-          completed_at: !isCompleted ? new Date().toISOString() : null
+          is_active: !isActive
         })
         .eq('id', id)
 
       if (error) throw error
-      toastNotify.success('Reminder Updated', isCompleted ? 'Marked as incomplete' : 'Marked as complete! ✓')
+      toastNotify.success('Reminder Updated', isActive ? 'Reminder deactivated' : 'Reminder activated! ✓')
       fetchReminders()
     } catch (err) {
       console.error('Error toggling reminder:', err)
@@ -163,15 +164,15 @@ export default function RemindersPage() {
     setFormData({
       title: reminder.title,
       description: reminder.description || '',
-      reminder_date: reminder.reminder_date.split('T')[0],
-      frequency: reminder.frequency
+      next_reminder_at: reminder.next_reminder_at.slice(0, 16), // datetime-local format
+      reminder_type: reminder.reminder_type
     })
     setShowAddModal(true)
   }
 
-  const upcomingReminders = reminders.filter(r => !r.is_completed && new Date(r.reminder_date) >= new Date())
-  const pastReminders = reminders.filter(r => !r.is_completed && new Date(r.reminder_date) < new Date())
-  const completedReminders = reminders.filter(r => r.is_completed)
+  const upcomingReminders = reminders.filter(r => r.is_active && new Date(r.next_reminder_at) >= new Date())
+  const pastReminders = reminders.filter(r => r.is_active && new Date(r.next_reminder_at) < new Date())
+  const inactiveReminders = reminders.filter(r => !r.is_active)
 
   if (authLoading || loading) {
     return <PageLoadingSkeleton />
@@ -201,7 +202,7 @@ export default function RemindersPage() {
             <button
               onClick={() => {
                 setEditingId(null)
-                setFormData({ title: '', description: '', reminder_date: '', frequency: 'once' })
+                setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
                 setShowAddModal(true)
               }}
               className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all"
@@ -288,14 +289,14 @@ export default function RemindersPage() {
               </div>
             )}
 
-            {/* Completed Reminders */}
-            {completedReminders.length > 0 && (
+            {/* Inactive Reminders */}
+            {inactiveReminders.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
-                  Completed ({completedReminders.length})
+                <h2 className="text-2xl font-bold text-gray-600 dark:text-gray-400 mb-4">
+                  Inactive ({inactiveReminders.length})
                 </h2>
                 <div className="space-y-3">
-                  {completedReminders.map((reminder) => (
+                  {inactiveReminders.map((reminder) => (
                     <ReminderCard
                       key={reminder.id}
                       reminder={reminder}
@@ -331,6 +332,7 @@ export default function RemindersPage() {
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
                   placeholder="Reminder title"
+                  required
                 />
               </div>
 
@@ -353,25 +355,26 @@ export default function RemindersPage() {
                 </label>
                 <input
                   type="datetime-local"
-                  value={formData.reminder_date}
-                  onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+                  value={formData.next_reminder_at}
+                  onChange={(e) => setFormData({ ...formData, next_reminder_at: e.target.value })}
                   className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-                  Frequency
+                  Reminder Type
                 </label>
                 <select
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  value={formData.reminder_type}
+                  onChange={(e) => setFormData({ ...formData, reminder_type: e.target.value as 'once' | 'daily' | 'weekly' | 'custom' })}
                   className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
                 >
                   <option value="once">Once</option>
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
+                  <option value="custom">Custom</option>
                 </select>
               </div>
 
@@ -381,7 +384,7 @@ export default function RemindersPage() {
                   onClick={() => {
                     setShowAddModal(false)
                     setEditingId(null)
-                    setFormData({ title: '', description: '', reminder_date: '', frequency: 'once' })
+                    setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
                   }}
                   className="flex-1 px-4 py-2.5 border border-charcoal/20 dark:border-white/20 rounded-lg font-medium hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
                 >
@@ -417,37 +420,37 @@ export default function RemindersPage() {
 
 function ReminderCard({ reminder, onToggle, onEdit, onDelete, isPast }: {
   reminder: Reminder
-  onToggle: (id: string, isCompleted: boolean) => void
+  onToggle: (id: string, isActive: boolean) => void
   onEdit: (reminder: Reminder) => void
   onDelete: (id: string) => void
   isPast: boolean
 }) {
-  const date = new Date(reminder.reminder_date)
-  const isCompleted = reminder.is_completed
+  const date = new Date(reminder.next_reminder_at)
+  const isActive = reminder.is_active
 
   return (
     <div className={`group bg-white dark:bg-graphite rounded-xl shadow-md p-5 border transition-all hover:shadow-lg ${
-      isCompleted
-        ? 'border-green-500/30 dark:border-green-400/30 opacity-60'
+      !isActive
+        ? 'border-gray-500/30 dark:border-gray-400/30 opacity-60'
         : isPast
         ? 'border-red-500/30 dark:border-red-400/30'
         : 'border-gold/20 dark:border-teal/20'
     }`}>
       <div className="flex items-start gap-4">
         <button
-          onClick={() => onToggle(reminder.id, isCompleted)}
+          onClick={() => onToggle(reminder.id, isActive)}
           className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-            isCompleted
-              ? 'bg-green-500 dark:bg-green-400 border-green-500 dark:border-green-400'
-              : 'border-charcoal/30 dark:border-white/30 hover:border-gold dark:hover:border-teal'
+            isActive
+              ? 'bg-gold dark:bg-teal border-gold dark:border-teal'
+              : 'border-charcoal/30 dark:border-white/30 hover:border-gray-500 dark:hover:border-gray-400 bg-gray-200 dark:bg-gray-700'
           }`}
         >
-          {isCompleted && <Check className="w-4 h-4 text-white dark:text-midnight" />}
+          {isActive && <Check className="w-4 h-4 text-white dark:text-midnight" />}
         </button>
 
         <div className="flex-1 min-w-0">
           <h3 className={`text-lg font-bold mb-1 ${
-            isCompleted ? 'line-through text-charcoal/50 dark:text-white/50' : 'text-charcoal dark:text-white'
+            !isActive ? 'line-through text-charcoal/50 dark:text-white/50' : 'text-charcoal dark:text-white'
           }`}>
             {reminder.title}
           </h3>
@@ -463,10 +466,10 @@ function ReminderCard({ reminder, onToggle, onEdit, onDelete, isPast }: {
               <Calendar className="w-3 h-3" />
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
-            {reminder.frequency !== 'once' && (
+            {reminder.reminder_type !== 'once' && (
               <span className="flex items-center gap-1">
                 <Repeat className="w-3 h-3" />
-                {reminder.frequency}
+                {reminder.reminder_type}
               </span>
             )}
           </div>

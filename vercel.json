@@ -75,6 +75,20 @@
       "destination": "/app",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/trigger-reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/trigger-email-queue",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/detect-inactive-users",
+      "schedule": "0 0 * * 0"
+    }
   ]
 
 }

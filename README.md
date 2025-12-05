@@ -24,12 +24,14 @@
 - **📊 Analytics & Insights** - Understand your writing patterns, streaks, and productivity
 - **👥 People & Stories** - Track relationships and life stories
 - **🎯 Goal Setting** - Set and track personal goals
+- **🔔 Smart Reminders** - Automated email reminders with Vercel Cron + Supabase Edge Functions
 - **🔍 Powerful Search** - Find entries instantly with full-text search
 - **📱 PWA Support** - Install as a native app on any device
 - **🌓 Theme Modes** - Light and Dark themes for comfortable writing
 - **🔒 Privacy First** - Your data is encrypted and secure with Supabase
 - **📤 Export/Import** - Backup your journal in JSON, Markdown, or PDF formats
 - **⚡ Blazing Fast** - Built on Next.js 14 with App Router and Server Components
+- **🤖 AI-Ready** - Foundation for AI-powered features (sentiment analysis, smart prompts)
 
 ---
 
@@ -61,9 +63,10 @@
    # Supabase
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    
-   # Email (Optional)
-   RESEND_API_KEY=your_resend_api_key
+   # Vercel Cron Secret (generate with: openssl rand -base64 32)
+   CRON_SECRET=your_32_character_secret
    ```
 
 4. **Run database migrations**
@@ -153,21 +156,23 @@ personal-diary/
 ## 🗄️ Database Schema
 
 ### Core Tables
-- **entries** - Journal entries with rich content
+- **diary_entries** - Journal entries with rich content
 - **folders** - Custom folder hierarchy
 - **entry_folders** - Many-to-many entry-folder relationships
 - **moods** - Mood tracking
 - **people** - Relationship tracking
 - **stories** - Life stories
-- **goals** - Goal setting
-- **reminders** - Email reminders
-- **user_settings** - User preferences
+- **goals** - Goal setting & progress
+- **reminders** - Smart reminders with cron scheduling
+- **email_queue** - Email notification queue
+- **user_settings** - User preferences and AI settings
 
 ### Features
 - **Row Level Security (RLS)** - Secure multi-tenant architecture
 - **Triggers** - Auto-create user settings, update timestamps
-- **Materialized Views** - Fast analytics queries
+- **Edge Functions** - Serverless automation for emails and reminders
 - **Full-Text Search** - PostgreSQL search capabilities
+- **Foreign Keys** - Referential integrity across all tables
 
 ---
 
@@ -281,26 +286,35 @@ npm run test:all
 3. **Configure Supabase**
    - Set Site URL to your Vercel domain
    - Add redirect URLs for auth callbacks
-   - See [SUPABASE_CONFIG_CHECKLIST.md](docs/SUPABASE_CONFIG_CHECKLIST.md)
-
 ### Environment Variables
 Set these in Vercel dashboard:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-RESEND_API_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+CRON_SECRET=
 ```
 
----
+### Vercel Cron Jobs
+Automated reminders are configured via Vercel Cron. See [VERCEL_CRON_SETUP.md](docs/VERCEL_CRON_SETUP.md) for detailed setup.
 
 ## 🔧 Configuration
 
 ### Supabase Setup
-Complete setup guide in [docs/SUPABASE_CONFIG_CHECKLIST.md](docs/SUPABASE_CONFIG_CHECKLIST.md)
+1. **Database**: All migrations applied (64 migrations total)
+2. **Edge Functions**: 4 functions deployed
+   - `email-reminders` - Send scheduled emails
+   - `detect-inactive-users` - Find inactive users
+   - `process-email-queue` - Process email queue
+   - `send-reminder-notifications` - Send reminders
+3. **Secrets**: Gmail SMTP configured for emails
+4. **RLS**: All policies active and optimized
 
-Key configurations:
-- Site URL and redirect URLs
+See [PRE_AI_READINESS_ASSESSMENT.md](docs/PRE_AI_READINESS_ASSESSMENT.md) for complete setup status.
+
+### Vercel Cron Jobs
+See [VERCEL_CRON_SETUP.md](docs/VERCEL_CRON_SETUP.md) for cron configuration.s
 - Email templates
 - Edge function environment variables
 - Storage bucket policies
@@ -357,26 +371,36 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🗺️ Roadmap
 
+### Coming Soon 🚀
+- [ ] **AI-Powered Prompts** - Daily writing prompts based on your history
+- [ ] **Sentiment Analysis** - Auto-detect emotions and patterns
+- [ ] **Semantic Search** - Find entries by meaning, not just keywords
+- [ ] **AI Chat** - Ask questions about your journal entries
+- [ ] **Writing Assistant** - Grammar and style suggestions
+- [ ] **Weekly AI Summaries** - Intelligent insights from your week
+
+See [AI_FEATURES_PLAN.md](docs/AI_FEATURES_PLAN.md) for detailed AI roadmap.
+
 ### Planned Features
-- [ ] **AI-Powered Insights** - RAG-based chat with your journal
-- [ ] **Sentiment Analysis** - Auto-detect emotions in entries
 - [ ] **Voice Journaling** - Record audio entries
 - [ ] **Collaborative Journals** - Share with trusted people
 - [ ] **Mobile Apps** - Native iOS and Android apps
-- [ ] **Encryption at Rest** - End-to-end encryption option
+- [ ] **End-to-End Encryption** - Additional privacy layer
 - [ ] **Template Library** - Pre-made journaling templates
 - [ ] **Habit Tracking** - Track daily habits
 - [ ] **Photo Albums** - Dedicated photo management
-- [ ] **Dark Patterns** - Additional theme options
 
-### Recently Added ✅
-- Calendar heatmap visualization
-- Full analytics dashboard
-- Export in multiple formats
-- Image upload with limits
-- PWA support
-- Mood tracking with custom options
-- Username customization in signup
+### Recently Completed ✅
+- ✅ Calendar heatmap visualization
+- ✅ Full analytics dashboard
+- ✅ Export in multiple formats (JSON, MD, PDF, HTML, Obsidian)
+- ✅ Image upload with limits
+- ✅ PWA support with offline functionality
+- ✅ Mood tracking with custom options
+- ✅ Smart reminders with Vercel Cron automation
+- ✅ Edge Functions for email notifications
+- ✅ Login page responsive design
+- ✅ Complete reminder system with proper schema
 
 ---
 
