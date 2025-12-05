@@ -11,24 +11,40 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Call Supabase edge function
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-reminder-notifications`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    // Call both Supabase edge functions (combined for Hobby plan limit)
+    const [remindersResponse, emailQueueResponse] = await Promise.all([
+      // Trigger reminder notifications
+      fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-reminder-notifications`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      ),
+      // Process email queue
+      fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-email-queue`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      ),
+    ])
 
-    const data = await response.json()
+    const remindersData = await remindersResponse.json()
+    const emailQueueData = await emailQueueResponse.json()
 
     return NextResponse.json({
       success: true,
-      message: 'Reminders triggered successfully',
-      data,
+      message: 'Reminders and email queue processed successfully',
+      reminders: remindersData,
+      emailQueue: emailQueueData,
     })
   } catch (error: any) {
     console.error('Error triggering reminders:', error)

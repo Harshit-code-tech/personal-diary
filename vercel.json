@@ -79,10 +79,6 @@
   "crons": [
     {
       "path": "/api/cron/trigger-reminders",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/trigger-email-queue",
       "schedule": "*/15 * * * *"
     },
     {
@@ -90,5 +86,4 @@
       "schedule": "0 0 * * 0"
     }
   ]
-
 }
