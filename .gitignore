@@ -43,6 +43,7 @@ DEBUG_*.sql
 VERIFY_*.sql
 RESET_*.sql
 
+test-deployment.ps1
 # Temporary documentation
 *_SUMMARY.md
 *_CHECKLIST.md
