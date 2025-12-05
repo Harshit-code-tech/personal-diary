@@ -1,5 +1,6 @@
-// Rate limiting utilities using in-memory storage
-// For production, consider using Redis or Upstash
+// Rate limiting utilities - optimized for Supabase Free Tier
+// Supabase free tier: 30 auth attempts per 5 minutes per IP
+// Strategy: Client-side limiting to prevent unnecessary requests
 
 interface RateLimitStore {
   [key: string]: {
@@ -30,6 +31,7 @@ export interface RateLimitResult {
   limit: number
   remaining: number
   reset: number
+  retryAfter?: number // Seconds to wait before retry
 }
 
 export function rateLimit(config: RateLimitConfig) {
@@ -53,11 +55,13 @@ export function rateLimit(config: RateLimitConfig) {
       }
       
       if (store[key].count >= config.limit) {
+        const retryAfter = Math.ceil((store[key].resetAt - now) / 1000)
         return {
           success: false,
           limit: config.limit,
           remaining: 0,
-          reset: store[key].resetAt
+          reset: store[key].resetAt,
+          retryAfter
         }
       }
       
@@ -69,22 +73,31 @@ export function rateLimit(config: RateLimitConfig) {
         remaining: config.limit - store[key].count,
         reset: store[key].resetAt
       }
+    },
+    // Reset for testing purposes
+    reset: (identifier: string) => {
+      delete store[`${identifier}`]
     }
   }
 }
 
 // Pre-configured rate limiters
+// Supabase Free Tier: 30 attempts per 5 minutes per IP
+// Our limits are MORE restrictive to be safe:
+
 export const apiLimiter = rateLimit({
   interval: 60 * 1000, // 1 minute
-  limit: 60, // 60 requests per minute
+  limit: 20, // 20 requests per minute (conservative)
 })
 
+// Auth limiter: More lenient to handle legitimate retries
+// Supabase limit: 30 per 5 min, we allow 4 per 1 min = 240 per 2 hours (safe)
 export const authLimiter = rateLimit({
-  interval: 15 * 60 * 1000, // 15 minutes
-  limit: 5, // 5 attempts per 15 minutes
+  interval: 60 * 1000, // 1 minute
+  limit: 4, // 4 attempts per minute
 })
 
 export const uploadLimiter = rateLimit({
   interval: 60 * 1000, // 1 minute
-  limit: 10, // 10 uploads per minute
+  limit: 5, // 5 uploads per minute
 })

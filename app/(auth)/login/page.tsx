@@ -8,6 +8,8 @@ import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { Book } from 'lucide-react'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
+import { authLimiter } from '@/lib/rate-limit'
+import { retryWithJitter } from '@/lib/retry-utils'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -39,10 +41,28 @@ export default function LoginPage() {
       return
     }
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    // Check rate limit on client side
+    const rateLimitResult = await authLimiter.check(`login-${email}`)
+    if (!rateLimitResult.success) {
+      setError(
+        `Too many login attempts. Please try again in ${rateLimitResult.retryAfter} seconds.`
+      )
+      setLoading(false)
+      return
+    }
+
+    // Use retry logic for network resilience
+    const { error: signInError } = await retryWithJitter(
+      () => supabase.auth.signInWithPassword({
+        email,
+        password,
+      }),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 300,
+        maxDelayMs: 2000,
+      }
+    )
 
     if (signInError) {
       setError(signInError.message)

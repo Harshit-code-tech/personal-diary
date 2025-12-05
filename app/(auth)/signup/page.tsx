@@ -9,6 +9,8 @@ import { Book } from 'lucide-react'
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
+import { authLimiter } from '@/lib/rate-limit'
+import { retryWithJitter } from '@/lib/retry-utils'
 
 export default function SignupPage() {
   const [username, setUsername] = useState('')
@@ -55,20 +57,38 @@ export default function SignupPage() {
       return
     }
 
+    // Check rate limit on client side
+    const rateLimitResult = await authLimiter.check(`signup-${email}`)
+    if (!rateLimitResult.success) {
+      const resetTime = new Date(rateLimitResult.reset)
+      setError(
+        `Too many signup attempts. Please try again in ${rateLimitResult.retryAfter} seconds.`
+      )
+      return
+    }
+
     setLoading(true)
 
     try {
-      const { data, error: signupError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            username: username,
-            display_name: username,
+      // Use retry logic for network resilience
+      const { data, error: signupError } = await retryWithJitter(
+        () => supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              username: username,
+              display_name: username,
+            },
           },
-        },
-      })
+        }),
+        {
+          maxAttempts: 3,
+          initialDelayMs: 300,
+          maxDelayMs: 2000,
+        }
+      )
 
       if (signupError) throw signupError
 
