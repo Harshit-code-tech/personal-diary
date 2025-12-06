@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useReminderRateLimit } from '@/lib/hooks/useReminderRateLimit'
 import Link from 'next/link'
-import { ArrowLeft, Bell, Plus, Check, X, Calendar, Repeat, Trash2 } from 'lucide-react'
+import { ArrowLeft, Bell, Plus, Check, X, Calendar, Repeat, Trash2, Shield } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
@@ -26,6 +27,7 @@ export default function RemindersPage() {
   const { user, loading: authLoading } = useAuth()
   const supabase = createClient()
   const toastNotify = useToast()
+  const { data: rateLimit, refetch: refetchRateLimit } = useReminderRateLimit()
   const [loading, setLoading] = useState(true)
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
@@ -107,9 +109,15 @@ export default function RemindersPage() {
       setEditingId(null)
       setShowAddModal(false)
       fetchReminders()
+      refetchRateLimit() // Refresh rate limit after creating/updating
     } catch (err: any) {
       console.error('Error saving reminder:', err)
-      toastNotify.error('Save Failed', err.message || 'Could not save reminder')
+      // Check if it's a rate limit error
+      if (err.message?.includes('Rate limit exceeded')) {
+        toastNotify.error('Rate Limit Exceeded', err.message)
+      } else {
+        toastNotify.error('Save Failed', err.message || 'Could not save reminder')
+      }
     }
   }
 
@@ -201,11 +209,20 @@ export default function RemindersPage() {
             <ThemeSwitcher />
             <button
               onClick={() => {
+                if (rateLimit && !rateLimit.can_create_more) {
+                  toastNotify.error('Limit Reached', 'You have reached your reminder creation limit. Please wait for the reset or deactivate some reminders.')
+                  return
+                }
                 setEditingId(null)
                 setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
                 setShowAddModal(true)
               }}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all"
+              disabled={rateLimit && !rateLimit.can_create_more}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                rateLimit && !rateLimit.can_create_more
+                  ? 'bg-gray-400 dark:bg-gray-600 text-gray-200 dark:text-gray-400 cursor-not-allowed'
+                  : 'bg-gold dark:bg-teal text-white dark:text-midnight hover:shadow-xl'
+              }`}
             >
               <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="hidden xs:inline">New Reminder</span>
@@ -227,6 +244,54 @@ export default function RemindersPage() {
             Never forget important moments and tasks
           </p>
         </div>
+
+        {/* Rate Limit Status */}
+        {rateLimit && (
+          <div className="mb-6 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10 shadow-md">
+            <div className="flex items-start gap-3">
+              <Shield className="w-5 h-5 text-gold dark:text-teal mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-4 mb-2">
+                  <h3 className="font-semibold text-charcoal dark:text-white">Usage Limits</h3>
+                  {!rateLimit.can_create_more && (
+                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded">
+                      LIMIT REACHED
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-charcoal/60 dark:text-white/60 mb-1">Today's Reminders</p>
+                    <p className="font-bold text-charcoal dark:text-white">
+                      {rateLimit.reminders_created_today} / {rateLimit.max_reminders_per_day}
+                    </p>
+                    <div className="mt-1 w-full bg-charcoal/10 dark:bg-white/10 rounded-full h-1.5">
+                      <div 
+                        className="bg-gold dark:bg-teal h-1.5 rounded-full transition-all"
+                        style={{ width: `${Math.min((rateLimit.reminders_created_today / rateLimit.max_reminders_per_day) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-charcoal/60 dark:text-white/60 mb-1">Active Reminders</p>
+                    <p className="font-bold text-charcoal dark:text-white">
+                      {rateLimit.active_reminders} / {rateLimit.max_active_reminders}
+                    </p>
+                    <div className="mt-1 w-full bg-charcoal/10 dark:bg-white/10 rounded-full h-1.5">
+                      <div 
+                        className="bg-gold dark:bg-teal h-1.5 rounded-full transition-all"
+                        style={{ width: `${Math.min((rateLimit.active_reminders / rateLimit.max_active_reminders) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-charcoal/50 dark:text-white/50 mt-2">
+                  Limits reset at {new Date(rateLimit.reset_at).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {reminders.length === 0 ? (
           <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
@@ -369,7 +434,7 @@ export default function RemindersPage() {
                 <select
                   value={formData.reminder_type}
                   onChange={(e) => setFormData({ ...formData, reminder_type: e.target.value as 'once' | 'daily' | 'weekly' | 'custom' })}
-                  className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-graphite [&>option]:text-charcoal [&>option]:dark:text-white"
                 >
                   <option value="once">Once</option>
                   <option value="daily">Daily</option>

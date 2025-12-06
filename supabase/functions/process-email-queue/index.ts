@@ -8,6 +8,9 @@ const GMAIL_USER = Deno.env.get('GMAIL_USER') ?? ''
 const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://personal-diary-three.vercel.app'
 
+// Batch size - process fewer emails per invocation to avoid timeouts
+const BATCH_SIZE = 10
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -26,18 +29,47 @@ interface EmailQueueItem {
   last_error: string | null
 }
 
-// Configure Gmail SMTP client
-const smtpClient = new SMTPClient({
-  connection: {
-    hostname: 'smtp.gmail.com',
-    port: 465,
-    tls: true,
-    auth: {
-      username: GMAIL_USER,
-      password: GMAIL_APP_PASSWORD,
+// Create SMTP client on-demand with timeout
+async function sendEmailWithTimeout(
+  recipient: string,
+  subject: string,
+  htmlBody: string,
+  timeoutMs = 8000 // 8 second timeout
+): Promise<void> {
+  const smtpClient = new SMTPClient({
+    connection: {
+      hostname: 'smtp.gmail.com',
+      port: 465,
+      tls: true,
+      auth: {
+        username: GMAIL_USER,
+        password: GMAIL_APP_PASSWORD,
+      },
     },
-  },
-})
+  })
+
+  try {
+    const sendPromise = smtpClient.send({
+      from: GMAIL_USER,
+      to: recipient,
+      subject: subject,
+      html: htmlBody,
+    })
+
+    // Race between send and timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('SMTP timeout after 8s')), timeoutMs)
+    )
+
+    await Promise.race([sendPromise, timeoutPromise])
+  } finally {
+    try {
+      await smtpClient.close()
+    } catch {
+      // Ignore close errors
+    }
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -49,7 +81,7 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
 
-    // Fetch pending emails that are due (max 50 per batch to avoid timeouts)
+    // Fetch pending emails that are due (smaller batch to avoid timeouts)
     const { data: pendingEmails, error: fetchError } = await supabase
       .from('email_queue')
       .select('*')
@@ -57,7 +89,7 @@ serve(async (req) => {
       .lte('scheduled_for', now.toISOString())
       .lt('retry_count', 3) // Max 3 retry attempts
       .order('scheduled_for', { ascending: true })
-      .limit(50)
+      .limit(BATCH_SIZE)
 
     if (fetchError) {
       throw fetchError
@@ -80,13 +112,12 @@ serve(async (req) => {
     const results = await Promise.allSettled(
       pendingEmails.map(async (emailItem: EmailQueueItem) => {
         try {
-          // Send email via Gmail SMTP
-          await smtpClient.send({
-            from: GMAIL_USER,
-            to: emailItem.recipient_email,
-            subject: emailItem.subject,
-            html: emailItem.html_body,
-          })
+          // Send email with timeout protection
+          await sendEmailWithTimeout(
+            emailItem.recipient_email,
+            emailItem.subject,
+            emailItem.html_body
+          )
 
           console.log(`✅ Email sent successfully to ${emailItem.recipient_email}`)
 
@@ -184,7 +215,6 @@ serve(async (req) => {
         status: 500,
       }
     )
-  } finally {
-    await smtpClient.close()
   }
+  // No finally block - we close connections per-email now
 })
