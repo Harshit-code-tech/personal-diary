@@ -275,7 +275,7 @@ export default function RemindersPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-charcoal/60 dark:text-white/60 mb-1">Today's Reminders</p>
+                    <p className="text-charcoal/60 dark:text-white/60 mb-1">Today&apos;s Reminders</p>
                     <p className="font-bold text-charcoal dark:text-white">
                       {rateLimit.reminders_created_today} / {rateLimit.max_reminders_per_day}
                     </p>
