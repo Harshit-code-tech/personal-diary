@@ -245,6 +245,20 @@ export default function RemindersPage() {
           </p>
         </div>
 
+        {/* Reminder Timing Information Banner */}
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+          <div className="flex items-start gap-3">
+            <Bell className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0 text-sm text-blue-900 dark:text-blue-100">
+              <p className="font-semibold mb-1">⏰ How Reminders Work</p>
+              <p className="text-blue-700 dark:text-blue-200">
+                Reminders are checked <strong>every minute</strong> and emails are sent <strong>every 5 minutes</strong>. 
+                You'll receive your reminder within <strong>1-6 minutes</strong> of the scheduled time (IST timezone).
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Rate Limit Status */}
         {rateLimit && (
           <div className="mb-6 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10 shadow-md">
