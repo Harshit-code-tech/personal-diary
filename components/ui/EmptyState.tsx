@@ -68,7 +68,7 @@ export const NoSearchResultsState = ({ onClearSearch }: { onClearSearch?: () => 
   <EmptyState
     icon="sparkles"
     title="No results found"
-    description="Try adjusting your search query or filters to find what you're looking for."
+    description="Try adjusting your search query or filters to find what you&apos;re looking for."
     action={onClearSearch ? {
       label: "Clear search",
       onClick: onClearSearch,
@@ -92,7 +92,7 @@ export const NoStoriesState = ({ onCreateStory }: { onCreateStory: () => void })
   <EmptyState
     icon="sparkles"
     title="No stories created"
-    description="Organize your entries into meaningful stories and track your life's adventures."
+    description="Organize your entries into meaningful stories and track your life&apos;s adventures."
     action={{
       label: "Create your first story",
       onClick: onCreateStory,

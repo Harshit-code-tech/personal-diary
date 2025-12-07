@@ -7,6 +7,7 @@ import { cacheUtils, CACHE_KEYS, CACHE_TTL } from '@/lib/redis'
  * Fetch analytics data for the authenticated user
  * Cached for 30 minutes since it's expensive to calculate
  */
+export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   try {
     const supabase = createClient()

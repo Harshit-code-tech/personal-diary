@@ -7,7 +7,7 @@ describe('EmptyState Component', () => {
     render(
       <EmptyState
         title="No data"
-        description="There's nothing here yet"
+        description="There&apos;s nothing here yet"
       />
     )
 

@@ -36,7 +36,7 @@ const steps: Step[] = [
   },
   {
     target: 'body',
-    content: '🎉 That\'s it! Start writing your first entry. Happy journaling!',
+    content: '🎉 That&apos;s it! Start writing your first entry. Happy journaling!',
     placement: 'center',
   },
 ]
