@@ -2,6 +2,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
+import { countWords } from '@/lib/sanitize'
 
 interface AutoSaveOptions {
   entryId: string
@@ -45,9 +46,8 @@ export function useAutoSave({
     savingRef.current = true
 
     try {
-      // Calculate word count
-      const text = content.replace(/<[^>]*>/g, '').trim()
-      const wordCount = text.split(/\s+/).filter(word => word.length > 0).length
+      // Calculate word count securely using DOMPurify
+      const wordCount = countWords(content)
 
       const { error } = await supabase
         .from('entries')

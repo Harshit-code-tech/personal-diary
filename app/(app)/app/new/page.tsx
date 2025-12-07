@@ -13,6 +13,7 @@ import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, Chevron
 import TagInput from '@/components/tags/TagInput'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { useAutoSaveDraft, formatTimeAgo } from '@/lib/hooks/useAutoSaveDraft'
+import { stripHtmlTags, countWords } from '@/lib/sanitize'
 
 // Lazy load heavy components
 const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'), {
@@ -357,11 +358,6 @@ export default function NewEntryPage() {
     return data.publicUrl
   }
 
-  const calculateWordCount = (html: string): number => {
-    const text = html.replace(/<[^>]*>/g, '').trim()
-    return text.split(/\s+/).filter(word => word.length > 0).length
-  }
-
   const handleSave = async () => {
     // Clear previous errors
     setErrors({})
@@ -389,7 +385,7 @@ export default function NewEntryPage() {
     setSaving(true)
 
     try {
-      const wordCount = calculateWordCount(content)
+      const wordCount = countWords(content)
       
       // Use custom mood if "Others" is selected and custom mood is provided
       const finalMood = mood === '🤔 Others' && customMood.trim() 
@@ -764,7 +760,7 @@ export default function NewEntryPage() {
 
           {/* Word Count */}
           <div className="mt-4 px-4 py-2 bg-charcoal/5 dark:bg-white/5 rounded-lg text-sm font-bold text-charcoal/60 dark:text-white/60 text-right">
-            ✍️ {calculateWordCount(content)} words
+            ✍️ {countWords(content)} words
           </div>
         </div>
 

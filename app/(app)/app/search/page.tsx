@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { stripHtmlTags } from '@/lib/sanitize'
 import { useSavedSearches } from '@/lib/hooks/useSavedSearches'
 import Link from 'next/link'
 import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile, Save, Star, Trash2, FolderOpen } from 'lucide-react'
@@ -182,7 +183,7 @@ export default function SearchPage() {
       ALLOWED_TAGS: [],
       ALLOWED_ATTR: []
     })
-    const text = sanitized.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+    const text = stripHtmlTags(sanitized)
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 

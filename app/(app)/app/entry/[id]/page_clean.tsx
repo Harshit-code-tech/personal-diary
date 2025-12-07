@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { stripHtmlTags } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Save, X } from 'lucide-react'
@@ -68,7 +69,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   }
 
   const calculateWordCount = (html: string): number => {
-    const text = html.replace(/<[^>]*>/g, '').trim()
+    const text = stripHtmlTags(html)
     return text.split(/\s+/).filter(word => word.length > 0).length
   }
 

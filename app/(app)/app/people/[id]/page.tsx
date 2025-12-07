@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { stripHtmlTags } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
@@ -160,7 +161,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
   }
 
   const getPreview = (content: string) => {
-    const text = content.replace(/<[^>]*>/g, '').trim()
+    const text = stripHtmlTags(content)
     return text.length > 150 ? text.slice(0, 150) + '...' : text
   }
 

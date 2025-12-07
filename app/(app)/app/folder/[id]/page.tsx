@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Folder as FolderIcon } from 'lucide-react'
 import FolderBreadcrumbs from '@/components/folders/FolderBreadcrumbs'
+import { stripHtmlTags } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,7 +142,7 @@ export default async function FolderPage({ params }: PageProps) {
                     </h3>
                     {entry.content && (
                       <p className="text-gray-600 dark:text-gray-400 line-clamp-2 text-sm">
-                        {entry.content.replace(/<[^>]*>/g, '').substring(0, 200)}
+                        {stripHtmlTags(entry.content).substring(0, 200)}
                         {entry.content.length > 200 && '...'}
                       </p>
                     )}

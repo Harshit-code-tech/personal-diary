@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useAutoSave } from '@/lib/hooks/useAutoSave'
+import { stripHtmlTags, countWords } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useToast } from '@/components/ui/ToastContainer'
@@ -68,7 +69,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   })
 
   // Calculate word count from content
-  const wordCount = content ? content.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(word => word.length > 0).length : 0
+  const wordCount = content ? countWords(content) : 0
 
   useEffect(() => {
     if (user) {
@@ -220,7 +221,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   }
 
   const calculateWordCount = (html: string): number => {
-    const text = html.replace(/<[^>]*>/g, '').trim()
+    const text = stripHtmlTags(html)
     return text.split(/\s+/).filter(word => word.length > 0).length
   }
 

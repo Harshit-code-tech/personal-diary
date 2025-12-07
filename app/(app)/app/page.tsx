@@ -9,6 +9,7 @@ import Link from 'next/link'
 import AppHeader from '@/components/layout/AppHeader'
 import FolderNavigation from '@/components/folders/FolderNavigation'
 import { Plus, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type } from 'lucide-react'
+import { stripHtmlTags } from '@/lib/sanitize'
 
 type Entry = {
   id: string
@@ -274,7 +275,7 @@ export default function AppPage() {
       ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i'],
       ALLOWED_ATTR: []
     })
-    const text = sanitized.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+    const text = stripHtmlTags(sanitized)
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 

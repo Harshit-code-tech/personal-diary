@@ -15,23 +15,15 @@ type Entry = {
  * Strip HTML tags and return plain text with proper formatting
  */
 export function stripHtml(html: string): string {
-  // First sanitize to remove all HTML tags
-  const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] })
+  // DOMPurify sanitizes and decodes entities automatically
+  // KEEP_CONTENT: true preserves text while removing all tags
+  const clean = DOMPurify.sanitize(html, { 
+    ALLOWED_TAGS: [],
+    KEEP_CONTENT: true 
+  })
   
-  // Replace common HTML entities
-  return clean
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&mdash;/g, '—')
-    .replace(/&ndash;/g, '–')
-    .replace(/&hellip;/g, '...')
-    // Remove excessive whitespace
-    .replace(/\s+/g, ' ')
-    .trim()
+  // Remove excessive whitespace only
+  return clean.replace(/\s+/g, ' ').trim()
 }
 
 /**
