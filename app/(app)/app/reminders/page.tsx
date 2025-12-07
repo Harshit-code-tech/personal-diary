@@ -10,6 +10,10 @@ import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz'
+
+// Timezone constant - IST (Indian Standard Time)
+const IST_TIMEZONE = 'Asia/Kolkata'
 
 type Reminder = {
   id: string
@@ -76,13 +80,23 @@ export default function RemindersPage() {
     }
 
     try {
+      // Convert IST datetime to UTC
+      // User picks time in datetime-local (treated as IST)
+      // We parse it as IST and convert to UTC for storage
+      const istDateTimeString = formData.next_reminder_at // "2025-12-07T08:50"
+      
+      // Parse as IST and convert to UTC
+      // toZonedTime interprets the string in the specified timezone
+      const istDate = toZonedTime(istDateTimeString, IST_TIMEZONE)
+      const utcDateTime = istDate.toISOString()
+
       if (editingId) {
         const { error } = await supabase
           .from('reminders')
           .update({
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            next_reminder_at: formData.next_reminder_at,
+            next_reminder_at: utcDateTime,
             reminder_type: formData.reminder_type
           })
           .eq('id', editingId)
@@ -96,7 +110,7 @@ export default function RemindersPage() {
             user_id: user?.id,
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            next_reminder_at: formData.next_reminder_at,
+            next_reminder_at: utcDateTime,
             reminder_type: formData.reminder_type,
             is_active: true
           })
@@ -169,10 +183,17 @@ export default function RemindersPage() {
 
   const startEdit = (reminder: Reminder) => {
     setEditingId(reminder.id)
+    
+    // Convert UTC from database to IST for datetime-local input
+    const utcDate = new Date(reminder.next_reminder_at)
+    
+    // Format UTC date in IST timezone for datetime-local input
+    const istDateTimeString = formatInTimeZone(utcDate, IST_TIMEZONE, "yyyy-MM-dd'T'HH:mm")
+    
     setFormData({
       title: reminder.title,
       description: reminder.description || '',
-      next_reminder_at: reminder.next_reminder_at.slice(0, 16), // datetime-local format
+      next_reminder_at: istDateTimeString,
       reminder_type: reminder.reminder_type
     })
     setShowAddModal(true)
@@ -252,8 +273,9 @@ export default function RemindersPage() {
             <div className="flex-1 min-w-0 text-sm text-blue-900 dark:text-blue-100">
               <p className="font-semibold mb-1">⏰ How Reminders Work</p>
               <p className="text-blue-700 dark:text-blue-200">
-                Reminders are checked <strong>every minute</strong> and emails are sent <strong>every 5 minutes</strong>. 
-                You&apos;ll receive your reminder within <strong>1-6 minutes</strong> of the scheduled time (IST timezone).
+                All times are in <strong>IST (Indian Standard Time, GMT+5:30)</strong>. 
+                Reminders are checked <strong>every minute</strong> and emails sent <strong>every 5 minutes</strong>. 
+                You&apos;ll receive your reminder within <strong>1-6 minutes</strong> of the scheduled time.
               </p>
             </div>
           </div>
