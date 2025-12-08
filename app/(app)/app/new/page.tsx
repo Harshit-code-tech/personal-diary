@@ -78,7 +78,7 @@ export default function NewEntryPage() {
       if (draft.title) setTitle(draft.title)
       if (draft.content) setContent(draft.content)
       if (draft.mood) setMood(draft.mood)
-      if (draft.entryDate) setEntryDate(draft.entryDate)
+      // Don't restore entryDate - always use current date
       if (draft.tags) setTags(draft.tags)
       if (draft.selectedPeople) setSelectedPeople(draft.selectedPeople)
       if (draft.selectedFolders) setSelectedFolders(draft.selectedFolders)

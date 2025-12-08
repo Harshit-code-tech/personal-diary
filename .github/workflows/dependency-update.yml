@@ -5,6 +5,10 @@ on:
     - cron: '0 8 * * 1'  # Every Monday at 8 AM
   workflow_dispatch:  # Manual trigger
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update:
     name: Update Dependencies

@@ -49,6 +49,9 @@ export default function AppPage() {
   const router = useRouter()
   const supabase = createClient()
   
+  // Username state
+  const [username, setUsername] = useState<string>('')
+  
   // Read folder from URL query parameter
   const [urlFolderId, setUrlFolderId] = useState<string | null>(null)
   
@@ -83,6 +86,7 @@ export default function AppPage() {
       setEntries([]) // Clear entries
       fetchEntries()
       fetchAllTags()
+      fetchUsername()
     }
   }, [user, selectedFolderId, selectedTag])
 
@@ -269,6 +273,21 @@ export default function AppPage() {
     }
   }
 
+  const fetchUsername = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('username')
+        .eq('user_id', user?.id)
+        .single()
+      
+      if (error) throw error
+      setUsername(data?.username || '')
+    } catch (error) {
+      console.error('Error fetching username:', error)
+    }
+  }
+
   const extractTextPreview = (html: string, maxLength: number = 150) => {
     // Sanitize HTML first
     const sanitized = DOMPurify.sanitize(html, {
@@ -351,7 +370,7 @@ export default function AppPage() {
                   {folderName}
                 </h1>
                 <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 font-medium">
-                  Welcome back ✨
+                  Welcome back{username ? `, ${username}` : ''} ✨
                 </p>
               </div>
               <Link
