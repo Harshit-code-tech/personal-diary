@@ -28,16 +28,38 @@ async function getFolderData(folderId: string) {
     return null
   }
 
-  // Get entries in folder
-  const { data: entries, error: entriesError } = await supabase.rpc('get_folder_entries', {
-    folder_id_param: folderId,
-    limit_param: 100,
-    offset_param: 0
-  })
+  // Get entries in folder via entry_folders junction table
+  const { data: entryFolders, error: efError } = await supabase
+    .from('entry_folders')
+    .select(`
+      entry_id,
+      entries (
+        id,
+        title,
+        content,
+        entry_date,
+        mood,
+        word_count,
+        created_at
+      )
+    `)
+    .eq('folder_id', folderId)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  if (efError) {
+    console.error('Error fetching entries:', efError)
+    return { folder, entries: [] }
+  }
+
+  // Extract entries from the junction table response
+  const entries = entryFolders
+    ?.map(ef => ef.entries)
+    .filter(entry => entry !== null) || []
 
   return {
     folder,
-    entries: entries || []
+    entries
   }
 }
 

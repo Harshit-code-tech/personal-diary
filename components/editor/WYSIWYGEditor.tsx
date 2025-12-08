@@ -40,8 +40,9 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         },
         codeBlock: false, // Disable default code block
         link: false, // Exclude link from StarterKit to avoid duplication
+        underline: false, // Disable StarterKit underline to avoid duplication
       }),
-      Underline.configure(),  // Explicitly configure to avoid duplication
+      Underline.configure(),  // Add underline separately
       CodeBlockLowlight.configure({
         lowlight,
         HTMLAttributes: {

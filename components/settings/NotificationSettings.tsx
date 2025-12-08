@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNotificationPreferences } from '@/lib/hooks/useNotificationPreferences'
 import { Bell, Clock, Calendar, Star, Zap, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -18,6 +18,11 @@ const days = [
 export default function NotificationSettings() {
   const { preferences, loading, saving, savePreferences, resetPreferences } = useNotificationPreferences()
   const [localPrefs, setLocalPrefs] = useState(preferences)
+
+  // Sync localPrefs with preferences when they load
+  useEffect(() => {
+    setLocalPrefs(preferences)
+  }, [preferences])
 
   const handleSave = async () => {
     const success = await savePreferences(localPrefs)

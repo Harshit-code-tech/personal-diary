@@ -1,23 +1,26 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter, Lora, Cormorant_Garamond } from 'next/font/google'
+import { Inter, Crimson_Pro, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import QueryProvider from '@/components/providers/QueryProvider'
 
 const inter = Inter({ 
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
 })
 
-const lora = Lora({ 
+const crimsonPro = Crimson_Pro({ 
   subsets: ['latin'],
-  variable: '--font-lora',
+  variable: '--font-crimson',
+  display: 'swap',
 })
 
-const cormorant = Cormorant_Garamond({ 
+const playfair = Playfair_Display({ 
   subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--font-cormorant',
+  weight: ['400', '600', '700', '900'],
+  variable: '--font-playfair',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
@@ -80,7 +83,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${lora.variable} ${cormorant.variable} font-sans`}>
+      <body className={`${inter.variable} ${crimsonPro.variable} ${playfair.variable} font-sans antialiased`}>
         <QueryProvider>
           {children}
         </QueryProvider>

@@ -36,9 +36,9 @@ const config: Config = {
         }
       },
       fontFamily: {
-        serif: ['Cormorant Garamond', 'serif'],
-        sans: ['Inter', 'sans-serif'],
-        body: ['Lora', 'serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-crimson)', 'Georgia', 'serif'],
       },
       backgroundImage: {
         'paper-texture': "url('/textures/paper.png')",

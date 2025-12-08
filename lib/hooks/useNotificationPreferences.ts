@@ -44,8 +44,8 @@ export function useNotificationPreferences() {
   }, [user])
 
   // Save preferences
-  const savePreferences = async (newPreferences: Partial<NotificationPreferences>) => {
-    if (!user) return
+  const savePreferences = async (newPreferences: Partial<NotificationPreferences>): Promise<boolean> => {
+    if (!user) return false
 
     setSaving(true)
     try {
@@ -62,8 +62,8 @@ export function useNotificationPreferences() {
   }
 
   // Reset to defaults
-  const resetPreferences = async () => {
-    if (!user) return
+  const resetPreferences = async (): Promise<boolean> => {
+    if (!user) return false
 
     setSaving(true)
     try {
