@@ -55,6 +55,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
@@ -92,6 +93,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       setContent(data.content)
       setMood(data.mood || '')
       setEntryDate(data.entry_date || '')
+      setIsBookmarked(data.is_bookmarked || false)
 
       // Fetch linked people
       const { data: peopleData, error: peopleError } = await supabase
@@ -351,6 +353,27 @@ export default function EntryPage({ params }: { params: { id: string } }) {
     }
   }
 
+  const toggleBookmark = async () => {
+    try {
+      const newBookmarkState = !isBookmarked
+      const { error } = await supabase
+        .from('entries')
+        .update({ 
+          is_bookmarked: newBookmarkState,
+          bookmarked_at: newBookmarkState ? new Date().toISOString() : null
+        })
+        .eq('id', params.id)
+
+      if (error) throw error
+
+      setIsBookmarked(newBookmarkState)
+      toast.success(newBookmarkState ? '⭐ Bookmarked!' : 'Bookmark removed')
+    } catch (error) {
+      console.error('Error toggling bookmark:', error)
+      toast.error('Failed to update bookmark')
+    }
+  }
+
   const removeGoal = async (goalId: string) => {
     try {
       const { error } = await supabase
@@ -441,6 +464,18 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             <ThemeSwitcher />
             {!editing ? (
               <>
+                <button
+                  onClick={toggleBookmark}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                    isBookmarked
+                      ? 'bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal border-2 border-gold dark:border-teal'
+                      : 'border-2 border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:border-gold dark:hover:border-teal'
+                  }`}
+                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark this entry'}
+                >
+                  <Star className="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} />
+                  {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                </button>
                 <button
                   onClick={() => setEditing(true)}
                   className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"

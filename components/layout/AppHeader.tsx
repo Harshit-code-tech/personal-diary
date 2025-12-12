@@ -73,6 +73,13 @@ const navLinks: NavLink[] = [
     hoverColor: 'hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-400/10',
   },
   {
+    href: '/app/bookmarks',
+    label: 'Bookmarks',
+    icon: Star,
+    color: 'text-gold dark:text-teal',
+    hoverColor: 'hover:text-gold dark:hover:text-teal hover:bg-gold/10 dark:hover:bg-teal/10',
+  },
+  {
     href: '/app/goals',
     label: 'Goals',
     icon: Target,

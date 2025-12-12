@@ -555,21 +555,21 @@ export default function NewEntryPage() {
 
           {/* People Selector */}
           {people.length > 0 && (
-            <div className="mb-8 p-6 bg-gradient-to-br from-blue-500/5 to-transparent dark:from-blue-400/5 dark:to-transparent rounded-xl border border-blue-500/10 dark:border-blue-400/10">
-              <label className="block text-sm font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
-                <div className="p-2 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
-                  <Users className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+            <div className="mb-6 md:mb-8 p-4 md:p-6 bg-gradient-to-br from-blue-500/5 to-transparent dark:from-blue-400/5 dark:to-transparent rounded-xl border border-blue-500/10 dark:border-blue-400/10">
+              <label className="block text-xs md:text-sm font-bold text-charcoal dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+                <div className="p-1.5 md:p-2 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
+                  <Users className="w-3.5 md:w-4 h-3.5 md:h-4 text-blue-500 dark:text-blue-400" />
                 </div>
                 Who is this entry about?
               </label>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 {people.map((person) => {
                   const isSelected = selectedPeople.includes(person.id)
                   return (
                     <button
                       key={person.id}
                       onClick={() => togglePerson(person.id)}
-                      className={`group flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                      className={`group flex items-center gap-1.5 md:gap-2.5 px-3 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all duration-300 ${
                         isSelected
                           ? 'bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 text-white shadow-xl scale-105 ring-2 ring-blue-500/30'
                           : 'bg-white dark:bg-charcoal text-charcoal dark:text-white hover:bg-blue-500/10 dark:hover:bg-blue-400/10 border border-charcoal/10 dark:border-white/10 hover:border-blue-500/30 dark:hover:border-blue-400/30 hover:scale-105 shadow-sm hover:shadow-md'
@@ -598,14 +598,16 @@ export default function NewEntryPage() {
           )}
 
           {/* Folder Selector */}
-          <div className="mb-8 p-6 bg-gradient-to-br from-purple-500/5 to-transparent dark:from-purple-400/5 dark:to-transparent rounded-xl border border-purple-500/10 dark:border-purple-400/10">
-            <label className="block text-sm font-bold text-charcoal dark:text-white mb-4 flex items-center gap-2">
-              <div className="p-2 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg">
-                <Folder className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+          <div className="mb-6 md:mb-8 p-4 md:p-6 bg-gradient-to-br from-purple-500/5 to-transparent dark:from-purple-400/5 dark:to-transparent rounded-xl border border-purple-500/10 dark:border-purple-400/10">
+            <label className="block text-xs md:text-sm font-bold text-charcoal dark:text-white mb-3 md:mb-4 flex flex-col md:flex-row md:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 md:p-2 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg">
+                  <Folder className="w-3.5 md:w-4 h-3.5 md:h-4 text-purple-500 dark:text-purple-400" />
+                </div>
+                <span>Additional Folders</span>
               </div>
-              Additional Folders
-              <span className="ml-auto text-xs font-normal text-charcoal/50 dark:text-white/50">
-                Auto-saves to date folder + {selectedFolders.length} more
+              <span className="text-xs font-normal text-charcoal/50 dark:text-white/50 md:ml-auto">
+                Auto-saves to date folder{selectedFolders.length > 0 ? ` + ${selectedFolders.length} more` : ''}
               </span>
             </label>
             
@@ -649,25 +651,25 @@ export default function NewEntryPage() {
           </div>
 
           {/* Entry Date */}
-          <div className="mb-8 flex items-center gap-4">
-            <label className="text-sm font-bold text-charcoal dark:text-white flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
+          <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
+            <label className="text-xs md:text-sm font-bold text-charcoal dark:text-white flex items-center gap-2">
+              <Calendar className="w-3.5 md:w-4 h-3.5 md:h-4" />
               Entry Date
             </label>
             <input
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="px-4 py-2.5 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/10 dark:border-white/10 rounded-xl text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
+              className="px-3 md:px-4 py-2 md:py-2.5 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/10 dark:border-white/10 rounded-lg md:rounded-xl text-sm md:text-base text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
             />
           </div>
 
           {/* Mood Selector */}
-          <div className="mb-8">
-            <label className="block text-sm font-bold text-charcoal dark:text-white mb-4">
+          <div className="mb-6 md:mb-8">
+            <label className="block text-xs md:text-sm font-bold text-charcoal dark:text-white mb-3 md:mb-4">
               How are you feeling?
             </label>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 md:gap-3">
               {moods.map((m) => (
                 <button
                   key={m}
@@ -677,7 +679,7 @@ export default function NewEntryPage() {
                       setCustomMood('')
                     }
                   }}
-                  className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  className={`px-3 md:px-5 py-2 md:py-2.5 rounded-lg md:rounded-xl text-xs md:text-sm font-bold transition-all duration-200 ${
                     mood === m
                       ? 'bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight shadow-xl'
                       : 'bg-charcoal/5 dark:bg-white/5 text-charcoal dark:text-white hover:bg-charcoal/10 dark:hover:bg-white/10 shadow-sm hover:shadow-md'

@@ -15,15 +15,20 @@ import DOMPurify from 'isomorphic-dompurify'
 export function stripHtmlTags(html: string): string {
   if (!html) return ''
   
-  // Use DOMPurify to completely remove all HTML tags
-  // ALLOWED_TAGS: [] means no tags are allowed (strip everything)
-  const cleaned = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true, // Keep text content
-  })
-  
-  return cleaned.trim()
+  // Use regex to strip HTML tags (server-side safe, no DOM needed)
+  // This avoids jsdom/parse5 issues in Vercel serverless
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove styles
+    .replace(/<[^>]+>/g, '') // Remove all HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+    .replace(/&amp;/g, '&') // Decode common entities
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim()
 }
 
 /**
