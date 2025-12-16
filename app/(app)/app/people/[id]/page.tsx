@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Edit, Trash2, Calendar, BookOpen, Heart, TrendingUp, Clock, MessageCircle, Sparkles } from 'lucide-react'
 
 interface Person {
@@ -31,10 +32,15 @@ interface Entry {
 interface Memory {
   id: string
   title: string
-  description: string
+  description: string | null
   memory_date: string
-  emotions: string[]
-  tags: string[]
+  location: string | null
+  mood: string | null
+  tags: string[] | null
+  images: string[] | null
+  is_favorite: boolean
+  created_at: string
+  updated_at: string
 }
 
 export default function PersonDetailPage({ params }: { params: { id: string } }) {
@@ -47,22 +53,24 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchPersonData()
-    }
-  }, [user, params.id])
-
-  const fetchPersonData = async () => {
+  const fetchPersonData = useCallback(async () => {
     try {
       // Fetch person details
       const { data: personData, error: personError } = await supabase
         .from('people')
         .select('*')
         .eq('id', params.id)
+        .eq('user_id', user?.id) // Security: Validate ownership
         .single()
 
-      if (personError) throw personError
+      if (personError) {
+        if (personError.code === 'PGRST116') {
+          toast.error('Person not found or access denied')
+          router.push('/app/people')
+          return
+        }
+        throw personError
+      }
       setPerson(personData)
 
       // Fetch entries linked to this person via entry_people junction table
@@ -108,7 +116,13 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, params.id, router, user?.id])
+
+  useEffect(() => {
+    if (user) {
+      fetchPersonData()
+    }
+  }, [user, params.id, fetchPersonData])
 
   const handleDelete = async () => {
     if (!confirm(`Are you sure you want to delete ${person?.name}? This action cannot be undone.`)) {
@@ -220,9 +234,11 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
             {/* Avatar */}
             <div className="flex-shrink-0">
               {person.avatar_url ? (
-                <img
+                <Image
                   src={person.avatar_url}
                   alt={person.name}
+                  width={128}
+                  height={128}
                   className="w-32 h-32 rounded-full object-cover border-4 border-gold/20 dark:border-teal/20"
                 />
               ) : (
@@ -236,7 +252,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
 
             {/* Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl font-serif font-bold text-charcoal dark:text-teal mb-3">
+              <h1 className="text-3xl md:text-4xl font-display font-bold text-charcoal dark:text-white mb-3">
                 {person.name}
               </h1>
               
@@ -336,7 +352,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
 
         {/* Memories Section */}
         <div>
-          <h2 className="text-2xl font-serif font-bold text-charcoal dark:text-teal mb-4 flex items-center gap-2">
+          <h2 className="text-2xl font-heading font-bold text-charcoal dark:text-teal mb-4 flex items-center gap-2">
             <Heart className="w-6 h-6" />
             Special Memories
           </h2>
@@ -346,31 +362,67 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
               <p className="text-charcoal/60 dark:text-white/60 mb-4">
                 No memories about {person.name} yet.
               </p>
-              <p className="text-sm text-charcoal/50 dark:text-white/50">
-                Memories feature coming soon!
+              <p className="text-sm text-charcoal/50 dark:text-white/50 mb-4">
+                Create beautiful memories by linking entries and moments!
               </p>
+              <Link
+                href={`/app/memories/new?person=${params.id}`}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all"
+              >
+                <Heart className="w-5 h-5" />
+                Create Memory
+              </Link>
             </div>
           ) : (
             <div className="space-y-4">
-              {memories.map((memory) => (
-                <div
-                  key={memory.id}
-                  className="bg-white dark:bg-graphite rounded-lg shadow-sm p-6 border border-charcoal/10 dark:border-white/10"
+              <div className="flex justify-end">
+                <Link
+                  href={`/app/memories/new?person=${params.id}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-teal dark:bg-gold text-white dark:text-midnight rounded-lg font-semibold hover:shadow-md transition-all"
                 >
+                  <Heart className="w-4 h-4" /> Add another memory
+                </Link>
+              </div>
+              {memories.map((memory) => (
+                <Link
+                  href={`/app/memories/${memory.id}`}
+                  key={memory.id}
+                  className="block rounded-xl border border-charcoal/10 dark:border-white/10 bg-gradient-to-r from-white via-white to-gold/10 dark:from-graphite dark:via-midnight dark:to-teal/10 p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2 text-sm text-charcoal/60 dark:text-white/60">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(memory.memory_date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </div>
+                    {memory.mood && (
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-charcoal/5 dark:bg-white/10 text-charcoal dark:text-white">
+                        {memory.mood}
+                      </span>
+                    )}
+                  </div>
+
                   <h3 className="text-xl font-serif font-bold text-charcoal dark:text-white mb-2">
                     {memory.title}
                   </h3>
-                  <p className="text-charcoal/70 dark:text-white/70 mb-4">
+                  <p className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3">
                     {memory.description}
                   </p>
-                  <div className="text-sm text-charcoal/60 dark:text-white/60">
-                    {new Date(memory.memory_date).toLocaleDateString('en-US', {
-                      month: 'long',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
+
+                  <div className="flex flex-wrap gap-2 text-xs text-charcoal/60 dark:text-white/60">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full font-semibold">
+                      <Heart className="w-4 h-4" /> Memory
+                    </span>
+                    {Array.isArray((memory as any).tags) && (memory as any).tags.length > 0 && (memory as any).tags.slice(0,3).map((tag: string) => (
+                      <span key={tag} className="px-3 py-1 rounded-full bg-charcoal/5 dark:bg-white/10">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

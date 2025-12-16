@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 import { useToast } from '@/components/ui/ToastContainer'
 import { entrySchema, formatZodErrors } from '@/lib/validation'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { ArrowLeft, Save, Loader2, Users, X, FileText, Calendar, Folder, ChevronRight, ChevronDown, Clock, AlertCircle } from 'lucide-react'
 import TagInput from '@/components/tags/TagInput'
@@ -25,10 +26,6 @@ const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'),
       </div>
     </div>
   )
-})
-
-const TemplateModal = dynamic(() => import('@/components/templates/TemplateModal'), {
-  ssr: false
 })
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful', '🤔 Others']
@@ -51,7 +48,6 @@ export default function NewEntryPage() {
   const [popularTags, setPopularTags] = useState<string[]>([])
   const [people, setPeople] = useState<Person[]>([])
   const [selectedPeople, setSelectedPeople] = useState<string[]>([])
-  const [showTemplates, setShowTemplates] = useState(false)
   const [folders, setFolders] = useState<any[]>([])
   const [selectedFolders, setSelectedFolders] = useState<string[]>([])
   const [showFolderSelector, setShowFolderSelector] = useState(false)
@@ -98,7 +94,7 @@ export default function NewEntryPage() {
         selectedFolders,
       })
     }
-  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders])
+  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders, saveDraft])
 
   useEffect(() => {
     // Pre-fill date from URL parameter (from calendar)
@@ -112,17 +108,9 @@ export default function NewEntryPage() {
     if (folderParam) {
       setSelectedFolders([folderParam])
     }
-  }, [searchParams])
+  }, [searchParams, folderParam])
 
-  useEffect(() => {
-    if (user) {
-      fetchPeople()
-      fetchFolders()
-      fetchPopularTags()
-    }
-  }, [user])
-
-  const fetchPeople = async () => {
+  const fetchPeople = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('people')
@@ -135,9 +123,9 @@ export default function NewEntryPage() {
     } catch (err) {
       console.error('Error fetching people:', err)
     }
-  }
+  }, [user?.id, supabase])
 
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('folders')
@@ -150,9 +138,9 @@ export default function NewEntryPage() {
     } catch (err) {
       console.error('Error fetching folders:', err)
     }
-  }
+  }, [user?.id, supabase])
 
-  const fetchPopularTags = async () => {
+  const fetchPopularTags = useCallback(async () => {
     try {
       // Get all tags from user's entries and count occurrences
       const { data, error } = await supabase
@@ -181,7 +169,15 @@ export default function NewEntryPage() {
     } catch (err) {
       console.error('Error fetching popular tags:', err)
     }
-  }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchPeople()
+      fetchFolders()
+      fetchPopularTags()
+    }
+  }, [user, fetchPeople, fetchFolders, fetchPopularTags])
 
   const togglePerson = (personId: string) => {
     setSelectedPeople(prev =>
@@ -191,142 +187,7 @@ export default function NewEntryPage() {
     )
   }
 
-  const handleTemplateSelect = (template: any) => {
-    if (template.content_template) {
-      // Convert template markdown to HTML
-      const lines = template.content_template.replace(/\\n/g, '\n').split('\n')
-      let html = ''
-      let inList = false
-      let listType = ''
-      let listItems: string[] = []
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i]
-        const trimmedLine = line.trim()
-        
-        // Headers
-        if (trimmedLine.startsWith('#')) {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          
-          const level = line.match(/^#+/)?.[0].length || 1
-          const text = line.replace(/^#+\s*/, '')
-          html += `<h${level}>${text}</h${level}>`
-        }
-        // Blockquote
-        else if (trimmedLine.startsWith('>')  || trimmedLine.startsWith('> "')) {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          
-          const quoteText = line.replace(/^>\s*/, '')
-          html += `<blockquote><p>${quoteText}</p></blockquote>`
-        }
-        // Numbered list
-        else if (trimmedLine.match(/^\d+\.\s/)) {
-          if (!inList || listType !== 'ol') {
-            // Close any other list type
-            if (inList && listType === 'ul') {
-              html += `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-              listItems = []
-            }
-            inList = true
-            listType = 'ol'
-          }
-          const itemText = line.replace(/^\d+\.\s*/, '')
-          listItems.push(itemText)
-        }
-        // Bullet list
-        else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
-          if (!inList || listType !== 'ul') {
-            // Close any other list type
-            if (inList && listType === 'ol') {
-              html += `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>`
-              listItems = []
-            }
-            inList = true
-            listType = 'ul'
-          }
-          const itemText = line.replace(/^[-*]\s*/, '')
-          listItems.push(itemText)
-        }
-        // Table row (preserve as-is for now)
-        else if (trimmedLine.startsWith('|')) {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          html += `<p>${line}</p>`
-        }
-        // Bold text
-        else if (trimmedLine.includes('**')) {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          
-          const formatted = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-          html += `<p>${formatted}</p>`
-        }
-        // Empty line
-        else if (trimmedLine === '') {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          html += '<p><br></p>'
-        }
-        // Regular text
-        else if (trimmedLine) {
-          // Close any open list
-          if (inList) {
-            html += listType === 'ol' 
-              ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-              : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-            inList = false
-            listItems = []
-          }
-          html += `<p>${line}</p>`
-        }
-      }
-      
-      // Close any remaining open list
-      if (inList) {
-        html += listType === 'ol' 
-          ? `<ol>${listItems.map(item => `<li>${item}</li>`).join('')}</ol>` 
-          : `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`
-      }
-      
-      setContent(html)
-    }
-    if (template.name !== 'Blank' && !title) {
-      setTitle(`${template.name} - ${new Date().toLocaleDateString()}`)
-    }
-    setShowTemplates(false)
-  }
+
 
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
@@ -489,14 +350,6 @@ export default function NewEntryPage() {
             )}
 
             <ThemeSwitcher />
-            
-            <button
-              onClick={() => setShowTemplates(true)}
-              className="group flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-charcoal text-charcoal dark:text-white rounded-xl font-semibold hover:shadow-xl transition-all duration-300 border border-charcoal/10 dark:border-white/10 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-105"
-            >
-              <FileText className="w-4 h-4 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-              Templates
-            </button>
 
             <button
               onClick={handleSave}
@@ -547,7 +400,7 @@ export default function NewEntryPage() {
                 }
               }}
               placeholder="What's on your mind?"
-              className="w-full font-serif text-4xl md:text-5xl font-bold text-charcoal dark:text-teal bg-transparent border-none outline-none placeholder:text-charcoal/20 dark:placeholder:text-teal/20 mb-2 focus:placeholder:text-charcoal/40 dark:focus:placeholder:text-teal/40 transition-all"
+              className="w-full font-display text-4xl md:text-5xl font-bold text-charcoal dark:text-teal bg-transparent border-none outline-none placeholder:text-charcoal/20 dark:placeholder:text-teal/20 mb-2 focus:placeholder:text-charcoal/40 dark:focus:placeholder:text-teal/40 transition-all"
               autoFocus
             />
             <div className="h-1 bg-gradient-to-r from-gold via-gold/50 to-transparent dark:from-teal dark:via-teal/50 dark:to-transparent rounded-full transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500"></div>
@@ -556,7 +409,7 @@ export default function NewEntryPage() {
           {/* People Selector */}
           {people.length > 0 && (
             <div className="mb-6 md:mb-8 p-4 md:p-6 bg-gradient-to-br from-blue-500/5 to-transparent dark:from-blue-400/5 dark:to-transparent rounded-xl border border-blue-500/10 dark:border-blue-400/10">
-              <label className="block text-xs md:text-sm font-bold text-charcoal dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+              <label className="block text-xs md:text-sm font-bold font-heading text-charcoal dark:text-white mb-3 md:mb-4 flex items-center gap-2">
                 <div className="p-1.5 md:p-2 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
                   <Users className="w-3.5 md:w-4 h-3.5 md:h-4 text-blue-500 dark:text-blue-400" />
                 </div>
@@ -576,9 +429,11 @@ export default function NewEntryPage() {
                       }`}
                     >
                       {person.avatar_url ? (
-                        <img
+                        <Image
                           src={person.avatar_url}
                           alt={person.name}
+                          width={24}
+                          height={24}
                           className={`w-6 h-6 rounded-full object-cover ${isSelected ? 'ring-2 ring-white/50' : ''}`}
                         />
                       ) : (
@@ -652,7 +507,7 @@ export default function NewEntryPage() {
 
           {/* Entry Date */}
           <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center gap-2 md:gap-4">
-            <label className="text-xs md:text-sm font-bold text-charcoal dark:text-white flex items-center gap-2">
+            <label className="text-xs md:text-sm font-bold font-heading text-charcoal dark:text-white flex items-center gap-2">
               <Calendar className="w-3.5 md:w-4 h-3.5 md:h-4" />
               Entry Date
             </label>
@@ -666,7 +521,7 @@ export default function NewEntryPage() {
 
           {/* Mood Selector */}
           <div className="mb-6 md:mb-8">
-            <label className="block text-xs md:text-sm font-bold text-charcoal dark:text-white mb-3 md:mb-4">
+            <label className="block text-xs md:text-sm font-bold font-heading text-charcoal dark:text-white mb-3 md:mb-4">
               How are you feeling?
             </label>
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 md:gap-3">
@@ -792,14 +647,6 @@ export default function NewEntryPage() {
           </ul>
         </div>
       </main>
-
-      {/* Template Modal */}
-      {showTemplates && (
-        <TemplateModal
-          onClose={() => setShowTemplates(false)}
-          onSelect={handleTemplateSelect}
-        />
-      )}
 
       {/* Folder Selector Modal */}
       {showFolderSelector && (

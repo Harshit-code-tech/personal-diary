@@ -1,48 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import DOMPurify from 'isomorphic-dompurify'
 import Link from 'next/link'
+import Image from 'next/image'
 import AppHeader from '@/components/layout/AppHeader'
 import FolderNavigation from '@/components/folders/FolderNavigation'
-import { Plus, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type } from 'lucide-react'
+import { Plus, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type, Star, Trash2 } from 'lucide-react'
 import { stripHtmlTags } from '@/lib/sanitize'
-
-type Entry = {
-  id: string
-  title: string
-  content: string
-  entry_date: string
-  word_count: number
-  mood: string | null
-  folder_id: string | null
-  person_id: string | null
-  created_at: string
-  entry_people?: Array<{
-    people: {
-      id: string
-      name: string
-      avatar_url: string | null
-    }
-  }>
-  story_entries?: Array<{
-    stories: {
-      id: string
-      title: string
-      icon: string
-      color: string
-    } | null
-  }>
-}
-
-type Folder = {
-  id: string
-  name: string
-  icon: string
-}
+import type { Entry, Folder, Stats } from '@/lib/types'
 
 export default function AppPage() {
   const { user, loading } = useAuth()
@@ -72,7 +40,7 @@ export default function AppPage() {
   const ITEMS_PER_PAGE = 20
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [allTags, setAllTags] = useState<string[]>([])
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     totalEntries: 0,
     totalWords: 0,
     peopleCount: 0,
@@ -80,23 +48,7 @@ export default function AppPage() {
     currentStreak: 0,
   })
 
-  useEffect(() => {
-    if (user) {
-      setPage(1) // Reset to page 1 when folder changes
-      setEntries([]) // Clear entries
-      fetchEntries()
-      fetchAllTags()
-      fetchUsername()
-    }
-  }, [user, selectedFolderId, selectedTag])
-
-  useEffect(() => {
-    if (user && page > 1) {
-      fetchEntries() // Load more when page changes
-    }
-  }, [page])
-
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     setFetchingEntries(true)
     try {
       let folderIds = [selectedFolderId]
@@ -147,7 +99,7 @@ export default function AppPage() {
         .from('entries')
         .select(`
           id, title, content, entry_date, word_count, mood, 
-          folder_id, person_id, created_at, tags,
+          folder_id, created_at, tags,
           folders!entries_folder_id_fkey (name, icon),
           entry_people (
             people (id, name, avatar_url)
@@ -156,6 +108,7 @@ export default function AppPage() {
             stories (id, title, icon, color)
           )
         `, { count: 'exact' })
+        .is('deleted_at', null) // Exclude soft-deleted entries
         .order('entry_date', { ascending: false })
         .range(from, to)
 
@@ -242,14 +195,15 @@ export default function AppPage() {
     } finally {
       setFetchingEntries(false)
     }
-  }
+  }, [selectedFolderId, selectedTag, page, supabase])
 
-  const fetchAllTags = async () => {
+  const fetchAllTags = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('entries')
         .select('tags')
         .eq('user_id', user?.id)
+        .is('deleted_at', null)
         .not('tags', 'is', null)
 
       if (error) throw error
@@ -271,30 +225,42 @@ export default function AppPage() {
     } catch (err) {
       console.error('Error fetching tags:', err)
     }
-  }
+  }, [user?.id, supabase])
 
-  const fetchUsername = async () => {
+  const fetchUsername = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('username')
-        .eq('user_id', user?.id)
-        .single()
-      
-      if (error) throw error
-      setUsername(data?.username || '')
+      // Get username from user metadata
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (authUser?.user_metadata?.username) {
+        setUsername(authUser.user_metadata.username)
+      } else if (authUser?.email) {
+        // Fallback to email username
+        setUsername(authUser.email.split('@')[0])
+      }
     } catch (error) {
       console.error('Error fetching username:', error)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (user) {
+      setPage(1) // Reset to page 1 when folder changes
+      setEntries([]) // Clear entries
+      fetchEntries()
+      fetchAllTags()
+      fetchUsername()
+    }
+  }, [user, selectedFolderId, selectedTag, fetchEntries, fetchAllTags, fetchUsername])
+
+  useEffect(() => {
+    if (user && page > 1) {
+      fetchEntries() // Load more when page changes
+    }
+  }, [page, user, fetchEntries])
 
   const extractTextPreview = (html: string, maxLength: number = 150) => {
-    // Sanitize HTML first
-    const sanitized = DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'b', 'i'],
-      ALLOWED_ATTR: []
-    })
-    const text = stripHtmlTags(sanitized)
+    // stripHtmlTags already handles sanitization
+    const text = stripHtmlTags(html)
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 
@@ -366,21 +332,44 @@ export default function AppPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
               <div className="flex-1">
-                <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight">
+                <h1 className="font-display text-display-lg font-bold tracking-tight text-charcoal dark:text-teal mb-2 sm:mb-3 leading-tight">
                   {folderName}
                 </h1>
                 <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 font-medium">
                   Welcome back{username ? `, ${username}` : ''} ✨
                 </p>
               </div>
-              <Link
-                href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
-                className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 w-full sm:w-auto justify-center"
-                data-tour="new-entry"
-              >
-                <Plus className="w-5 sm:w-6 h-5 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
-                <span className="text-sm sm:text-base">New Entry</span>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+                <Link
+                  href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
+                  className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 justify-center"
+                  data-tour="new-entry"
+                >
+                  <Plus className="w-5 sm:w-6 h-5 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
+                  <span className="text-sm sm:text-base">New Entry</span>
+                </Link>
+                
+                {/* Quick Access Buttons */}
+                <div className="flex gap-3 sm:gap-3" data-tour="quick-access">
+                  <Link
+                    href="/app/bookmarks"
+                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-graphite border-2 border-amber-500/20 dark:border-amber-400/20 text-amber-600 dark:text-amber-400 rounded-xl font-semibold hover:shadow-xl hover:border-amber-500/40 dark:hover:border-amber-400/40 transition-all duration-300 hover:scale-105"
+                    title="View bookmarked entries"
+                  >
+                    <Star className="w-4 sm:w-5 h-4 sm:h-5 group-hover:fill-current transition-all" />
+                    <span className="hidden sm:inline text-sm">Bookmarks</span>
+                  </Link>
+                  
+                  <Link
+                    href="/app/trash"
+                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-graphite border-2 border-red-500/20 dark:border-red-400/20 text-red-600 dark:text-red-400 rounded-xl font-semibold hover:shadow-xl hover:border-red-500/40 dark:hover:border-red-400/40 transition-all duration-300 hover:scale-105"
+                    title="View deleted entries"
+                  >
+                    <Trash2 className="w-4 sm:w-5 h-4 sm:h-5 group-hover:shake transition-all" />
+                    <span className="hidden sm:inline text-sm">Trash</span>
+                  </Link>
+                </div>
+              </div>
             </div>
 
             {/* Statistics Cards */}
@@ -581,10 +570,9 @@ export default function AppPage() {
                       </div>
                     </div>
                     
-                    <div
-                      className="text-sm sm:text-base text-charcoal/80 dark:text-white/80 line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-5 leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: extractTextPreview(entry.content, 200) }}
-                    />
+                    <p className="text-sm sm:text-base text-charcoal/80 dark:text-white/80 line-clamp-2 sm:line-clamp-3 mb-4 sm:mb-5 leading-relaxed">
+                      {extractTextPreview(entry.content, 200)}
+                    </p>
                     
                     <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-charcoal/60 dark:text-white/60 flex-wrap">
                       <span className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-charcoal/5 dark:bg-white/5 rounded-lg font-semibold">
@@ -607,9 +595,11 @@ export default function AppPage() {
                                 className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-500/10 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] sm:text-xs font-bold hover:bg-blue-500/20 dark:hover:bg-blue-400/20 transition-colors"
                               >
                                 {ep.people.avatar_url ? (
-                                  <img
+                                  <Image
                                     src={ep.people.avatar_url}
                                     alt={ep.people.name}
+                                    width={20}
+                                    height={20}
                                     className="w-4 sm:w-5 h-4 sm:h-5 rounded-full object-cover ring-2 ring-blue-500/20"
                                   />
                                 ) : (

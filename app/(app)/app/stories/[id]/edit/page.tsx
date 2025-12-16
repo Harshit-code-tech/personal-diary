@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react'
 
 const categories = ['Trip', 'Project', 'Life Event', 'Hobby', 'Relationship', 'Career', 'Health', 'Other']
@@ -34,13 +35,7 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchStory()
-    }
-  }, [user, params.id])
-
-  const fetchStory = async () => {
+  const fetchStory = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('stories')
@@ -66,7 +61,13 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, params.id, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchStory()
+    }
+  }, [user, params.id, fetchStory])
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -219,9 +220,11 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
             </label>
             {coverPreview ? (
               <div className="relative h-64 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={coverPreview}
                   alt="Cover preview"
+                  width={800}
+                  height={256}
                   className="w-full h-full object-cover"
                 />
                 <button

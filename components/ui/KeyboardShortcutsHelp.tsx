@@ -8,17 +8,13 @@ export default function KeyboardShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false)
   const shortcuts = useGlobalShortcuts()
 
-  // Listen for ? key to toggle help
+  // Listen for Ctrl+/ or Cmd+/ to toggle help
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        e.preventDefault()
-        setIsOpen(true)
-      }
       if (e.key === 'Escape' && isOpen) {
         setIsOpen(false)
       }
-      // Also listen for Ctrl+/ or Cmd+/
+      // Listen for Ctrl+/ or Cmd+/
       if (e.key === '/' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault()
         setIsOpen(prev => !prev)
@@ -35,7 +31,7 @@ export default function KeyboardShortcutsHelp() {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 p-3 bg-gold dark:bg-teal text-white rounded-full shadow-lg hover:opacity-90 transition-opacity z-40"
         aria-label="Keyboard Shortcuts"
-        title="Press ? for keyboard shortcuts"
+        title="Press Ctrl+/ for keyboard shortcuts"
       >
         <Keyboard className="w-5 h-5" />
       </button>
@@ -107,20 +103,14 @@ export default function KeyboardShortcutsHelp() {
             <span className="text-charcoal dark:text-white font-medium">
               Toggle this help
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
-                ?
+                {typeof navigator !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'}
               </kbd>
-              <span className="text-charcoal/40 dark:text-white/40">or</span>
-              <div className="flex items-center gap-1">
-                <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
-                  Ctrl
-                </kbd>
-                <span className="text-charcoal/40 dark:text-white/40">+</span>
-                <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
-                  /
-                </kbd>
-              </div>
+              <span className="text-charcoal/40 dark:text-white/40">+</span>
+              <kbd className="px-2 py-1 bg-white dark:bg-charcoal border border-charcoal/20 dark:border-white/20 rounded text-xs font-mono text-charcoal dark:text-white">
+                /
+              </kbd>
             </div>
           </div>
         </div>

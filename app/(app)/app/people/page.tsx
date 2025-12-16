@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Plus, User, ArrowLeft, Search, Filter, SortAsc, X } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
@@ -31,42 +32,25 @@ export default function PeoplePage() {
 
   const relationships = ['all', 'Family', 'Friend', 'Partner', 'Colleague', 'Mentor', 'Acquaintance', 'Other']
 
-  useEffect(() => {
-    if (user) {
-      fetchPeople()
-    }
-  }, [user])
-
-  const fetchPeople = async () => {
+  const fetchPeople = useCallback(async () => {
     try {
-      // Fetch people
+      // Fetch people with counts in a single optimized query
       const { data: peopleData, error } = await supabase
         .from('people')
-        .select('*')
+        .select(`
+          *,
+          entry_people(count)
+        `)
         .order('name')
 
       if (error) throw error
 
-      // Fetch entry counts using entry_people junction table
-      const peopleWithCounts = await Promise.all(
-        (peopleData || []).map(async (person) => {
-          const { count: entryCount } = await supabase
-            .from('entry_people')
-            .select('*', { count: 'exact', head: true })
-            .eq('person_id', person.id)
-
-          const { count: memoryCount } = await supabase
-            .from('memories')
-            .select('*', { count: 'exact', head: true })
-            .eq('person_id', person.id)
-
-          return {
-            ...person,
-            entry_count: entryCount || 0,
-            memory_count: memoryCount || 0,
-          }
-        })
-      )
+      // Process counts from joined data
+      const peopleWithCounts = (peopleData || []).map((person: any) => ({
+        ...person,
+        entry_count: person.entry_people?.[0]?.count || 0,
+        memory_count: 0, // Note: memories table doesn't have person_id in current schema
+      }))
 
       setPeople(peopleWithCounts)
       setFilteredPeople(peopleWithCounts)
@@ -75,7 +59,13 @@ export default function PeoplePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchPeople()
+    }
+  }, [user, fetchPeople])
 
   // Apply filters whenever search, relationship filter, or sort changes
   useEffect(() => {
@@ -143,7 +133,7 @@ export default function PeoplePage() {
               <span className="font-medium">Back to Diary</span>
             </Link>
             <div className="h-6 w-px bg-charcoal/20 dark:bg-white/20" />
-            <h1 className="text-2xl font-serif font-bold text-charcoal dark:text-teal flex items-center gap-2">
+            <h1 className="text-2xl font-display font-bold text-charcoal dark:text-teal flex items-center gap-2">
               <User className="w-6 h-6" />
               People
             </h1>
@@ -275,9 +265,11 @@ export default function PeoplePage() {
                   {/* Avatar */}
                   <div className="flex justify-center mb-4">
                     {person.avatar_url ? (
-                      <img
+                      <Image
                         src={person.avatar_url}
                         alt={person.name}
+                        width={96}
+                        height={96}
                         className="w-24 h-24 rounded-full object-cover border-4 border-gold/20 dark:border-teal/20"
                       />
                     ) : (

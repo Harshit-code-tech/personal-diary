@@ -86,7 +86,7 @@ export default function Home() {
             <Book className="w-16 h-16 sm:w-20 sm:h-20 text-gold dark:text-teal" strokeWidth={1.5} />
           </div>
           
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
             <span className="text-charcoal dark:text-white">Your Space.</span>
             <br />
             <span className="text-gold dark:text-teal">Your Thoughts.</span>

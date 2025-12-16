@@ -71,17 +71,20 @@ export default function ReauthModal({
 
         <form onSubmit={handleReauth} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+            <label htmlFor="reauth-password" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
               Password
             </label>
             <div className="relative">
               <input
+                id="reauth-password"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
                 autoFocus
+                autoComplete="current-password"
                 className="w-full px-4 py-3 pr-12 border border-charcoal/20 dark:border-white/20 rounded-lg bg-transparent text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal transition-all"
               />
               <button

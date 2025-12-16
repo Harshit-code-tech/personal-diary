@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -29,13 +29,7 @@ export default function ExportPage() {
   const [endDate, setEndDate] = useState('')
   const [exporting, setExporting] = useState(false)
 
-  useEffect(() => {
-    if (user) {
-      fetchEntries()
-    }
-  }, [user, dateRange, startDate, endDate])
-
-  const fetchEntries = async () => {
+  const fetchEntries = useCallback(async () => {
     setLoading(true)
     try {
       let query = supabase
@@ -70,7 +64,13 @@ export default function ExportPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, dateRange, startDate, endDate, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchEntries()
+    }
+  }, [user, dateRange, startDate, endDate, fetchEntries])
 
   const toggleEntry = (id: string) => {
     const newSelected = new Set(selectedEntries)

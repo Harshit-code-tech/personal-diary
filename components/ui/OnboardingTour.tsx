@@ -15,6 +15,10 @@ const steps: Step[] = [
     content: '📝 Click here to create a new journal entry. You can also press Ctrl+E!',
   },
   {
+    target: '[data-tour="quick-access"]',
+    content: '⭐ Quick access to your bookmarked entries and trash. Star important entries to find them easily!',
+  },
+  {
     target: '[data-tour="search"]',
     content: '🔍 Search all your entries instantly. Press Ctrl+K from anywhere!',
   },
@@ -36,7 +40,7 @@ const steps: Step[] = [
   },
   {
     target: 'body',
-    content: "🎉 That's it! Start writing your first entry. Happy journaling!",
+    content: "🎉 That's it! Start writing your first entry. Deleted entries go to Trash for 30 days before permanent deletion. Happy journaling!",
     placement: 'center',
   },
 ]

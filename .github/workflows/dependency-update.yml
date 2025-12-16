@@ -48,6 +48,9 @@ jobs:
             
             - Updated npm packages
             - Ran tests successfully
-            - Build verified
+            - Security vulnerabilities fixed
+            
+            Please review and merge if all checks pass.
           branch: deps/automated-updates
           delete-branch: true
+          labels: dependencies, automated

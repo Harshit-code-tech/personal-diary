@@ -194,6 +194,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
             </label>
             <input
               id="import-file"
+              name="importFile"
               type="file"
               accept=".json"
               onChange={handleFileSelect}

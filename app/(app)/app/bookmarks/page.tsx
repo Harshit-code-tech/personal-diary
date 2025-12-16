@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
@@ -27,19 +27,7 @@ export default function BookmarksPage() {
   const [entries, setEntries] = useState<BookmarkedEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
-    }
-  }, [user, authLoading, router])
-
-  useEffect(() => {
-    if (user) {
-      fetchBookmarkedEntries()
-    }
-  }, [user])
-
-  const fetchBookmarkedEntries = async () => {
+  const fetchBookmarkedEntries = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('entries')
@@ -55,7 +43,19 @@ export default function BookmarksPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, authLoading, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchBookmarkedEntries()
+    }
+  }, [user, fetchBookmarkedEntries])
 
   const handleUnbookmark = async (entryId: string, e: React.MouseEvent) => {
     e.preventDefault()

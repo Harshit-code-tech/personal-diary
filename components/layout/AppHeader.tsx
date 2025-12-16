@@ -26,6 +26,8 @@ import {
   BookMarked,
   Calendar,
   TrendingUp,
+  Sparkles,
+  Trash2,
 } from 'lucide-react'
 
 interface NavLink {
@@ -44,6 +46,7 @@ const navLinks: NavLink[] = [
     color: 'text-gold dark:text-teal',
     hoverColor: 'hover:text-gold dark:hover:text-teal hover:bg-gold/10 dark:hover:bg-teal/10',
   },
+
   {
     href: '/app/analytics',
     label: 'Analytics',
@@ -68,16 +71,9 @@ const navLinks: NavLink[] = [
   {
     href: '/app/timeline',
     label: 'Timeline',
-    icon: Star,
+    icon: TrendingUp,
     color: 'text-indigo-500 dark:text-indigo-400',
     hoverColor: 'hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-400/10',
-  },
-  {
-    href: '/app/bookmarks',
-    label: 'Bookmarks',
-    icon: Star,
-    color: 'text-gold dark:text-teal',
-    hoverColor: 'hover:text-gold dark:hover:text-teal hover:bg-gold/10 dark:hover:bg-teal/10',
   },
   {
     href: '/app/goals',
@@ -155,8 +151,8 @@ export default function AppHeader() {
             <div className="p-2 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-gold dark:text-teal" />
             </div>
-            <span className="hidden sm:block font-serif text-2xl lg:text-3xl font-black bg-gradient-to-r from-charcoal to-charcoal/70 dark:from-teal dark:to-teal/70 bg-clip-text text-transparent">
-              Noted.
+            <span className="font-script text-3xl lg:text-4xl tracking-wide text-gold dark:text-teal">
+              Noted<span className="text-2xl lg:text-3xl">.</span>
             </span>
           </Link>
 

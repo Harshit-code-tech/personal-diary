@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
@@ -80,13 +80,7 @@ export default function SearchPage() {
     }
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      fetchFiltersData()
-    }
-  }, [user])
-
-  const fetchFiltersData = async () => {
+  const fetchFiltersData = useCallback(async () => {
     const [peopleRes, storiesRes, foldersRes] = await Promise.all([
       supabase.from('people').select('id, name').eq('user_id', user?.id),
       supabase.from('stories').select('id, title, icon').eq('user_id', user?.id),
@@ -96,7 +90,13 @@ export default function SearchPage() {
     setPeople(peopleRes.data || [])
     setStories(storiesRes.data || [])
     setFolders(foldersRes.data || [])
-  }
+  }, [supabase, user?.id])
+
+  useEffect(() => {
+    if (user) {
+      fetchFiltersData()
+    }
+  }, [user, fetchFiltersData])
 
   const handleSearch = async (searchQuery?: string) => {
     if (!user) return
@@ -569,21 +569,19 @@ export default function SearchPage() {
                   className="block bg-white dark:bg-graphite p-6 rounded-xl shadow-sm border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
-                    <h3 
-                      className="text-xl font-bold text-charcoal dark:text-white flex-1"
-                      dangerouslySetInnerHTML={{ __html: highlightText(result.title, query) }}
-                    />
-                    {result.mood && (
-                      <span className="px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium">
-                        {result.mood}
-                      </span>
-                    )}
-                  </div>
+<h3 className="text-xl font-bold text-charcoal dark:text-white flex-1">
+                    {result.title}
+                  </h3>
+                  {result.mood && (
+                    <span className="px-3 py-1 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium">
+                      {result.mood}
+                    </span>
+                  )}
+                </div>
 
-                  <p 
-                    className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3"
-                    dangerouslySetInnerHTML={{ __html: highlightText(extractTextPreview(result.content, 250), query) }}
-                  />
+                  <p className="text-charcoal/70 dark:text-white/70 mb-4 line-clamp-3">
+                    {extractTextPreview(result.content, 250)}
+                  </p>
 
                   <div className="flex items-center gap-4 text-sm text-charcoal/60 dark:text-white/60">
                     {result.folder_name && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -52,21 +52,7 @@ export default function LifeTimelinePage() {
     is_major: false
   })
 
-  useEffect(() => {
-    if (user) {
-      fetchEvents()
-    }
-  }, [user])
-
-  useEffect(() => {
-    if (selectedCategory === 'all') {
-      setFilteredEvents(events)
-    } else {
-      setFilteredEvents(events.filter(e => e.category === selectedCategory))
-    }
-  }, [selectedCategory, events])
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -84,7 +70,21 @@ export default function LifeTimelinePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, user?.id])
+
+  useEffect(() => {
+    if (user) {
+      fetchEvents()
+    }
+  }, [user, fetchEvents])
+
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      setFilteredEvents(events)
+    } else {
+      setFilteredEvents(events.filter(e => e.category === selectedCategory))
+    }
+  }, [selectedCategory, events])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

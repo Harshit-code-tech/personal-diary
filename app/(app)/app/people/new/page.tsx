@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/ToastContainer'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, User, Upload, Save, X } from 'lucide-react'
 
 const relationships = [
@@ -22,6 +23,7 @@ export default function NewPersonPage() {
   const toastNotify = useToast()
   const [name, setName] = useState('')
   const [relationship, setRelationship] = useState('Friend')
+  const [customRelationship, setCustomRelationship] = useState('')
   const [birthday, setBirthday] = useState('')
   const [notes, setNotes] = useState('')
   const [avatar, setAvatar] = useState<File | null>(null)
@@ -73,11 +75,16 @@ export default function NewPersonPage() {
         avatarUrl = await uploadAvatar()
       }
 
+      // Use custom relationship if "Other" is selected and custom value is provided
+      const finalRelationship = relationship === 'Other' && customRelationship.trim() 
+        ? customRelationship.trim() 
+        : relationship
+
       const { error } = await supabase
         .from('people')
         .insert({
           name: name.trim(),
-          relationship,
+          relationship: finalRelationship,
           birthday: birthday || null,
           notes: notes.trim() || null,
           avatar_url: avatarUrl,
@@ -110,7 +117,7 @@ export default function NewPersonPage() {
               <span className="font-medium">Back to People</span>
             </Link>
             <div className="h-6 w-px bg-charcoal/20 dark:bg-white/20" />
-            <h1 className="text-2xl font-serif font-bold text-charcoal dark:text-teal">
+            <h1 className="text-2xl font-heading font-bold text-charcoal dark:text-teal">
               Add Person
             </h1>
           </div>
@@ -146,9 +153,11 @@ export default function NewPersonPage() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 {avatarPreview ? (
-                  <img
+                  <Image
                     src={avatarPreview}
                     alt="Avatar preview"
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full object-cover border-4 border-gold/20 dark:border-teal/20"
                   />
                 ) : (
@@ -189,7 +198,7 @@ export default function NewPersonPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Smith"
+              placeholder="Someone's name"
               required
               className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
             />
@@ -213,6 +222,17 @@ export default function NewPersonPage() {
                 </option>
               ))}
             </select>
+            {relationship === 'Other' && (
+              <input
+                type="text"
+                id="custom-relationship"
+                name="customRelationship"
+                value={customRelationship}
+                onChange={(e) => setCustomRelationship(e.target.value)}
+                placeholder="Enter custom relationship"
+                className="w-full mt-3 px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              />
+            )}
           </div>
 
           {/* Birthday */}

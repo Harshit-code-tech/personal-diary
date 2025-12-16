@@ -36,9 +36,30 @@ const config: Config = {
         }
       },
       fontFamily: {
-        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        body: ['var(--font-crimson)', 'Georgia', 'serif'],
+        // Premium Typography System
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        heading: ['"Cormorant Garamond"', 'Baskerville', 'serif'],
+        sans: ['Inter', '"SF Pro Display"', '-apple-system', 'system-ui', 'sans-serif'],
+        body: ['Inter', '"SF Pro Display"', 'sans-serif'],
+        script: ['"Dancing Script"', '"Brush Script MT"', 'cursive'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', '"Courier New"', 'monospace'],
+      },
+      fontSize: {
+        // Responsive, harmonious scale
+        'display-xl': 'clamp(3rem, 5vw, 4.5rem)',
+        'display-lg': 'clamp(2.5rem, 4vw, 3.5rem)',
+        'display-md': 'clamp(2rem, 3.5vw, 3rem)',
+        'h1': 'clamp(1.75rem, 3vw, 2.5rem)',
+        'h2': 'clamp(1.5rem, 2.5vw, 2rem)',
+        'h3': 'clamp(1.25rem, 2vw, 1.75rem)',
+        'h4': 'clamp(1.125rem, 1.5vw, 1.5rem)',
+      },
+      letterSpacing: {
+        tighter: '-0.05em',
+        tight: '-0.025em',
+        wide: '0.025em',
+        wider: '0.05em',
+        widest: '0.1em',
       },
       backgroundImage: {
         'paper-texture': "url('/textures/paper.png')",

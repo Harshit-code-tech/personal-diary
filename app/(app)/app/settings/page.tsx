@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
@@ -46,6 +46,21 @@ export default function SettingsPage() {
   const router = useRouter()
   const supabase = createClient()
 
+  const fetchUsername = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('username')
+        .eq('user_id', user?.id)
+        .single()
+      
+      if (error) throw error
+      setUsername(data?.username || '')
+    } catch (error) {
+      console.error('Error fetching username:', error)
+    }
+  }, [supabase, user?.id])
+
   useEffect(() => {
     if (user) {
       setEmail(user.email || '')
@@ -65,22 +80,7 @@ export default function SettingsPage() {
       
       setLoading(false)
     }
-  }, [user])
-
-  const fetchUsername = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_settings')
-        .select('username')
-        .eq('user_id', user?.id)
-        .single()
-      
-      if (error) throw error
-      setUsername(data?.username || '')
-    } catch (error) {
-      console.error('Error fetching username:', error)
-    }
-  }
+  }, [user, fetchUsername])
 
   const handleUpdateUsername = async () => {
     if (!username) {

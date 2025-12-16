@@ -105,7 +105,8 @@ export function useAutoSave({
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [title, content, delay, enabled, autoSave])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, content, delay, enabled])
 
   // Save on unmount (component cleanup)
   useEffect(() => {
@@ -115,7 +116,7 @@ export function useAutoSave({
         autoSave()
       }
     }
-  }, [])
+  }, [enabled, title, content, autoSave])
 
   return {
     isSaving: savingRef.current,

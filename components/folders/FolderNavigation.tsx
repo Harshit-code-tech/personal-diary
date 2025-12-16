@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
@@ -41,13 +41,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
   const { user } = useAuth()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchFolders()
-    }
-  }, [user])
-
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('folders')
@@ -102,7 +96,13 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchFolders()
+    }
+  }, [user, fetchFolders])
 
   const toggleFolder = (folderId: string) => {
     const newExpanded = new Set(expandedFolders)
@@ -311,6 +311,15 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </div>
             <span className="text-sm font-semibold group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">People</span>
           </Link>
+          <Link
+            href="/app/trash"
+            className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gradient-to-r hover:from-red-500/10 hover:to-red-500/5 dark:hover:from-red-400/10 dark:hover:to-red-400/5 transition-all duration-300 text-charcoal dark:text-white hover:shadow-sm"
+          >
+            <div className="p-1.5 rounded-lg bg-red-500/10 dark:bg-red-400/10 group-hover:bg-red-500/20 dark:group-hover:bg-red-400/20 transition-colors">
+              <Trash2 className="w-4 h-4 text-red-500 dark:text-red-400" />
+            </div>
+            <span className="text-sm font-semibold group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">Trash</span>
+          </Link>
         </div>
       </div>
 
@@ -355,13 +364,13 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
         }}>
           <div className="bg-white dark:bg-graphite rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-b from-white dark:from-graphite to-transparent p-8 pb-6 border-b border-charcoal/10 dark:border-white/10">
+            <div className="sticky top-0 bg-white dark:bg-graphite p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="p-4 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-2xl">
                     <Plus className="w-7 h-7 text-gold dark:text-teal" />
                   </div>
-                  <h3 className="text-3xl font-black text-charcoal dark:text-teal">Create Custom Folder</h3>
+                  <h3 className="font-display text-3xl font-bold text-charcoal dark:text-teal">Create Custom Folder</h3>
                 </div>
                 <button
                   onClick={() => {
@@ -378,10 +387,12 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             {/* Content */}
             <div className="p-8 space-y-8">
               <div>
-                <label className="block text-base font-bold text-charcoal dark:text-white mb-4">
+                <label htmlFor="folder-name-create" className="block text-base font-bold text-charcoal dark:text-white mb-4">
                   Folder Name
                 </label>
                 <input
+                  id="folder-name-create"
+                  name="folderName"
                   type="text"
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
@@ -392,11 +403,13 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
               </div>
 
               <div>
-                <label className="block text-base font-bold text-charcoal dark:text-white mb-4">
+                <label htmlFor="parent-folder-create" className="block text-base font-bold text-charcoal dark:text-white mb-4">
                   Parent Folder (Optional)
                   <span className="ml-2 text-xs font-normal text-charcoal/50 dark:text-white/50">Create a subfolder</span>
                 </label>
                 <select
+                  id="parent-folder-create"
+                  name="parentFolder"
                   value={parentFolderId || ''}
                   onChange={(e) => setParentFolderId(e.target.value || null)}
                   className="w-full px-4 py-3 bg-charcoal/5 dark:bg-white/5 border-2 border-charcoal/10 dark:border-white/10 rounded-xl text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal font-medium transition-all [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
@@ -415,8 +428,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   <label className="block text-base font-bold text-charcoal dark:text-white">
                     Choose Icon
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label htmlFor="custom-icon-create" className="flex items-center gap-2 cursor-pointer">
                     <input
+                      id="custom-icon-create"
+                      name="useCustomIcon"
                       type="checkbox"
                       checked={useCustomIcon}
                       onChange={(e) => setUseCustomIcon(e.target.checked)}
@@ -450,7 +465,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-gradient-to-t from-white dark:from-graphite to-transparent p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4">
+            <div className="sticky bottom-0 bg-white dark:bg-graphite p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
               <button
                 onClick={() => {
                   setShowNewFolder(false)
@@ -519,13 +534,13 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowEditFolder(false)}>
           <div className="bg-white dark:bg-graphite rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-b from-white dark:from-graphite to-transparent p-8 pb-6 border-b border-charcoal/10 dark:border-white/10">
+            <div className="sticky top-0 bg-white dark:bg-graphite p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="p-4 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-2xl">
                     <Edit2 className="w-7 h-7 text-gold dark:text-teal" />
                   </div>
-                  <h3 className="text-3xl font-black text-charcoal dark:text-teal">Edit Folder</h3>
+                  <h3 className="font-display text-3xl font-bold text-charcoal dark:text-teal">Edit Folder</h3>
                 </div>
                 <button
                   onClick={() => setShowEditFolder(false)}
@@ -539,10 +554,12 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             {/* Content */}
             <div className="p-8 space-y-8">
               <div>
-                <label className="block text-base font-bold text-charcoal dark:text-white mb-4">
+                <label htmlFor="folder-name-edit" className="block text-base font-bold text-charcoal dark:text-white mb-4">
                   Folder Name
                 </label>
                 <input
+                  id="folder-name-edit"
+                  name="folderName"
                   type="text"
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
@@ -556,8 +573,10 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   <label className="block text-base font-bold text-charcoal dark:text-white">
                     Choose Icon
                   </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label htmlFor="custom-icon-edit" className="flex items-center gap-2 cursor-pointer">
                     <input
+                      id="custom-icon-edit"
+                      name="useCustomIcon"
                       type="checkbox"
                       checked={useCustomIcon}
                       onChange={(e) => setUseCustomIcon(e.target.checked)}
@@ -591,7 +610,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-gradient-to-t from-white dark:from-graphite to-transparent p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4">
+            <div className="sticky bottom-0 bg-white dark:bg-graphite p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
               <button
                 onClick={() => setShowEditFolder(false)}
                 className="flex-1 px-6 py-4 border-2 border-charcoal/20 dark:border-white/20 rounded-xl hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all font-bold text-lg hover:scale-105"

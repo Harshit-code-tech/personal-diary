@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react'
 
 const categories = ['Trip', 'Project', 'Life Event', 'Hobby', 'Relationship', 'Career', 'Health', 'Other']
@@ -27,6 +28,7 @@ export default function NewStoryPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('Trip')
+  const [customCategory, setCustomCategory] = useState('')
   const [status, setStatus] = useState<'ongoing' | 'completed' | 'archived'>('ongoing')
   const [icon, setIcon] = useState('📖')
   const [color, setColor] = useState('#D4AF37')
@@ -98,6 +100,11 @@ export default function NewStoryPage() {
         coverUrl = await uploadCover()
       }
 
+      // Use custom category if "Other" is selected and custom value is provided
+      const finalCategory = category === 'Other' && customCategory.trim()
+        ? customCategory.trim()
+        : category
+
       const { data, error: insertError } = await supabase
         .from('stories')
         .insert({
@@ -110,7 +117,7 @@ export default function NewStoryPage() {
           start_date: startDate || null,
           end_date: endDate || null,
           status,
-          category: category || null,
+          category: finalCategory || null,
         })
         .select()
         .single()
@@ -167,7 +174,7 @@ export default function NewStoryPage() {
         )}
 
         <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8">
-          <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal mb-8">
+          <h1 className="font-heading text-3xl font-bold text-charcoal dark:text-teal mb-8">
             Create New Story
           </h1>
 
@@ -178,9 +185,11 @@ export default function NewStoryPage() {
             </label>
             {coverPreview ? (
               <div className="relative h-64 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src={coverPreview}
                   alt="Cover preview"
+                  width={800}
+                  height={256}
                   className="w-full h-full object-cover"
                 />
                 <button
@@ -296,6 +305,17 @@ export default function NewStoryPage() {
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
+              {category === 'Other' && (
+                <input
+                  type="text"
+                  id="custom-category"
+                  name="customCategory"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  placeholder="Enter custom category"
+                  className="w-full mt-3 px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                />
+              )}
             </div>
 
             <div>

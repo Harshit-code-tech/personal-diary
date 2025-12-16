@@ -17,18 +17,32 @@ export function stripHtmlTags(html: string): string {
   
   // Use regex to strip HTML tags (server-side safe, no DOM needed)
   // This avoids jsdom/parse5 issues in Vercel serverless
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '') // Remove styles
-    .replace(/<[^>]+>/g, '') // Remove all HTML tags
-    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
-    .replace(/&amp;/g, '&') // Decode common entities
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .trim()
+  let text = html
+    // Remove script and style tags with their content
+    .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, '')
+    .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, '')
+    // Remove all other HTML tags
+    .replace(/<[^>]+>/g, '')
+  
+  // Decode HTML entities using a safe approach
+  const entityMap: Record<string, string> = {
+    '&nbsp;': ' ',
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#039;': "'",
+    '&#x27;': "'",
+    '&apos;': "'"
+  }
+  
+  // Replace entities in a single pass to avoid double-escaping
+  Object.entries(entityMap).forEach(([entity, char]) => {
+    text = text.split(entity).join(char)
+  })
+  
+  // Normalize whitespace
+  return text.replace(/\s+/g, ' ').trim()
 }
 
 /**

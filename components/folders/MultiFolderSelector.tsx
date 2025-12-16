@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X, FolderPlus, Check, Folder } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Folder as FolderType } from '@/lib/hooks/useFolderTree'
@@ -24,12 +24,7 @@ export default function MultiFolderSelector({
   const supabase = createClient()
 
   // Load entry's current folders
-  useEffect(() => {
-    loadEntryFolders()
-    loadAllFolders()
-  }, [entryId])
-
-  const loadEntryFolders = async () => {
+  const loadEntryFolders = useCallback(async () => {
     try {
       const { data, error } = await supabase.rpc('get_entry_folders', {
         entry_id_param: entryId
@@ -42,9 +37,9 @@ export default function MultiFolderSelector({
     } finally {
       setLoading(false)
     }
-  }
+  }, [entryId, supabase])
 
-  const loadAllFolders = async () => {
+  const loadAllFolders = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -65,7 +60,13 @@ export default function MultiFolderSelector({
     } catch (error) {
       console.error('Error loading folders:', error)
     }
-  }
+  }, [supabase])
+
+  // Load entry's current folders
+  useEffect(() => {
+    loadEntryFolders()
+    loadAllFolders()
+  }, [entryId, loadEntryFolders, loadAllFolders])
 
   const isSelected = (folderId: string) => {
     return selectedFolders.some(f => f.id === folderId)

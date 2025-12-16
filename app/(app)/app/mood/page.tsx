@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -59,13 +59,7 @@ export default function MoodAnalysisPage() {
   const [selectedMood, setSelectedMood] = useState<string | null>(null)
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('month')
 
-  useEffect(() => {
-    if (user) {
-      fetchMoodData()
-    }
-  }, [user, timeRange])
-
-  const fetchMoodData = async () => {
+  const fetchMoodData = useCallback(async () => {
     setLoading(true)
     try {
       // Calculate date range
@@ -147,7 +141,13 @@ export default function MoodAnalysisPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, timeRange, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchMoodData()
+    }
+  }, [user, timeRange, fetchMoodData])
 
   const filteredEntries = selectedMood
     ? entries.filter(e => e.mood === selectedMood)
@@ -186,7 +186,7 @@ export default function MoodAnalysisPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Page Title */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight flex items-center gap-3 sm:gap-4">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight flex items-center gap-3 sm:gap-4">
             <Smile className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gold dark:text-teal" />
             Mood Analysis
           </h1>

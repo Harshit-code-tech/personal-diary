@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Save, Loader2, Upload, X } from 'lucide-react'
 
 interface Person {
@@ -33,13 +34,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchPerson()
-    }
-  }, [user, params.id])
-
-  const fetchPerson = async () => {
+  const fetchPerson = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('people')
@@ -61,7 +56,13 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, params.id, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchPerson()
+    }
+  }, [user, params.id, fetchPerson])
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -218,9 +219,11 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
             <div className="flex items-center gap-6">
               {avatarPreview ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={avatarPreview}
                     alt="Avatar preview"
+                    width={96}
+                    height={96}
                     className="w-24 h-24 rounded-full object-cover border-4 border-gold/20 dark:border-teal/20"
                   />
                   <button

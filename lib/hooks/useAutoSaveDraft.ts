@@ -72,6 +72,21 @@ export function useAutoSaveDraft({
 
   const storageKey = `draft-${key}`
 
+  // Load draft from localStorage
+  const loadDraft = useCallback((): DraftData | null => {
+    try {
+      const stored = localStorage.getItem(storageKey)
+      if (!stored) return null
+
+      const draft = JSON.parse(stored) as DraftData
+      lastDataRef.current = draft
+      return draft
+    } catch (error) {
+      console.error('Failed to load draft:', error)
+      return null
+    }
+  }, [storageKey])
+
   // Check if draft exists on mount
   useEffect(() => {
     const draft = loadDraft()
@@ -80,7 +95,7 @@ export function useAutoSaveDraft({
       setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null)
       onRestore?.(draft)
     }
-  }, []) // Only run on mount
+  }, [loadDraft, onRestore])
 
   // Save draft to localStorage
   const saveDraft = useCallback((data: DraftData) => {
@@ -115,21 +130,6 @@ export function useAutoSaveDraft({
       }
     }, autoSaveDelay)
   }, [storageKey, autoSaveDelay, onSave])
-
-  // Load draft from localStorage
-  const loadDraft = useCallback((): DraftData | null => {
-    try {
-      const stored = localStorage.getItem(storageKey)
-      if (!stored) return null
-
-      const draft = JSON.parse(stored) as DraftData
-      lastDataRef.current = draft
-      return draft
-    } catch (error) {
-      console.error('Failed to load draft:', error)
-      return null
-    }
-  }, [storageKey])
 
   // Clear draft from localStorage
   const clearDraft = useCallback(() => {

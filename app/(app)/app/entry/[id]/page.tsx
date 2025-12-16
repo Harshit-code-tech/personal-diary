@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useAutoSave } from '@/lib/hooks/useAutoSave'
-import { stripHtmlTags, countWords } from '@/lib/sanitize'
+import { stripHtmlTags, countWords, sanitizeHtml } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useToast } from '@/components/ui/ToastContainer'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { ArrowLeft, Edit, Trash2, Save, X, Users, BookMarked, Plus, Target, Star, Folder } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
@@ -72,13 +73,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   // Calculate word count from content
   const wordCount = content ? countWords(content) : 0
 
-  useEffect(() => {
-    if (user) {
-      fetchEntry()
-    }
-  }, [user, params.id])
-
-  const fetchEntry = async () => {
+  const fetchEntry = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('entries')
@@ -177,6 +172,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       // Fetch all user life events for adding
       const { data: allEventsData, error: allEventsError } = await supabase
         .from('life_events')
+
         .select('id, title, category, icon, color, event_date, is_major')
         .eq('user_id', user?.id)
 
@@ -190,7 +186,13 @@ export default function EntryPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, user?.id, supabase, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchEntry()
+    }
+  }, [user, params.id, fetchEntry])
 
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
@@ -270,14 +272,18 @@ export default function EntryPage({ params }: { params: { id: string } }) {
   const handleConfirmDelete = async () => {
     setDeleting(true)
     try {
+      // Soft delete - move to trash instead of permanent deletion
       const { error } = await supabase
         .from('entries')
-        .delete()
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          deleted_by: user?.id 
+        })
         .eq('id', params.id)
 
       if (error) throw error
 
-      toastNotify.success('Entry Deleted', 'Your entry has been permanently removed')
+      toastNotify.success('Entry Moved to Trash', 'Entry will be permanently deleted after 30 days')
       router.push('/app')
     } catch (error) {
       console.error('Error deleting entry:', error)
@@ -588,9 +594,11 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                     className="inline-flex items-center gap-2 px-3 py-1.5 bg-gold/10 dark:bg-teal/10 text-gold dark:text-teal rounded-full text-sm font-medium hover:bg-gold/20 dark:hover:bg-teal/20 transition-colors"
                   >
                     {person.avatar_url ? (
-                      <img
+                      <Image
                         src={person.avatar_url}
                         alt={person.name}
+                        width={20}
+                        height={20}
                         className="w-5 h-5 rounded-full object-cover"
                       />
                     ) : (
@@ -756,7 +764,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             <div className="prose prose-lg max-w-none dark:prose-invert">
               <div 
                 className="text-charcoal/90 dark:text-white/90 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: entry.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.content) }}
               />
             </div>
           </div>

@@ -111,10 +111,12 @@ export default function NotificationSettings() {
           <div className="ml-8 space-y-4">
             {/* Time Picker */}
             <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+              <label htmlFor="reminder-time" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
                 Reminder Time
               </label>
               <input
+                id="reminder-time"
+                name="reminderTime"
                 type="time"
                 value={localPrefs.reminderTime}
                 onChange={(e) => setLocalPrefs(prev => ({ ...prev, reminderTime: e.target.value }))}

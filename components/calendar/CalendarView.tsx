@@ -2,7 +2,7 @@
 
 import CalendarHeatmap from 'react-calendar-heatmap'
 import 'react-calendar-heatmap/dist/styles.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -20,13 +20,7 @@ export default function CalendarView() {
   const { user } = useAuth()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (!user) return
-
-    fetchEntryData()
-  }, [user])
-
-  const fetchEntryData = async () => {
+  const fetchEntryData = useCallback(async () => {
     try {
       // Get entries from the last year
       const oneYearAgo = new Date()
@@ -100,7 +94,13 @@ export default function CalendarView() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    if (!user) return
+
+    fetchEntryData()
+  }, [user, fetchEntryData])
 
   const getColorClass = (value: any) => {
     if (!value || value.count === 0) return 'color-empty'
@@ -112,6 +112,7 @@ export default function CalendarView() {
   }
 
   if (loading) {
+
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-charcoal dark:text-white">Loading calendar...</div>

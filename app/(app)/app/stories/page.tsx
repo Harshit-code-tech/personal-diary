@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Plus, ArrowLeft, BookOpen, Calendar, FileText, Star, Archive, Search, Filter, X } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
@@ -37,17 +38,7 @@ export default function StoriesPage() {
   const { user } = useAuth()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchStories()
-    }
-  }, [user])
-
-  useEffect(() => {
-    applyFilters()
-  }, [stories, searchQuery, selectedCategory, selectedStatus])
-
-  const fetchStories = async () => {
+  const fetchStories = useCallback(async () => {
     try {
       // Fetch stories with entry counts
       const { data, error } = await supabase
@@ -73,9 +64,9 @@ export default function StoriesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let result = [...stories]
 
     // Search filter
@@ -97,7 +88,17 @@ export default function StoriesPage() {
     }
 
     setFilteredStories(result)
-  }
+  }, [stories, searchQuery, selectedCategory, selectedStatus])
+
+  useEffect(() => {
+    if (user) {
+      fetchStories()
+    }
+  }, [user, fetchStories])
+
+  useEffect(() => {
+    applyFilters()
+  }, [stories, searchQuery, selectedCategory, selectedStatus, applyFilters])
 
   const toggleFavorite = async (storyId: string, currentFavorite: boolean) => {
     try {
@@ -165,7 +166,7 @@ export default function StoriesPage() {
               <span className="font-medium">Back to Diary</span>
             </Link>
             <div className="h-6 w-px bg-charcoal/20 dark:bg-white/20" />
-            <h1 className="text-2xl font-serif font-bold text-charcoal dark:text-teal flex items-center gap-2">
+            <h1 className="text-2xl font-display font-bold text-charcoal dark:text-teal flex items-center gap-2">
               <BookOpen className="w-6 h-6" />
               My Stories
             </h1>
@@ -300,9 +301,11 @@ export default function StoriesPage() {
                 {/* Cover Image or Color */}
                 {story.cover_image_url ? (
                   <div className="h-48 overflow-hidden">
-                    <img
+                    <Image
                       src={story.cover_image_url}
                       alt={story.title}
+                      width={400}
+                      height={192}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>

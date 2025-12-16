@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
@@ -51,6 +51,7 @@ export default function GoalsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [customCategory, setCustomCategory] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -59,13 +60,7 @@ export default function GoalsPage() {
     milestones: ['']
   })
 
-  useEffect(() => {
-    if (user) {
-      fetchGoals()
-    }
-  }, [user])
-
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     setLoading(true)
     try {
       const { data: goalsData, error: goalsError } = await supabase
@@ -99,7 +94,13 @@ export default function GoalsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, supabase, toastNotify])
+
+  useEffect(() => {
+    if (user) {
+      fetchGoals()
+    }
+  }, [user, fetchGoals])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,6 +111,11 @@ export default function GoalsPage() {
     }
 
     try {
+      // Use custom category if "other" is selected and custom value is provided
+      const finalCategory = formData.category === 'other' && customCategory.trim()
+        ? customCategory.trim()
+        : formData.category
+
       if (editingId) {
         // Update goal
         const { error } = await supabase
@@ -117,7 +123,7 @@ export default function GoalsPage() {
           .update({
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            category: formData.category,
+            category: finalCategory,
             target_date: formData.target_date || null
           })
           .eq('id', editingId)
@@ -169,7 +175,7 @@ export default function GoalsPage() {
             user_id: user?.id,
             title: formData.title.trim(),
             description: formData.description.trim() || null,
-            category: formData.category,
+            category: finalCategory,
             target_date: formData.target_date || null,
             progress: 0,
             is_completed: false
@@ -292,6 +298,7 @@ export default function GoalsPage() {
       milestones: ['']
     })
     setEditingId(null)
+    setCustomCategory('')
     setShowAddModal(false)
   }
 
@@ -368,7 +375,7 @@ export default function GoalsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Page Title & Stats */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight flex items-center gap-3 sm:gap-4">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-black bg-gradient-to-r from-charcoal via-charcoal to-charcoal/70 dark:from-teal dark:via-teal dark:to-teal/70 bg-clip-text text-transparent mb-2 sm:mb-3 leading-tight flex items-center gap-3 sm:gap-4">
             <Target className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-gold dark:text-teal" />
             Goals & Dreams
           </h1>
@@ -629,6 +636,17 @@ export default function GoalsPage() {
                       </option>
                     ))}
                   </select>
+                  {formData.category === 'other' && (
+                    <input
+                      type="text"
+                      id="custom-goal-category"
+                      name="customCategory"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      placeholder="Enter custom category"
+                      className="w-full mt-3 px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                    />
+                  )}
                 </div>
 
                 <div>

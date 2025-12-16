@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useReminderRateLimit } from '@/lib/hooks/useReminderRateLimit'
@@ -60,13 +60,7 @@ export default function RemindersPage() {
     reminder_type: 'once' as 'once' | 'daily' | 'weekly' | 'custom'
   })
 
-  useEffect(() => {
-    if (user) {
-      fetchReminders()
-    }
-  }, [user])
-
-  const fetchReminders = async () => {
+  const fetchReminders = useCallback(async () => {
     setLoading(true)
     try {
       const { data, error } = await supabase
@@ -83,7 +77,13 @@ export default function RemindersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, user?.id, toastNotify])
+
+  useEffect(() => {
+    if (user) {
+      fetchReminders()
+    }
+  }, [user, fetchReminders])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

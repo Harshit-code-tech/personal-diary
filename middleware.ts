@@ -48,9 +48,35 @@ export async function middleware(req: NextRequest) {
   
   const supabase = createMiddlewareClient({ req, res })
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Get session without automatic refresh to prevent infinite loops
+  let session = null
+  try {
+    const {
+      data: { session: currentSession },
+      error,
+    } = await supabase.auth.getSession()
+
+    // If there's an auth error (invalid refresh token, etc.), clear cookies and continue
+    if (error) {
+      console.error('Auth error in middleware:', error.message)
+      // Clear auth cookies to prevent repeated errors
+      const response = NextResponse.redirect(new URL('/login', req.url))
+      response.cookies.delete('sb-access-token')
+      response.cookies.delete('sb-refresh-token')
+      
+      // Only redirect to login if accessing protected routes
+      if (req.nextUrl.pathname.startsWith('/app')) {
+        return response
+      }
+      return NextResponse.next()
+    }
+
+    session = currentSession
+  } catch (error) {
+    console.error('Unexpected error in middleware:', error)
+    // On any unexpected error, just continue without auth
+    session = null
+  }
 
   // If user is not signed in and trying to access protected routes, redirect to login
   if (!session && req.nextUrl.pathname.startsWith('/app')) {
@@ -66,5 +92,18 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/login', '/signup'],
+  matcher: [
+    '/app/:path*',
+    '/login',
+    '/signup',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     * - api routes (handled separately)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

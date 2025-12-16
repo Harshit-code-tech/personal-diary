@@ -73,10 +73,12 @@ export default function DateRangePicker({
               <div className="space-y-4">
                 {/* Start Date */}
                 <div>
-                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                  <label htmlFor="start-date" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
                     Start Date
                   </label>
                   <input
+                    id="start-date"
+                    name="startDate"
                     type="date"
                     value={localStartDate}
                     onChange={(e) => setLocalStartDate(e.target.value)}
@@ -87,10 +89,12 @@ export default function DateRangePicker({
 
                 {/* End Date */}
                 <div>
-                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                  <label htmlFor="end-date" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
                     End Date
                   </label>
                   <input
+                    id="end-date"
+                    name="endDate"
                     type="date"
                     value={localEndDate}
                     onChange={(e) => setLocalEndDate(e.target.value)}

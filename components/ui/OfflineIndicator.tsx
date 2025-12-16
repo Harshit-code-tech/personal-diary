@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import { isOnline, setupOnlineListener, syncPendingOperations, getPendingOperations } from '@/lib/offline-sync'
 import { createClient } from '@/lib/supabase/client'
@@ -11,6 +11,33 @@ export default function OfflineIndicator() {
   const [pendingCount, setPendingCount] = useState(0)
   const [syncing, setSyncing] = useState(false)
   const supabase = createClient()
+
+  const checkPending = useCallback(async () => {
+    const pending = await getPendingOperations()
+    setPendingCount(pending.length)
+  }, [])
+
+  const handleSync = useCallback(async () => {
+    if (!online || syncing) {
+      return
+    }
+    
+    setSyncing(true)
+    try {
+      const results = await syncPendingOperations(supabase)
+      if (results.success > 0) {
+        toast.success(`Synced ${results.success} changes`)
+        checkPending()
+      }
+      if (results.failed > 0) {
+        toast.error(`${results.failed} changes failed to sync`)
+      }
+    } catch (error) {
+      toast.error('Sync failed')
+    } finally {
+      setSyncing(false)
+    }
+  }, [online, syncing, supabase, checkPending])
 
   useEffect(() => {
     setOnline(isOnline())
@@ -31,36 +58,7 @@ export default function OfflineIndicator() {
       cleanup?.()
       clearInterval(interval)
     }
-  }, [])
-
-  const checkPending = async () => {
-    const pending = await getPendingOperations()
-    setPendingCount(pending.length)
-  }
-
-  const handleSync = async () => {
-    if (!online || syncing) {
-      return
-    }
-    
-    setSyncing(true)
-    try {
-      const results = await syncPendingOperations(supabase)
-      if (results.success > 0) {
-        toast.success(`Synced ${results.success} changes`)
-        checkPending()
-      }
-      if (results.failed > 0) {
-        toast.error(`${results.failed} changes failed to sync`)
-      }
-    } catch (error) {
-      toast.error('Sync failed')
-    } finally {
-      setSyncing(false)
-    }
-  }
-
-  if (online && pendingCount === 0) return null
+  }, [handleSync, checkPending])
 
   return (
     <div className="fixed bottom-6 left-6 z-50">

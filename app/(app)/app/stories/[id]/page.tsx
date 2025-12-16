@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft, Edit, Trash2, Calendar, FileText, Star, Plus, X, Clock, TrendingUp } from 'lucide-react'
 
 interface Story {
@@ -47,13 +48,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    if (user) {
-      fetchStoryData()
-    }
-  }, [user, params.id])
-
-  const fetchStoryData = async () => {
+  const fetchStoryData = useCallback(async () => {
     try {
       // Fetch story details
       const { data: storyData, error: storyError } = await supabase
@@ -103,7 +98,13 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, params.id, user?.id, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchStoryData()
+    }
+  }, [user, params.id, fetchStoryData])
 
   const toggleFavorite = async () => {
     if (!story) return
@@ -285,9 +286,11 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
           {/* Cover */}
           {story.cover_image_url ? (
             <div className="h-64 md:h-80 overflow-hidden">
-              <img
+              <Image
                 src={story.cover_image_url}
                 alt={story.title}
+                width={1200}
+                height={320}
                 className="w-full h-full object-cover"
               />
             </div>

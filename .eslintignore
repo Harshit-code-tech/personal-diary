@@ -1,0 +1,5 @@
+# Ignore backup/temp files
+**/*_clean.tsx
+**/*_old.tsx
+**/*_backup.tsx
+**/page_clean.tsx

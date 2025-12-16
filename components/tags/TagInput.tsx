@@ -68,6 +68,8 @@ export default function TagInput({
         
         {tags.length < maxTags && (
           <input
+            id="tag-input"
+            name="tags"
             type="text"
             value={input}
             onChange={(e) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Bell, X, Check } from 'lucide-react'
@@ -23,6 +23,27 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [showPanel, setShowPanel] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (error) throw error
+
+      setNotifications(data || [])
+      setUnreadCount(data?.filter(n => !n.is_read).length || 0)
+    } catch (err) {
+      console.error('Error fetching notifications:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.id, supabase])
 
   useEffect(() => {
     if (user) {
@@ -50,28 +71,7 @@ export default function NotificationBell() {
         supabase.removeChannel(channel)
       }
     }
-  }, [user])
-
-  const fetchNotifications = async () => {
-    setLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(20)
-
-      if (error) throw error
-
-      setNotifications(data || [])
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0)
-    } catch (err) {
-      console.error('Error fetching notifications:', err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [user, fetchNotifications, supabase])
 
   const markAsRead = async (id: string) => {
     try {
