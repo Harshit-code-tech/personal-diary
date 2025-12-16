@@ -42,7 +42,7 @@ CHECK_*.sql
 DEBUG_*.sql
 VERIFY_*.sql
 RESET_*.sql
-
+*.log
 test-deployment.ps1
 # Temporary documentation
 *_SUMMARY.md
