@@ -187,7 +187,7 @@ serve(async (req) => {
     const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length
     const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value.success)).length
 
-    console.log(`📊 Email processing complete: ${successful} sent, ${failed} failed`)
+    console.log(`📊 Email processing complete: pending=${pendingEmails.length}, sent=${successful}, failed=${failed}`)
 
     return new Response(
       JSON.stringify({
