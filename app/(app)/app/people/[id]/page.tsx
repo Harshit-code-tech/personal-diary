@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Edit, Trash2, Calendar, BookOpen, Heart, TrendingUp, Clock, MessageCircle, Sparkles } from 'lucide-react'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface Person {
   id: string
@@ -48,6 +49,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
   const [entries, setEntries] = useState<Entry[]>([])
   const [memories, setMemories] = useState<Memory[]>([])
   const [loading, setLoading] = useState(true)
+  const [confirmDeletePerson, setConfirmDeletePerson] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const { user } = useAuth()
   const router = useRouter()
@@ -125,10 +127,6 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
   }, [user, params.id, fetchPersonData])
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${person?.name}? This action cannot be undone.`)) {
-      return
-    }
-
     setDeleting(true)
     try {
       const { error } = await supabase
@@ -428,6 +426,20 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
           )}
         </div>
       </main>
-    </div>
+      {/* Confirm delete person dialog */}
+      <ConfirmDialog
+        isOpen={confirmDeletePerson}
+        onClose={() => setConfirmDeletePerson(false)}
+        onConfirm={() => {
+          handleDelete()
+          setConfirmDeletePerson(false)
+        }}
+        title="Delete this person?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={deleting}
+        type="danger"
+      />    </div>
   )
 }

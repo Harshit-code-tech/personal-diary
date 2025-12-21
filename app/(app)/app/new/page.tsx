@@ -77,7 +77,8 @@ export default function NewEntryPage() {
       // Don't restore entryDate - always use current date
       if (draft.tags) setTags(draft.tags)
       if (draft.selectedPeople) setSelectedPeople(draft.selectedPeople)
-      if (draft.selectedFolders) setSelectedFolders(draft.selectedFolders)
+      // If user came from a specific folder, prefer that over stored draft selection
+      if (!folderParam && draft.selectedFolders) setSelectedFolders(draft.selectedFolders)
     },
   })
 

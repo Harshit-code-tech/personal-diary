@@ -8,6 +8,7 @@ import { Trash2, RefreshCw, X, Calendar, FileText, AlertCircle } from 'lucide-re
 import { stripHtmlTags } from '@/lib/sanitize'
 import AppHeader from '@/components/layout/AppHeader'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface Entry {
   id: string
@@ -25,6 +26,8 @@ export default function TrashPage() {
   const [loading, setLoading] = useState(true)
   const [restoring, setRestoring] = useState<string | null>(null)
   const [permanentlyDeleting, setPermanentlyDeleting] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [confirmEmpty, setConfirmEmpty] = useState(false)
   const { user } = useAuth()
   const supabase = createClient()
 
@@ -75,10 +78,6 @@ export default function TrashPage() {
   }
 
   const permanentlyDelete = async (entryId: string) => {
-    if (!confirm('Are you sure? This entry will be permanently deleted and cannot be recovered.')) {
-      return
-    }
-
     try {
       setPermanentlyDeleting(entryId)
       const { error } = await supabase
@@ -99,10 +98,6 @@ export default function TrashPage() {
   }
 
   const emptyTrash = async () => {
-    if (!confirm(`Are you sure you want to empty the trash? This will permanently delete ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} and cannot be undone.`)) {
-      return
-    }
-
     try {
       setLoading(true)
       const { error} = await supabase
@@ -124,7 +119,7 @@ export default function TrashPage() {
   }
 
   const getMoodEmoji = (mood: string | null) => {
-    if (!mood) return '😊'
+    if (!mood) return '😞'
     return mood.split(' ')[0]
   }
 
@@ -163,7 +158,7 @@ export default function TrashPage() {
           
           {entries.length > 0 && (
             <button
-              onClick={emptyTrash}
+              onClick={() => setConfirmEmpty(true)}
               className="flex items-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors"
             >
               <Trash2 className="w-5 h-5" />
@@ -237,7 +232,7 @@ export default function TrashPage() {
                       </button>
                       
                       <button
-                        onClick={() => permanentlyDelete(entry.id)}
+                        onClick={() => setConfirmDeleteId(entry.id)}
                         disabled={permanentlyDeleting === entry.id}
                         className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 text-sm"
                       >
@@ -256,6 +251,43 @@ export default function TrashPage() {
           </div>
         )}
       </main>
+
+      {/* Confirm delete single entry */}
+      <ConfirmDialog
+        isOpen={!!confirmDeleteId}
+        onClose={() => {
+          if (permanentlyDeleting) return
+          setConfirmDeleteId(null)
+        }}
+        onConfirm={() => {
+          if (confirmDeleteId) permanentlyDelete(confirmDeleteId)
+        }}
+        title="Permanently delete this entry?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={!!permanentlyDeleting}
+        type="danger"
+      />
+
+      {/* Confirm empty trash */}
+      <ConfirmDialog
+        isOpen={confirmEmpty}
+        onClose={() => {
+          if (loading) return
+          setConfirmEmpty(false)
+        }}
+        onConfirm={() => {
+          emptyTrash()
+          setConfirmEmpty(false)
+        }}
+        title="Empty trash?"
+        message={`This will permanently delete ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} and cannot be undone.`}
+        confirmText="Empty Trash"
+        cancelText="Keep"
+        loading={loading}
+        type="danger"
+      />
     </div>
   )
 }

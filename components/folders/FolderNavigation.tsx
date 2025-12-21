@@ -7,6 +7,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Folder, ChevronRight, ChevronDown, Plus, User, BookOpen, MoreVertical, Edit2, Trash2, Zap, X } from 'lucide-react'
 import Link from 'next/link'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface FolderItem {
   id: string
@@ -38,6 +39,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
   const [useCustomColor, setUseCustomColor] = useState(false)
   const [parentFolderId, setParentFolderId] = useState<string | null>(null)
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, folder: FolderItem} | null>(null)
+  const [confirmDeleteFolderId, setConfirmDeleteFolderId] = useState<string | null>(null)
   const { user } = useAuth()
   const supabase = createClient()
 
@@ -170,8 +172,6 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
   }
 
   const deleteFolder = async (folderId: string) => {
-    if (!confirm('Delete this folder? Entries will not be deleted.')) return
-
     try {
       const { error } = await supabase
         .from('folders')
@@ -181,6 +181,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       if (error) throw error
       fetchFolders()
       toast.success('Folder deleted successfully!')
+      setConfirmDeleteFolderId(null)
     } catch (error) {
       console.error('Error deleting folder:', error)
       toast.error('Failed to delete folder. Please try again.')
@@ -517,7 +518,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </button>
             <button
               onClick={() => {
-                deleteFolder(contextMenu.folder.id)
+                setConfirmDeleteFolderId(contextMenu.folder.id)
                 setContextMenu(null)
               }}
               className="w-full px-5 py-3 text-left text-sm font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-all text-red-600 dark:text-red-400 flex items-center gap-3"
@@ -629,6 +630,20 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
         </div>,
         document.body
       )}
+
+      {/* Confirm delete folder dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmDeleteFolderId}
+        onClose={() => setConfirmDeleteFolderId(null)}
+        onConfirm={() => {
+          if (confirmDeleteFolderId) deleteFolder(confirmDeleteFolderId)
+        }}
+        title="Delete this folder?"
+        message="Entries will not be deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </>
   )
 }

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Edit, Trash2, Calendar, FileText, Star, Plus, X, Clock, TrendingUp } from 'lucide-react'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 interface Story {
   id: string
@@ -41,6 +42,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
   const [allEntries, setAllEntries] = useState<Entry[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [confirmDeleteStory, setConfirmDeleteStory] = useState(false)
   const [showAddEntries, setShowAddEntries] = useState(false)
   const [selectedEntries, setSelectedEntries] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -124,10 +126,6 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete "${story?.title}"? This won't delete the diary entries.`)) {
-      return
-    }
-
     setDeleting(true)
     try {
       const { error } = await supabase
@@ -543,6 +541,22 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
           </div>
         </div>
       )}
+
+      {/* Confirm delete story dialog */}
+      <ConfirmDialog
+        isOpen={confirmDeleteStory}
+        onClose={() => setConfirmDeleteStory(false)}
+        onConfirm={() => {
+          handleDelete()
+          setConfirmDeleteStory(false)
+        }}
+        title="Delete this story?"
+        message="This won't delete the diary entries."
+        confirmText="Delete"
+        cancelText="Cancel"
+        loading={deleting}
+        type="danger"
+      />
     </div>
   )
 }

@@ -1,9 +1,19 @@
 /**
  * Secure HTML sanitization utilities
- * Using DOMPurify to prevent XSS attacks
  */
 
-import DOMPurify from 'isomorphic-dompurify'
+// Lazily create a DOMPurify instance only in the browser to avoid jsdom/parse5 in serverless
+let clientPurifier: any = null
+
+function getClientPurifier() {
+  if (typeof window === 'undefined') return null
+  if (clientPurifier) return clientPurifier
+
+  // dompurify exports a factory that expects a Window instance
+  const createDOMPurify = require('dompurify')
+  clientPurifier = (createDOMPurify.default || createDOMPurify)(window)
+  return clientPurifier
+}
 
 /**
  * Safely strip all HTML tags from content
@@ -54,8 +64,16 @@ export function stripHtmlTags(html: string): string {
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
-  
-  return DOMPurify.sanitize(html, {
+
+  // Server-side render: strip tags to avoid pulling in jsdom/parse5
+  if (typeof window === 'undefined') {
+    return stripHtmlTags(html)
+  }
+
+  const purifier = getClientPurifier()
+  if (!purifier) return stripHtmlTags(html)
+
+  return purifier.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img'],
     ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel'],
     ALLOW_DATA_ATTR: false,

@@ -8,6 +8,7 @@ import { ArrowLeft, Star, Plus, Calendar, Trash2, Filter } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import toast from 'react-hot-toast'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 type LifeEvent = {
   id: string
@@ -42,6 +43,7 @@ export default function LifeTimelinePage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [customCategory, setCustomCategory] = useState('')
+  const [confirmDeleteEventId, setConfirmDeleteEventId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -146,8 +148,6 @@ export default function LifeTimelinePage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return
-
     try {
       const { error } = await supabase
         .from('life_events')
@@ -157,6 +157,7 @@ export default function LifeTimelinePage() {
       if (error) throw error
       toast.success('Event deleted!')
       fetchEvents()
+      setConfirmDeleteEventId(null)
     } catch (err) {
       console.error('Error deleting event:', err)
       toast.error('Failed to delete event')
@@ -507,6 +508,20 @@ export default function LifeTimelinePage() {
           </div>
         </div>
       )}
+
+      {/* Confirm delete event dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmDeleteEventId}
+        onClose={() => setConfirmDeleteEventId(null)}
+        onConfirm={() => {
+          if (confirmDeleteEventId) handleDelete(confirmDeleteEventId)
+        }}
+        title="Delete this event?"
+        message="This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   )
 }
