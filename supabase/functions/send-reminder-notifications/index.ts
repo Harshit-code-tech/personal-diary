@@ -74,7 +74,8 @@ serve(async (req) => {
       users.users.map(u => [u.id, u.email])
     )
 
-    // Send notifications for each reminder
+    let queuedCount = 0
+    let skippedCount = 0
     const notifications = await Promise.all(
       reminders.map(async (reminder: any) => {
         try {
@@ -82,6 +83,7 @@ serve(async (req) => {
           
           if (!userEmail) {
             console.error(`No email found for user ${reminder.user_id}`)
+            skippedCount += 1
             return {
               success: false,
               reminderId: reminder.id,
@@ -148,6 +150,7 @@ serve(async (req) => {
             throw queueError
           }
           
+            queuedCount += 1
           console.log(`✅ Added reminder notification to email queue for ${userEmail}:`, {
             title: reminder.title,
             description: reminder.description,
@@ -196,6 +199,7 @@ serve(async (req) => {
           }
         } catch (err: any) {
           console.error(`Failed to send notification for reminder ${reminder.id}:`, err)
+          skippedCount += 1
           return {
             success: false,
             reminderId: reminder.id,
@@ -205,10 +209,14 @@ serve(async (req) => {
       })
     )
 
+    console.log(`📧 Reminder run summary: queued=${queuedCount}, skipped=${skippedCount}, total=${reminders.length}`)
+
     return new Response(
       JSON.stringify({
         success: true,
         processed: notifications.length,
+        queued: queuedCount,
+        skipped: skippedCount,
         results: notifications,
       }),
       {
