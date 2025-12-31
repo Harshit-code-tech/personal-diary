@@ -52,10 +52,16 @@ export default function SettingsPage() {
         .from('user_settings')
         .select('username')
         .eq('user_id', user?.id)
-        .single()
+        .maybeSingle()
       
       if (error) throw error
-      setUsername(data?.username || '')
+      
+      if (data) {
+        setUsername(data?.username || '')
+      } else {
+        // Create user_settings row if it doesn't exist
+        await supabase.from('user_settings').insert({ user_id: user?.id })
+      }
     } catch (error) {
       console.error('Error fetching username:', error)
     }
@@ -65,14 +71,17 @@ export default function SettingsPage() {
     if (user) {
       setEmail(user.email || '')
       
-      // Get theme from localStorage
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme === 'dark' || savedTheme === 'light') {
-        setTheme(savedTheme)
-      } else {
-        // Check system preference
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        setTheme(isDark ? 'dark' : 'light')
+      // Only access browser APIs after mount
+      if (typeof window !== 'undefined') {
+        // Get theme from localStorage
+        const savedTheme = localStorage.getItem('theme')
+        if (savedTheme === 'dark' || savedTheme === 'light') {
+          setTheme(savedTheme)
+        } else {
+          // Check system preference
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          setTheme(isDark ? 'dark' : 'light')
+        }
       }
       
       // Fetch username
@@ -127,13 +136,17 @@ export default function SettingsPage() {
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
     
-    // Apply theme
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
+    // Only access browser APIs in client
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme)
+      
+      // Apply theme
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
     }
   }
 
@@ -153,16 +166,18 @@ export default function SettingsPage() {
         exportDate: new Date().toISOString(),
       }
 
-      // Create and download JSON file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `diary-export-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+      // Create and download JSON file (browser only)
+      if (typeof window !== 'undefined') {
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `diary-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }
       toastNotify.success('Export Complete', 'Your data has been exported successfully')
     } catch (error) {
       console.error('Error exporting data:', error)

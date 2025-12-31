@@ -39,7 +39,8 @@ export default function PeoplePage() {
         .from('people')
         .select(`
           *,
-          entry_people(count)
+          entry_people(count),
+          memories(count)
         `)
         .order('name')
 
@@ -49,7 +50,7 @@ export default function PeoplePage() {
       const peopleWithCounts = (peopleData || []).map((person: any) => ({
         ...person,
         entry_count: person.entry_people?.[0]?.count || 0,
-        memory_count: 0, // Note: memories table doesn't have person_id in current schema
+        memory_count: person.memories?.[0]?.count || 0,
       }))
 
       setPeople(peopleWithCounts)

@@ -108,36 +108,37 @@ export default function NotificationSettings() {
         </div>
 
         {localPrefs.dailyReminder && (
-          <div className="ml-8 space-y-4">
-            {/* Time Picker */}
-            <div>
-              <label htmlFor="reminder-time" className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+          <>
+            {/* Reminder Time */}
+            <div className="ml-8 mt-3">
+              <label className="text-sm font-medium text-charcoal/70 dark:text-white/70 flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4" />
                 Reminder Time
               </label>
               <input
-                id="reminder-time"
-                name="reminderTime"
                 type="time"
                 value={localPrefs.reminderTime}
                 onChange={(e) => setLocalPrefs(prev => ({ ...prev, reminderTime: e.target.value }))}
-                className="px-4 py-2 bg-gray-50 dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white"
+                className="block w-full px-3 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal bg-white dark:bg-midnight text-charcoal dark:text-white"
               />
             </div>
 
-            {/* Days Selector */}
-            <div>
-              <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
-                Reminder Days
+            {/* Reminder Days */}
+            <div className="ml-8 mt-3">
+              <label className="text-sm font-medium text-charcoal/70 dark:text-white/70 flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4" />
+                Active Days
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {days.map(day => (
                   <button
                     key={day.key}
+                    type="button"
                     onClick={() => toggleDay(day.key)}
-                    className={`w-12 h-12 rounded-lg font-medium text-sm transition-all ${
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                       localPrefs.reminderDays.includes(day.key)
                         ? 'bg-gold dark:bg-teal text-white'
-                        : 'bg-gray-100 dark:bg-midnight text-charcoal/60 dark:text-white/60 hover:bg-gray-200 dark:hover:bg-charcoal'
+                        : 'bg-charcoal/10 dark:bg-white/10 text-charcoal/70 dark:text-white/70'
                     }`}
                   >
                     {day.label}
@@ -145,7 +146,15 @@ export default function NotificationSettings() {
                 ))}
               </div>
             </div>
-          </div>
+
+            <div className="ml-8 mt-3">
+              <div className="bg-gray-50 dark:bg-midnight/50 rounded-lg p-4 border border-charcoal/10 dark:border-white/10">
+                <p className="text-sm text-charcoal/70 dark:text-white/70">
+                  📧 Daily reminders will be sent at your chosen time on selected days.
+                </p>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -263,8 +272,8 @@ export default function NotificationSettings() {
 
       {/* Info Box */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <p className="text-sm text-charcoal/70 dark:text-white/70">
-          <strong>Note:</strong> Email notifications require server-side setup. These preferences are saved locally and will be ready when email features are enabled.
+        <p className="text-sm text-charcoal/70 dark:text-white/70 mb-2">
+          <strong>✓ Your preferences are saved to the database.</strong>
         </p>
       </div>
     </div>

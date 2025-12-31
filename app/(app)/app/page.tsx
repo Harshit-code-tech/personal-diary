@@ -24,6 +24,9 @@ export default function AppPage() {
   const [urlFolderId, setUrlFolderId] = useState<string | null>(null)
   
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return
+    
     const params = new URLSearchParams(window.location.search)
     const folderId = params.get('folder')
     setUrlFolderId(folderId)
