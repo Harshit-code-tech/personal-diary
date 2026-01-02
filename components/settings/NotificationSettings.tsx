@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useNotificationPreferences } from '@/lib/hooks/useNotificationPreferences'
-import { Bell, Clock, Calendar, Star, Zap, RefreshCw } from 'lucide-react'
+import { Bell, Clock, Calendar, Star, Zap, RefreshCw, Globe } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const days = [
@@ -13,6 +13,33 @@ const days = [
   { key: 'friday', label: 'Fri' },
   { key: 'saturday', label: 'Sat' },
   { key: 'sunday', label: 'Sun' },
+]
+
+// Common timezones grouped by region
+const timezones = [
+  { label: 'Auto-detect', value: 'auto' },
+  { label: '--- Asia ---', value: '', disabled: true },
+  { label: 'India (IST)', value: 'Asia/Kolkata' },
+  { label: 'Singapore', value: 'Asia/Singapore' },
+  { label: 'Tokyo', value: 'Asia/Tokyo' },
+  { label: 'Dubai', value: 'Asia/Dubai' },
+  { label: 'Hong Kong', value: 'Asia/Hong_Kong' },
+  { label: '--- Americas ---', value: '', disabled: true },
+  { label: 'New York (EST)', value: 'America/New_York' },
+  { label: 'Los Angeles (PST)', value: 'America/Los_Angeles' },
+  { label: 'Chicago (CST)', value: 'America/Chicago' },
+  { label: 'Denver (MST)', value: 'America/Denver' },
+  { label: 'Toronto', value: 'America/Toronto' },
+  { label: '--- Europe ---', value: '', disabled: true },
+  { label: 'London (GMT)', value: 'Europe/London' },
+  { label: 'Paris (CET)', value: 'Europe/Paris' },
+  { label: 'Berlin', value: 'Europe/Berlin' },
+  { label: 'Moscow', value: 'Europe/Moscow' },
+  { label: '--- Pacific ---', value: '', disabled: true },
+  { label: 'Sydney', value: 'Australia/Sydney' },
+  { label: 'Auckland', value: 'Pacific/Auckland' },
+  { label: '--- Other ---', value: '', disabled: true },
+  { label: 'UTC', value: 'UTC' },
 ]
 
 export default function NotificationSettings() {
@@ -147,17 +174,50 @@ export default function NotificationSettings() {
               </div>
             </div>
 
+            {/* Timezone Selector */}
+            <div className="ml-8 mt-3">
+              <label className="text-sm font-medium text-charcoal/70 dark:text-white/70 flex items-center gap-2 mb-2">
+                <Globe className="h-4 w-4" />
+                Timezone
+              </label>
+              <select
+                value={localPrefs.timezone || 'auto'}
+                onChange={(e) => {
+                  const value = e.target.value
+                  const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+                  setLocalPrefs(prev => ({ 
+                    ...prev, 
+                    timezone: value === 'auto' ? detectedTimezone : value 
+                  }))
+                }}
+                className="block w-full px-3 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal bg-white dark:bg-midnight text-charcoal dark:text-white"
+              >
+                {timezones.map((tz, idx) => (
+                  <option 
+                    key={idx} 
+                    value={tz.value} 
+                    disabled={tz.disabled}
+                    className={tz.disabled ? 'font-semibold text-charcoal/50 dark:text-white/50' : ''}
+                  >
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-charcoal/50 dark:text-white/50 mt-1">
+                Current: <strong>{localPrefs.timezone || 'UTC'}</strong>
+                {localPrefs.timezone === (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') && (
+                  <span className="text-green-600 dark:text-green-400"> ✓ Auto-detected</span>
+                )}
+              </p>
+            </div>
+
             <div className="ml-8 mt-3">
               <div className="bg-gray-50 dark:bg-midnight/50 rounded-lg p-4 border border-charcoal/10 dark:border-white/10">
                 <p className="text-sm text-charcoal/70 dark:text-white/70">
-                  📧 Daily reminders will be sent at your chosen time on selected days.
+                  📧 Daily reminders will be sent at <strong>{localPrefs.reminderTime}</strong> in your selected timezone on the days you choose.
                 </p>
                 <p className="text-xs text-charcoal/50 dark:text-white/50 mt-2">
-                  🌍 Timezone: <strong>{localPrefs.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'}</strong>
-                  <br />
-                  <span className="text-charcoal/40 dark:text-white/40">
-                    (Auto-detected from your browser)
-                  </span>
+                  💡 If auto-detection doesn't work, manually select your timezone from the dropdown above.
                 </p>
               </div>
             </div>
