@@ -63,25 +63,14 @@ export function useAutoSave({
 
       lastSavedRef.current = { title, content }
       
-      // Show subtle toast (rarely visible due to debounce)
-      toast.success('Saved', {
-        duration: 1000,
-        style: {
-          background: '#10B981',
-          color: '#fff',
-          fontSize: '13px',
-          padding: '8px 12px',
-        },
-      })
+      // Silent save - no toast notifications to avoid stacking
+      // Status is shown in the UI via autoSaving state
 
       onSave?.()
     } catch (error) {
       console.error('Auto-save error:', error)
       onError?.(error as Error)
-      
-      toast.error('Auto-save failed', {
-        duration: 2000,
-      })
+      // Silent error - UI will show auto-save failed state
     } finally {
       savingRef.current = false
     }

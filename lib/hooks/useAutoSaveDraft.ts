@@ -13,7 +13,7 @@ export interface DraftData {
 
 interface UseAutoSaveDraftOptions {
   key: string // Unique key for this draft (e.g., 'new-entry' or 'edit-entry-{id}')
-  autoSaveDelay?: number // Delay in ms before auto-saving (default: 3000)
+  autoSaveDelay?: number // Delay in ms before auto-saving (default: 5000)
   onSave?: (draft: DraftData) => void // Callback when draft is saved
   onRestore?: (draft: DraftData) => void // Callback when draft is restored
 }
@@ -60,7 +60,7 @@ interface UseAutoSaveDraftReturn {
  */
 export function useAutoSaveDraft({
   key,
-  autoSaveDelay = 3000,
+  autoSaveDelay = 5000,
   onSave,
   onRestore,
 }: UseAutoSaveDraftOptions): UseAutoSaveDraftReturn {
@@ -69,6 +69,8 @@ export function useAutoSaveDraft({
   const [isDirty, setIsDirty] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const lastDataRef = useRef<DraftData | null>(null)
+  const isRestoringRef = useRef(false) // Prevent save during restore
+  const isSavingRef = useRef(false) // Prevent concurrent saves
 
   const storageKey = `draft-${key}`
 
@@ -91,14 +93,34 @@ export function useAutoSaveDraft({
   useEffect(() => {
     const draft = loadDraft()
     if (draft) {
+      isRestoringRef.current = true // Set flag before restore
       setHasDraft(true)
       setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null)
       onRestore?.(draft)
+      // Clear flag after a short delay to allow state updates to settle
+      setTimeout(() => {
+        isRestoringRef.current = false
+      }, 100)
+    } // currently restoring from draft
+    if (isRestoringRef.current) {
+      return
     }
+
+    // Don't save if 
   }, [loadDraft, onRestore])
 
   // Save draft to localStorage
   const saveDraft = useCallback((data: DraftData) => {
+    // Don't save if currently restoring from draft
+    if (isRestoringRef.current) {
+      return
+    }
+
+    // Don't save if currently saving (prevent concurrent saves)
+    if (isSavingRef.current) {
+      return
+    }
+
     // Don't save if data hasn't changed
     if (JSON.stringify(data) === JSON.stringify(lastDataRef.current)) {
       return
@@ -114,6 +136,8 @@ export function useAutoSaveDraft({
 
     // Set new timer for auto-save
     autoSaveTimerRef.current = setTimeout(() => {
+      isSavingRef.current = true // Set saving flag
+      
       const draftWithTimestamp = {
         ...data,
         lastSaved: Date.now(),
@@ -127,6 +151,8 @@ export function useAutoSaveDraft({
         onSave?.(draftWithTimestamp)
       } catch (error) {
         console.error('Failed to save draft:', error)
+      } finally {
+        isSavingRef.current = false // Clear saving flag
       }
     }, autoSaveDelay)
   }, [storageKey, autoSaveDelay, onSave])

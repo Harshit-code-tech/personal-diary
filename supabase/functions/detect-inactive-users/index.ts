@@ -126,6 +126,8 @@ function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number,
 }
 
 serve(async (req) => {
+  console.log('🔍 Detect inactive users function called')
+  
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
@@ -138,13 +140,36 @@ serve(async (req) => {
       final: new Date(now.getTime() - INACTIVITY_THRESHOLDS.FINAL_CHECK_IN * 24 * 60 * 60 * 1000)
     }
 
-    // Get all users with their last entry date
-    const { data: users, error: usersError } = await supabase.rpc('get_inactive_users')
+    console.log('📅 Checking for inactive users since:', dates.gentle.toISOString())
 
-    if (usersError) {
-      console.error('Error fetching inactive users:', usersError)
-      throw usersError
+    // Get all users with their last entry date using direct query instead of RPC
+    // This avoids the type mismatch error with varchar(255) vs text
+    const { data: entries, error: entriesError } = await supabase
+      .from('entries')
+      .select('user_id, created_at')
+      .order('created_at', { ascending: false })
+
+    if (entriesError) {
+      console.error('❌ Error fetching entries:', entriesError)
+      throw entriesError
     }
+
+    console.log(`📊 Found ${entries?.length || 0} total entries`)
+
+    // Group by user and get last entry date
+    const userLastEntry = new Map()
+    entries?.forEach(entry => {
+      if (!userLastEntry.has(entry.user_id)) {
+        userLastEntry.set(entry.user_id, entry.created_at)
+      }
+    })
+
+    console.log(`👥 Tracking ${userLastEntry.size} users with entries`)
+
+    const users = Array.from(userLastEntry.entries()).map(([user_id, last_entry_date]) => ({
+      id: user_id,
+      last_entry_date
+    }))
 
     const emailsSent = []
     const errors = []
@@ -229,6 +254,8 @@ serve(async (req) => {
       }
     }
 
+    console.log(`✅ Process complete: ${emailsSent.length} emails sent, ${errors.length} errors`)
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -243,9 +270,18 @@ serve(async (req) => {
     )
 
   } catch (error: any) {
-    console.error('Function error:', error)
+    console.error('❌ FATAL ERROR in detect-inactive-users:')
+    console.error('Error type:', error?.constructor?.name)
+    console.error('Error message:', error?.message)
+    console.error('Error stack:', error?.stack)
+    console.error('Full error:', JSON.stringify(error, null, 2))
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || 'Unknown error',
+        type: error?.constructor?.name,
+        details: error?.toString()
+      }),
       {
         headers: { 'Content-Type': 'application/json' },
         status: 500,
