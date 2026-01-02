@@ -217,7 +217,7 @@ export default function NotificationSettings() {
                   📧 Daily reminders will be sent at <strong>{localPrefs.reminderTime}</strong> in your selected timezone on the days you choose.
                 </p>
                 <p className="text-xs text-charcoal/50 dark:text-white/50 mt-2">
-                  💡 If auto-detection doesn't work, manually select your timezone from the dropdown above.
+                  💡 If auto-detection doesn&apos;t work, manually select your timezone from the dropdown above.
                 </p>
               </div>
             </div>

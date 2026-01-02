@@ -79,6 +79,18 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-hot-toast'],
   },
+  // Exclude server-only packages from client bundle
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't bundle these server-only packages on client side
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'onnxruntime-node': false,
+        '@xenova/transformers': false,
+      }
+    }
+    return config
+  },
 }
 
 module.exports = withPWA(nextConfig)
