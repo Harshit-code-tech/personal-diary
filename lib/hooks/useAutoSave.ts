@@ -63,13 +63,14 @@ export function useAutoSave({
 
       lastSavedRef.current = { title, content }
       
-      // Show subtle toast
-      toast.success('Auto-saved', {
-        duration: 1500,
+      // Show subtle toast (rarely visible due to debounce)
+      toast.success('Saved', {
+        duration: 1000,
         style: {
           background: '#10B981',
           color: '#fff',
-          fontSize: '14px',
+          fontSize: '13px',
+          padding: '8px 12px',
         },
       })
 

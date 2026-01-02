@@ -68,7 +68,7 @@ export default function NewEntryPage() {
   // Auto-save draft system (user-specific + folder-specific key)
   const { saveDraft, clearDraft, hasDraft, lastSaved, isDirty } = useAutoSaveDraft({
     key: draftKey,
-    autoSaveDelay: 3000, // Auto-save after 3 seconds of inactivity
+    autoSaveDelay: 5000, // Auto-save after 5 seconds of inactivity
     onRestore: (draft) => {
       // Restore draft data on mount
       if (draft.title) setTitle(draft.title)
@@ -82,7 +82,7 @@ export default function NewEntryPage() {
     },
   })
 
-  // Auto-save on content changes
+  // Auto-save on content changes (removed saveDraft from deps to prevent loops)
   useEffect(() => {
     if (title || content || mood || tags.length > 0 || selectedPeople.length > 0 || selectedFolders.length > 0) {
       saveDraft({
@@ -95,7 +95,8 @@ export default function NewEntryPage() {
         selectedFolders,
       })
     }
-  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders, saveDraft])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders])
 
   useEffect(() => {
     // Pre-fill date from URL parameter (from calendar)

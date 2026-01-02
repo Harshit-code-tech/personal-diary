@@ -11,40 +11,62 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Call both Supabase edge functions (combined for Hobby plan limit)
-    const [remindersResponse, emailQueueResponse] = await Promise.all([
-      // Trigger reminder notifications
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceKey) {
+      throw new Error('Missing Supabase environment variables')
+    }
+
+    console.log('🔄 Vercel cron triggered at', new Date().toISOString())
+
+    // Call both Supabase edge functions
+    // Note: Using slug 'quick-handler' which maps to 'email-reminders' function
+    const [quickHandlerResponse, emailQueueResponse] = await Promise.all([
+      // Process reminders via quick-handler (slug for email-reminders function)
       fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-reminder-notifications`,
+        `${supabaseUrl}/functions/v1/quick-handler`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Authorization': `Bearer ${serviceKey}`,
             'Content-Type': 'application/json',
+            'apikey': serviceKey,
           },
+          body: JSON.stringify({ timestamp: new Date().toISOString() }),
         }
       ),
       // Process email queue
       fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/process-email-queue`,
+        `${supabaseUrl}/functions/v1/process-email-queue`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Authorization': `Bearer ${serviceKey}`,
             'Content-Type': 'application/json',
+            'apikey': serviceKey,
           },
         }
       ),
     ])
 
-    const remindersData = await remindersResponse.json()
+    const quickHandlerData = await quickHandlerResponse.json()
     const emailQueueData = await emailQueueResponse.json()
+
+    console.log('✅ Quick-handler response:', quickHandlerData)
+    console.log('✅ Email queue response:', emailQueueData)
 
     return NextResponse.json({
       success: true,
       message: 'Reminders and email queue processed successfully',
-      reminders: remindersData,
-      emailQueue: emailQueueData,
+      quickHandler: {
+        status: quickHandlerResponse.status,
+        data: quickHandlerData,
+      },
+      emailQueue: {
+        status: emailQueueResponse.status,
+        data: emailQueueData,
+      },
     })
   } catch (error: any) {
     console.error('Error triggering reminders:', error)
