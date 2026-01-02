@@ -9,6 +9,16 @@ export interface NotificationPreferences {
   streakNotifications: boolean
   reminderTime: string // HH:MM format
   reminderDays: string[] // ['monday', 'tuesday', ...]
+  timezone: string // IANA timezone (e.g., 'Asia/Kolkata', 'America/New_York')
+}
+
+// Detect browser timezone with fallback
+const getBrowserTimezone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  } catch {
+    return 'UTC'
+  }
 }
 
 const defaultPreferences: NotificationPreferences = {
@@ -18,6 +28,7 @@ const defaultPreferences: NotificationPreferences = {
   streakNotifications: true,
   reminderTime: '20:00',
   reminderDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+  timezone: getBrowserTimezone(),
 }
 
 export function useNotificationPreferences() {
@@ -50,6 +61,7 @@ export function useNotificationPreferences() {
             streakNotifications: data.inactivity_emails_enabled ?? true,
             reminderTime: data.reminder_time ?? '20:00',
             reminderDays: data.reminder_days ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+            timezone: data.timezone || getBrowserTimezone(),
           })
         } else {
           // No settings row exists yet, create one with defaults
@@ -78,6 +90,9 @@ export function useNotificationPreferences() {
     setSaving(true)
     try {
       const updated = { ...preferences, ...newPreferences }
+      
+      // Always use current browser timezone (handles travel/timezone changes)
+      const currentTimezone = getBrowserTimezone()
 
       // Use UPSERT to handle both insert and update
       const { error } = await supabase
@@ -90,6 +105,7 @@ export function useNotificationPreferences() {
           milestone_notifications_enabled: updated.milestoneNotifications,
           reminder_time: updated.reminderTime,
           reminder_days: updated.reminderDays,
+          timezone: currentTimezone,
         }, {
           onConflict: 'user_id'
         })
@@ -111,6 +127,7 @@ export function useNotificationPreferences() {
           streakNotifications: reloaded.inactivity_emails_enabled ?? true,
           reminderTime: reloaded.reminder_time ?? '20:00',
           reminderDays: reloaded.reminder_days ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+          timezone: reloaded.timezone || getBrowserTimezone(),
         })
       }
 
@@ -140,6 +157,7 @@ export function useNotificationPreferences() {
           milestone_notifications_enabled: defaultPreferences.milestoneNotifications,
           reminder_time: defaultPreferences.reminderTime,
           reminder_days: defaultPreferences.reminderDays,
+          timezone: getBrowserTimezone(),
         }, {
           onConflict: 'user_id'
         })

@@ -152,6 +152,13 @@ export default function NotificationSettings() {
                 <p className="text-sm text-charcoal/70 dark:text-white/70">
                   📧 Daily reminders will be sent at your chosen time on selected days.
                 </p>
+                <p className="text-xs text-charcoal/50 dark:text-white/50 mt-2">
+                  🌍 Timezone: <strong>{localPrefs.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'}</strong>
+                  <br />
+                  <span className="text-charcoal/40 dark:text-white/40">
+                    (Auto-detected from your browser)
+                  </span>
+                </p>
               </div>
             </div>
           </>
