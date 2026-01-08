@@ -60,7 +60,7 @@ serve(async (req) => {
 
     console.log(`Found ${reminders.length} due reminder(s) to process...`)
 
-    // Fetch user emails for all reminders
+    // Fetch user emails AND timezones for all reminders
     const userIds = [...new Set(reminders.map(r => r.user_id))]
     const { data: users, error: userError } = await supabaseClient
       .auth.admin.listUsers()
@@ -73,6 +73,16 @@ serve(async (req) => {
     const userEmailMap = new Map(
       users.users.map(u => [u.id, u.email])
     )
+    
+    // Fetch user timezones from user_settings
+    const { data: userSettings } = await supabaseClient
+      .from('user_settings')
+      .select('user_id, timezone')
+      .in('user_id', userIds)
+    
+    const userTimezoneMap = new Map(
+      userSettings?.map(s => [s.user_id, s.timezone || 'UTC']) || []
+    )
 
     let queuedCount = 0
     let skippedCount = 0
@@ -80,6 +90,7 @@ serve(async (req) => {
       reminders.map(async (reminder: any) => {
         try {
           const userEmail = userEmailMap.get(reminder.user_id)
+          const userTimezone = userTimezoneMap.get(reminder.user_id) || 'UTC'
           
           if (!userEmail) {
             console.error(`No email found for user ${reminder.user_id}`)
@@ -106,37 +117,27 @@ serve(async (req) => {
                   <meta charset="UTF-8">
                   <title>Reminder</title>
                 </head>
-                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; background-color: #f5f5f5;">
-                  <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <h2 style="color: #D4AF37; margin-top: 0;">🔔 Reminder</h2>
-                    <h3 style="color: #2C3E50; margin-bottom: 16px;">${reminder.title}</h3>
-                    ${reminder.description ? `<p style="color: #546E7A; line-height: 1.6; margin-bottom: 24px;">${reminder.description}</p>` : ''}
-                    <div style="background: #F8F9FA; padding: 16px; border-radius: 8px; border-left: 4px solid #D4AF37;">
-                      <p style="margin: 0; color: #90A4AE; font-size: 14px;">
-                        <strong>Scheduled for:</strong> ${new Date(reminder.next_reminder_at).toLocaleString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                    </div>
-                    <div style="margin-top: 24px; text-align: center;">
-                      <a href="${Deno.env.get('APP_URL') || 'https://personal-diary-three.vercel.app'}/app" 
-                         style="display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #B8941A 100%); 
-                                color: white; text-decoration: none; padding: 12px 32px; border-radius: 8px; 
-                                font-weight: 600; box-shadow: 0 4px 6px rgba(212, 175, 55, 0.3);">
-                        Open Diary →
-                      </a>
-                    </div>
-                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E0E0E0; text-align: center;">
-                      <p style="margin: 0; color: #90A4AE; font-size: 13px;">
-                        <a href="${Deno.env.get('APP_URL') || 'https://personal-diary-three.vercel.app'}/app/reminders" 
-                           style="color: #D4AF37; text-decoration: none;">Manage reminders</a>
-                      </p>
-                    </div>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; background-color: #ffffff;">
+                  <div style="max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #2C3E50; margin: 0 0 16px 0;">🔔 Reminder: ${reminder.title}</h2>
+                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">Hi there,</p>
+                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">This is your reminder:</p>
+                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0; font-weight: 600;">${reminder.title}</p>
+                    ${reminder.description ? `<p style="color: #546E7A; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">${reminder.description}</p>` : ''}
+                    <p style="color: #90A4AE; font-size: 14px; margin: 0 0 24px 0;">
+                      Set for: ${new Date(reminder.next_reminder_at).toLocaleString('en-US', { 
+                        timeZone: userTimezone,
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                      })} (${userTimezone})
+                    </p>
+                    <p style="color: #90A4AE; font-size: 12px; margin: 40px 0 0 0;">
+                      Sent from Noted - Your Personal Diary
+                    </p>
                   </div>
                 </body>
                 </html>

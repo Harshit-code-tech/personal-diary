@@ -287,8 +287,8 @@ export default function RemindersPage() {
               <p className="font-semibold mb-1">⏰ How Reminders Work</p>
               <p className="text-blue-700 dark:text-blue-200">
                 Times are in <strong>your timezone ({userTimezone})</strong>. 
-                Reminders are checked <strong>every minute</strong> and emails sent <strong>every 5 minutes</strong>. 
-                You&apos;ll receive your reminder within <strong>1-6 minutes</strong> of the scheduled time.
+                Reminders are checked <strong>every 15 minutes</strong>. 
+                You&apos;ll receive your reminder within <strong>15 minutes</strong> of the scheduled time.
               </p>
             </div>
           </div>

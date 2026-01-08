@@ -55,15 +55,26 @@ export function generateDailyReminderEmail({ userName, currentStreak, appUrl }: 
               ` : ''}
               
               <div style="background-color: #F8F9FA; border-radius: 12px; padding: 24px; margin-bottom: 28px;">
-                <p style="margin: 0 0 16px; color: #2C3E50; font-size: 16px; font-weight: 600;">
-                  Reflection prompts for today:
+                <p style="margin: 0 0 12px; color: #2C3E50; font-size: 16px; font-weight: 600;">
+                  💡 Writing Prompt:
                 </p>
-                <ul style="margin: 0; padding-left: 20px; color: #546E7A; font-size: 15px; line-height: 1.8;">
-                  <li>What went well today?</li>
-                  <li>What challenges did you face?</li>
-                  <li>What did you learn?</li>
-                  <li>How are you feeling right now?</li>
-                </ul>
+                <p style="margin: 0; color: #546E7A; font-size: 15px; line-height: 1.6;">
+                  ${(() => {
+                    const prompts = [
+                      'What was the highlight of your day? What are you grateful for?',
+                      'What are three things you\'re grateful for today?',
+                      'What went well today? Celebrate your wins, big or small.',
+                      'What did you learn about yourself today?',
+                      'What are your intentions for tomorrow?',
+                      'How do you want to feel by the end of the week?',
+                      'What\'s one small thing that brought you joy recently?',
+                      'What challenges did you face, and how did you overcome them?',
+                      'What would you do if you knew you couldn\'t fail?',
+                      'What does success mean to you right now?'
+                    ];
+                    return prompts[Math.floor(Math.random() * prompts.length)];
+                  })()}
+                </p>
               </div>
               
               <!-- CTA Button -->
