@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     console.log('🔄 Vercel cron triggered at', new Date().toISOString())
 
     // Call both Supabase edge functions
-    // Note: Using slug 'quick-handler' which maps to 'email-reminders' function
+    // Note: 'quick-handler' is the slug for the 'email-reminders' function
     const [quickHandlerResponse, emailQueueResponse] = await Promise.all([
       // Process reminders via quick-handler (slug for email-reminders function)
       fetch(

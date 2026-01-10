@@ -59,17 +59,23 @@ export default function NewEntryPage() {
 
   // Get folder parameter early for draft key
   const folderParam = searchParams.get('folder')
+  // IMPORTANT: Wait for user to load before creating draft key
+  // This ensures the key remains stable and drafts are saved/loaded correctly
   const draftKey = user?.id 
     ? folderParam 
       ? `new-entry-${user.id}-folder-${folderParam}` 
       : `new-entry-${user.id}`
-    : 'new-entry'
+    : `new-entry-temp` // Temporary key until user loads
 
   // Auto-save draft system (user-specific + folder-specific key)
+  // Only restore if user is loaded to prevent key mismatch
   const { saveDraft, clearDraft, hasDraft, lastSaved, isDirty } = useAutoSaveDraft({
     key: draftKey,
     autoSaveDelay: 5000, // Auto-save after 5 seconds of inactivity
     onRestore: (draft) => {
+      // Only restore if we have a valid user (prevent restoring from temp key)
+      if (!user?.id) return
+      
       // Restore draft data on mount
       if (draft.title) setTitle(draft.title)
       if (draft.content) setContent(draft.content)
@@ -84,6 +90,9 @@ export default function NewEntryPage() {
 
   // Auto-save on content changes (removed saveDraft from deps to prevent loops)
   useEffect(() => {
+    // Only save drafts if user is loaded (prevent saving to wrong key)
+    if (!user?.id) return
+    
     if (title || content || mood || tags.length > 0 || selectedPeople.length > 0 || selectedFolders.length > 0) {
       saveDraft({
         title,
@@ -96,7 +105,7 @@ export default function NewEntryPage() {
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders])
+  }, [title, content, mood, entryDate, tags, selectedPeople, selectedFolders, user?.id])
 
   useEffect(() => {
     // Pre-fill date from URL parameter (from calendar)

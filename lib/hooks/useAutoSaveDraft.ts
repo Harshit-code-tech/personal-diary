@@ -69,8 +69,8 @@ export function useAutoSaveDraft({
   const [isDirty, setIsDirty] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const lastDataRef = useRef<DraftData | null>(null)
-  const isRestoringRef = useRef(false) // Prevent save during restore
   const isSavingRef = useRef(false) // Prevent concurrent saves
+  const hasRestoredRef = useRef(false) // Track if we've already restored
 
   const storageKey = `draft-${key}`
 
@@ -89,45 +89,48 @@ export function useAutoSaveDraft({
     }
   }, [storageKey])
 
-  // Check if draft exists on mount
+  // Check if draft exists whenever storage key changes
   useEffect(() => {
+    // Reset restoration flag when key changes
+    hasRestoredRef.current = false
+    
     const draft = loadDraft()
     if (draft) {
-      isRestoringRef.current = true // Set flag before restore
+      hasRestoredRef.current = true
       setHasDraft(true)
       setLastSaved(draft.lastSaved ? new Date(draft.lastSaved) : null)
+      setIsDirty(false)
+      lastDataRef.current = draft
       onRestore?.(draft)
-      // Clear flag after a short delay to allow state updates to settle
-      setTimeout(() => {
-        isRestoringRef.current = false
-      }, 100)
-    } // currently restoring from draft
-    if (isRestoringRef.current) {
-      return
+    } else {
+      // No draft found, reset state
+      setHasDraft(false)
+      setLastSaved(null)
+      setIsDirty(false)
+      lastDataRef.current = null
     }
-
-    // Don't save if 
-  }, [loadDraft, onRestore])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]) // Re-run when storage key changes (user/folder changes)
 
   // Save draft to localStorage
   const saveDraft = useCallback((data: DraftData) => {
-    // Don't save if currently restoring from draft
-    if (isRestoringRef.current) {
-      return
-    }
-
     // Don't save if currently saving (prevent concurrent saves)
     if (isSavingRef.current) {
       return
     }
 
-    // Don't save if data hasn't changed
-    if (JSON.stringify(data) === JSON.stringify(lastDataRef.current)) {
+    const serializedData = JSON.stringify(data)
+    const lastSerializedData = lastDataRef.current ? JSON.stringify(lastDataRef.current) : null
+
+    // Don't save if data hasn't changed (prevents save on restore)
+    if (serializedData === lastSerializedData) {
       return
     }
 
     lastDataRef.current = data
-    setIsDirty(true)
+    
+    // Only set dirty if not already dirty (prevent unnecessary re-renders)
+    setIsDirty(prevDirty => prevDirty ? prevDirty : true)
 
     // Clear existing timer
     if (autoSaveTimerRef.current) {
