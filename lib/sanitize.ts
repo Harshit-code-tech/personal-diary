@@ -29,10 +29,10 @@ export function stripHtmlTags(html: string): string {
   // This avoids jsdom/parse5 issues in Vercel serverless
   let text = html
     // Remove script and style tags with their content
-    .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, '')
-    .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
     // Remove all other HTML tags
-    .replace(/<[^>]+>/g, '')
+    .replace(/<[^>]*>/g, '')
   
   // Decode HTML entities using a safe approach
   const entityMap: Record<string, string> = {
@@ -47,9 +47,11 @@ export function stripHtmlTags(html: string): string {
   }
   
   // Replace entities in a single pass to avoid double-escaping
-  Object.entries(entityMap).forEach(([entity, char]) => {
-    text = text.split(entity).join(char)
-  })
+  // Use a more robust replacement that handles entities properly
+  for (const [entity, char] of Object.entries(entityMap)) {
+    // Use a regex with global flag to replace all occurrences
+    text = text.replace(new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), char)
+  }
   
   // Normalize whitespace
   return text.replace(/\s+/g, ' ').trim()

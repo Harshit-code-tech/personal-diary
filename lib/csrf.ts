@@ -19,7 +19,7 @@ export function generateCSRFToken(): string {
 
 export async function setCSRFToken(): Promise<string> {
   const token = generateCSRFToken()
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   
   cookieStore.set(CSRF_TOKEN_NAME, token, {
     httpOnly: true,
@@ -33,7 +33,7 @@ export async function setCSRFToken(): Promise<string> {
 }
 
 export async function getCSRFToken(): Promise<string | undefined> {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   return cookieStore.get(CSRF_TOKEN_NAME)?.value
 }
 
