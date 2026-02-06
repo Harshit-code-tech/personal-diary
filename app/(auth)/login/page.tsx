@@ -65,7 +65,7 @@ export default function LoginPage() {
     )
 
     if (signInError) {
-      setError(signInError.message)
+      setError('Invalid email or password')
       setLoading(false)
     } else {
       router.push('/app')

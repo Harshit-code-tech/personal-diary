@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
       setSent(true)
       toast.success('Password reset link sent to your email!')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send reset link')
+      toast.error('Failed to send reset link')
     } finally {
       setLoading(false)
     }

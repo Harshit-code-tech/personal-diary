@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cacheUtils, CACHE_KEYS, CACHE_TTL } from '@/lib/redis'
+import { getApiError } from '@/lib/api-utils'
 
 /**
  * GET /api/analytics
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
       .order('entry_date', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: getApiError(error) }, { status: 500 })
     }
 
     // Calculate analytics
@@ -88,6 +89,6 @@ export async function GET(request: Request) {
     })
   } catch (error: any) {
     console.error('Error fetching analytics:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: getApiError(error) }, { status: 500 })
   }
 }

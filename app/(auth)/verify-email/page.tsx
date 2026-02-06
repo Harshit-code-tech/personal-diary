@@ -55,7 +55,7 @@ export default function VerifyEmailPage() {
       // Reset "resent" state after 5 seconds
       setTimeout(() => setResent(false), 5000)
     } catch (error: any) {
-      toast.error(error.message || 'Failed to resend email')
+      toast.error('Failed to resend email')
     } finally {
       setResending(false)
     }

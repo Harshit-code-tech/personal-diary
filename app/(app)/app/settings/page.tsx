@@ -127,7 +127,7 @@ export default function SettingsPage() {
       
       toastNotify.success('Username Updated', 'Your username has been saved')
     } catch (error: any) {
-      toastNotify.error('Update Failed', error.message || 'Could not update username')
+      toastNotify.error('Update Failed', 'Could not update username')
     } finally {
       setUsernameLoading(false)
     }
@@ -264,7 +264,7 @@ export default function SettingsPage() {
       setEmailOtpSent(true)
       toastNotify.success('Verification Sent', 'Check your new email inbox for verification link')
     } catch (error: any) {
-      toastNotify.error('Send Failed', error.message || 'Could not send verification email')
+      toastNotify.error('Send Failed', 'Could not send verification email')
     } finally {
       setChangingEmail(false)
     }
@@ -309,7 +309,7 @@ export default function SettingsPage() {
       setNewPassword('')
       setConfirmPassword('')
     } catch (error: any) {
-      toastNotify.error('Update Failed', error.message || 'Could not update password')
+      toastNotify.error('Update Failed', 'Could not update password')
     } finally {
       setChangingPassword(false)
     }

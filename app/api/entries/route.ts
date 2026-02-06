@@ -3,6 +3,17 @@ import { createClient } from '@/lib/supabase/server'
 import { cacheUtils, CACHE_KEYS, CACHE_TTL } from '@/lib/redis'
 
 /**
+ * Sanitize error message for API response
+ * In production, return generic messages to prevent information leakage
+ */
+function getApiError(error: any): string {
+  if (process.env.NODE_ENV === 'production') {
+    return 'An error occurred while processing your request'
+  }
+  return error?.message || 'Unknown error'
+}
+
+/**
  * GET /api/entries
  * Fetch all entries for the authenticated user
  * Uses Redis cache for faster responses
@@ -48,7 +59,7 @@ export async function GET(request: Request) {
     })
   } catch (error: any) {
     console.error('Error fetching entries:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: getApiError(error) }, { status: 500 })
   }
 }
 
@@ -76,7 +87,7 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: getApiError(error) }, { status: 500 })
     }
 
     // Invalidate caches - data has changed!
@@ -88,6 +99,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: entry })
   } catch (error: any) {
     console.error('Error creating entry:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: getApiError(error) }, { status: 500 })
   }
 }

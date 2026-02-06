@@ -59,9 +59,8 @@ const nextConfig = {
   },
   // Optimize for faster dev and smaller bundle
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    // Remove ALL console logs in production for security
+    removeConsole: process.env.NODE_ENV === 'production',
   },
   reactStrictMode: true,
   // Turbopack configuration (Next.js 16+)

@@ -72,7 +72,7 @@ export default function ResetPasswordPage() {
       toast.success('Password updated successfully!')
       router.push('/login')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to reset password')
+      toast.error('Failed to reset password')
     } finally {
       setLoading(false)
     }
