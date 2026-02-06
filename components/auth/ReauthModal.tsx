@@ -51,7 +51,7 @@ export default function ReauthModal({
       onSuccess()
       onClose()
     } catch (error: any) {
-      toast.error(error.message || 'Invalid password')
+      toast.error('Invalid password')
     } finally {
       setLoading(false)
     }

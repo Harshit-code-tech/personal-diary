@@ -104,7 +104,7 @@ export default function MultiFolderSelector({
       onUpdate?.()
     } catch (error: any) {
       console.error('Error toggling folder:', error)
-      toast.error(error.message || 'Failed to update folders')
+      toast.error('Failed to update folders')
     } finally {
       setSaving(false)
     }
