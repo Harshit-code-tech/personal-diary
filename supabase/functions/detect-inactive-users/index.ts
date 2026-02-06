@@ -231,7 +231,7 @@ serve(async (req) => {
 
         // Send email
         await smtpClient.send({
-          from: `Noted`, // Display name "Noted"
+          from: `Noted <${GMAIL_USER}>`, // Display name "Noted"
           to: profile.email,
           subject: subject,
           html: html,

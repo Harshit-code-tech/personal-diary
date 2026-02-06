@@ -50,7 +50,7 @@ async function sendEmailWithTimeout(
 
   try {
     const sendPromise = smtpClient.send({
-      from: `Noted`, // Display name "Noted" with email
+      from: `Noted <${GMAIL_USER}>`, // Display name "Noted" with valid email
       to: recipient,
       subject: subject,
       html: htmlBody,

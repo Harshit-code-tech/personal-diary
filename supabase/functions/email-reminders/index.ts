@@ -171,7 +171,7 @@ serve(async (req) => {
 
           // Send email via Gmail SMTP
           await smtpClient.send({
-            from: `Noted`, // Display name "Noted"
+            from: `Noted <${GMAIL_USER}>`, // Display name with valid email
             to: profile.email,
             subject: emailSubject,
             html: emailHtml,

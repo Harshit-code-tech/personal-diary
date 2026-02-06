@@ -78,8 +78,12 @@
   ],
   "crons": [
     {
+      "path": "/api/cron/trigger-reminders",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron/detect-inactive-users",
-      "schedule": "0 0 * * 0"
+      "schedule": "0 0 * * *"
     }
   ]
 }

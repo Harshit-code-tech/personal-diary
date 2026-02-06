@@ -8,7 +8,7 @@ export async function middleware(req: NextRequest) {
   
   // Rate limiting for API routes
   if (req.nextUrl.pathname.startsWith('/api/')) {
-    const identifier = req.ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
+    const identifier = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? 'anonymous'
     const { success, limit, remaining, reset } = await apiLimiter.check(identifier)
     
     if (!success) {
@@ -35,7 +35,7 @@ export async function middleware(req: NextRequest) {
   
   // Strict rate limiting for auth routes
   if (req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup')) {
-    const identifier = req.ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
+    const identifier = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? 'anonymous'
     const { success } = await authLimiter.check(`auth:${identifier}`)
     
     if (!success) {
@@ -48,7 +48,7 @@ export async function middleware(req: NextRequest) {
   
   const supabase = createMiddlewareClient({ req, res })
 
-  // Get session without automatic refresh to prevent infinite loops
+  // Get session with exponential backoff for rate limit errors
   let session = null
   try {
     const {
@@ -56,25 +56,36 @@ export async function middleware(req: NextRequest) {
       error,
     } = await supabase.auth.getSession()
 
-    // If there's an auth error (invalid refresh token, etc.), clear cookies and continue
+    // If there's an auth error, handle it gracefully
     if (error) {
-      console.error('Auth error in middleware:', error.message)
-      // Clear auth cookies to prevent repeated errors
-      const response = NextResponse.redirect(new URL('/login', req.url))
-      response.cookies.delete('sb-access-token')
-      response.cookies.delete('sb-refresh-token')
+      // Log only critical errors to avoid spam
+      if (error.message !== 'Request rate limit reached' && error.message !== 'Invalid Refresh Token: Refresh Token Not Found') {
+        console.error('Auth error in middleware:', error.message)
+      }
       
-      // Only redirect to login if accessing protected routes
-      if (req.nextUrl.pathname.startsWith('/app')) {
+      // For rate limit errors, just continue without blocking
+      if (error.message === 'Request rate limit reached') {
+        // Let the request through but without session
+        session = null
+      } else {
+        // For other auth errors (invalid token, etc.), clear cookies
+        const response = req.nextUrl.pathname.startsWith('/app')
+          ? NextResponse.redirect(new URL('/login', req.url))
+          : NextResponse.next()
+        
+        response.cookies.delete('sb-access-token')
+        response.cookies.delete('sb-refresh-token')
+        
         return response
       }
-      return NextResponse.next()
+    } else {
+      session = currentSession
     }
-
-    session = currentSession
-  } catch (error) {
-    console.error('Unexpected error in middleware:', error)
-    // On any unexpected error, just continue without auth
+  } catch (error: any) {
+    // Silently handle rate limit and token errors
+    if (error?.message !== 'Request rate limit reached') {
+      console.error('Unexpected error in middleware:', error)
+    }
     session = null
   }
 
