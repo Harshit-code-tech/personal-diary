@@ -65,7 +65,7 @@ async function getFolderData(folderId: string) {
 
 export default async function FolderPage({ params }: PageProps) {
   const resolvedParams = await params
-  const supabase = await createClient()
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
