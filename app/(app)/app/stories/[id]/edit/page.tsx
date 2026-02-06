@@ -16,8 +16,10 @@ const colorOptions = [
   '#3B82F6', '#10B981', '#F97316', '#6366F1',
 ]
 
-export default function EditStoryPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function EditStoryPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  // Safely unwrap params whether it's a Promise or already resolved
+  const resolvedParams = params instanceof Promise ? use(params) : params
+  const { id } = resolvedParams
   const [story, setStory] = useState<any>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
