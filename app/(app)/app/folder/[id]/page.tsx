@@ -9,13 +9,13 @@ import { stripHtmlTags } from '@/lib/sanitize'
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 async function getFolderData(folderId: string) {
-  const supabase = await createClient()
+  const supabase = createClient()
   
   // Get folder details
   const { data: folder, error: folderError } = await supabase
@@ -64,6 +64,7 @@ async function getFolderData(folderId: string) {
 }
 
 export default async function FolderPage({ params }: PageProps) {
+  const resolvedParams = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -71,7 +72,7 @@ export default async function FolderPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  const data = await getFolderData(params.id)
+  const data = await getFolderData(resolvedParams.id)
 
   if (!data) {
     redirect('/app')
@@ -94,7 +95,7 @@ export default async function FolderPage({ params }: PageProps) {
 
           {/* Breadcrumbs */}
           <Suspense fallback={<div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-64 animate-pulse mb-4" />}>
-            <FolderBreadcrumbs folderId={params.id} className="mb-4" />
+            <FolderBreadcrumbs folderId={resolvedParams.id} className="mb-4" />
           </Suspense>
 
           {/* Folder Info */}
@@ -122,7 +123,7 @@ export default async function FolderPage({ params }: PageProps) {
             </div>
 
             <Link
-              href={`/app/new?folder=${params.id}`}
+              href={`/app/new?folder=${resolvedParams.id}`}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors shadow-lg"
             >
               <Plus className="w-5 h-5" />
@@ -142,7 +143,7 @@ export default async function FolderPage({ params }: PageProps) {
               Start by creating a new entry or add existing entries to this folder
             </p>
             <Link
-              href={`/app/new?folder=${params.id}`}
+              href={`/app/new?folder=${resolvedParams.id}`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
             >
               <Plus className="w-5 h-5" />

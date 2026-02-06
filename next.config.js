@@ -63,8 +63,9 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  swcMinify: true,
   reactStrictMode: true,
+  // Turbopack configuration (Next.js 16+)
+  turbopack: {},
   // Reduce compilation time
   modularizeImports: {
     'lucide-react': {
@@ -82,7 +83,6 @@ const nextConfig = {
   // Exclude server-only packages from client bundle
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Don't bundle these server-only packages on client side
       config.resolve.alias = {
         ...config.resolve.alias,
         'onnxruntime-node': false,

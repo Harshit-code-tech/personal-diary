@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { use, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
@@ -19,7 +19,8 @@ interface Person {
 
 const relationships = ['Family', 'Friend', 'Partner', 'Colleague', 'Mentor', 'Acquaintance', 'Other']
 
-export default function EditPersonPage({ params }: { params: { id: string } }) {
+export default function EditPersonPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [person, setPerson] = useState<Person | null>(null)
   const [name, setName] = useState('')
   const [relationship, setRelationship] = useState('')
@@ -39,7 +40,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from('people')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (error) throw error
@@ -56,13 +57,13 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }, [supabase, params.id, router])
+  }, [supabase, id, router])
 
   useEffect(() => {
     if (user) {
       fetchPerson()
     }
-  }, [user, params.id, fetchPerson])
+  }, [user, id, fetchPerson])
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -141,11 +142,11 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
           birthday: birthday || null,
           notes: notes.trim() || null,
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (updateError) throw updateError
 
-      router.push(`/app/people/${params.id}`)
+      router.push(`/app/people/${id}`)
     } catch (err: any) {
       console.error('Error updating person:', err)
       setError(err.message || 'Failed to update person')
@@ -171,7 +172,7 @@ export default function EditPersonPage({ params }: { params: { id: string } }) {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
-            href={`/app/people/${params.id}`}
+            href={`/app/people/${id}`}
             className="flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />

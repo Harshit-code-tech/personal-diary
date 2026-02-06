@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { use, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
@@ -44,7 +44,8 @@ interface Memory {
   updated_at: string
 }
 
-export default function PersonDetailPage({ params }: { params: { id: string } }) {
+export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [person, setPerson] = useState<Person | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [memories, setMemories] = useState<Memory[]>([])
@@ -61,7 +62,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
       const { data: personData, error: personError } = await supabase
         .from('people')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .eq('user_id', user?.id) // Security: Validate ownership
         .single()
 
@@ -83,7 +84,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
             id, title, content, entry_date, mood, word_count
           )
         `)
-        .eq('person_id', params.id)
+        .eq('person_id', id)
         .order('created_at', { ascending: false })
 
       if (entryPeopleError) throw entryPeopleError
@@ -105,7 +106,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
       const { data: memoriesData, error: memoriesError } = await supabase
         .from('memories')
         .select('*')
-        .eq('person_id', params.id)
+        .eq('person_id', id)
         .order('memory_date', { ascending: false })
 
       if (memoriesError && memoriesError.code !== 'PGRST116') {
@@ -118,13 +119,13 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
     } finally {
       setLoading(false)
     }
-  }, [supabase, params.id, router, user?.id])
+  }, [supabase, id, router, user?.id])
 
   useEffect(() => {
     if (user) {
       fetchPersonData()
     }
-  }, [user, params.id, fetchPersonData])
+  }, [user, id, fetchPersonData])
 
   const handleDelete = async () => {
     setDeleting(true)
@@ -132,7 +133,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
       const { error } = await supabase
         .from('people')
         .delete()
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -206,7 +207,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
 
           <div className="flex gap-3">
             <Link
-              href={`/app/people/${params.id}/edit`}
+              href={`/app/people/${id}/edit`}
               className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
             >
               <Edit className="w-5 h-5" />
@@ -364,7 +365,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
                 Create beautiful memories by linking entries and moments!
               </p>
               <Link
-                href={`/app/memories/new?person=${params.id}`}
+                href={`/app/memories/new?person=${id}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all"
               >
                 <Heart className="w-5 h-5" />
@@ -375,7 +376,7 @@ export default function PersonDetailPage({ params }: { params: { id: string } })
             <div className="space-y-4">
               <div className="flex justify-end">
                 <Link
-                  href={`/app/memories/new?person=${params.id}`}
+                  href={`/app/memories/new?person=${id}`}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-teal dark:bg-gold text-white dark:text-midnight rounded-lg font-semibold hover:shadow-md transition-all"
                 >
                   <Heart className="w-4 h-4" /> Add another memory

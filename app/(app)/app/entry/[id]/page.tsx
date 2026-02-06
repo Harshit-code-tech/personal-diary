@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { use, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useAutoSave } from '@/lib/hooks/useAutoSave'
@@ -31,7 +31,8 @@ const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'),
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful', '🤔 Others']
 
-export default function EntryPage({ params }: { params: { id: string } }) {
+export default function EntryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [entry, setEntry] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -64,7 +65,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
 
   // Auto-save functionality
   const { isSaving: autoSaving } = useAutoSave({
-    entryId: params.id,
+    entryId: id,
     title,
     content,
     enabled: editing,
@@ -78,7 +79,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from('entries')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (error) throw error
@@ -98,7 +99,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             id, name, avatar_url, relationship
           )
         `)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (!peopleError && peopleData) {
         setLinkedPeople(peopleData.map(ep => ep.people).filter(Boolean))
@@ -112,7 +113,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             id, title, icon, color, status
           )
         `)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (!storiesError && storiesData) {
         setLinkedStories(storiesData.map(se => se.stories).filter(Boolean))
@@ -137,7 +138,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             id, title, category, progress, is_completed
           )
         `)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (!goalsError && goalsData) {
         setLinkedGoals(goalsData.map(eg => eg.goals).filter(Boolean))
@@ -163,7 +164,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             id, title, category, icon, color, event_date, is_major
           )
         `)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (!eventsError && eventsData) {
         setLinkedEvents(eventsData.map(ele => ele.life_events).filter(Boolean))
@@ -186,13 +187,13 @@ export default function EntryPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }, [params.id, user?.id, supabase, router])
+  }, [id, user?.id, supabase, router])
 
   useEffect(() => {
     if (user) {
       fetchEntry()
     }
-  }, [user, params.id, fetchEntry])
+  }, [user, id, fetchEntry])
 
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
@@ -250,7 +251,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           entry_date: entryDate,
           word_count: wordCount,
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -279,7 +280,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           deleted_at: new Date().toISOString(),
           deleted_by: user?.id 
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -299,7 +300,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
     try {
       const links = selectedStories.map(storyId => ({
         story_id: storyId,
-        entry_id: params.id,
+        entry_id: id,
       }))
 
       const { error } = await supabase
@@ -324,7 +325,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
         .from('story_entries')
         .delete()
         .eq('story_id', storyId)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (error) throw error
 
@@ -342,7 +343,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
         .from('entry_goals')
         .insert(
           selectedGoals.map(goalId => ({
-            entry_id: params.id,
+            entry_id: id,
             goal_id: goalId
           }))
         )
@@ -368,7 +369,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
           is_bookmarked: newBookmarkState,
           bookmarked_at: newBookmarkState ? new Date().toISOString() : null
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -386,7 +387,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
         .from('entry_goals')
         .delete()
         .eq('goal_id', goalId)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (error) throw error
 
@@ -406,7 +407,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
         .from('entry_life_events')
         .insert(
           selectedEvents.map(eventId => ({
-            entry_id: params.id,
+            entry_id: id,
             life_event_id: eventId
           }))
         )
@@ -429,7 +430,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
         .from('entry_life_events')
         .delete()
         .eq('life_event_id', eventId)
-        .eq('entry_id', params.id)
+        .eq('entry_id', id)
 
       if (error) throw error
 
@@ -619,7 +620,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
                 <span>In Folders:</span>
               </div>
               <MultiFolderSelector
-                entryId={params.id}
+                entryId={id}
                 onUpdate={fetchEntry}
               />
             </div>

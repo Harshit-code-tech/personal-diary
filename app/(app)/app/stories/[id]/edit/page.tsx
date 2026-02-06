@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { use, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useRouter } from 'next/navigation'
@@ -16,7 +16,8 @@ const colorOptions = [
   '#3B82F6', '#10B981', '#F97316', '#6366F1',
 ]
 
-export default function EditStoryPage({ params }: { params: { id: string } }) {
+export default function EditStoryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [story, setStory] = useState<any>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -40,7 +41,7 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
       const { data, error } = await supabase
         .from('stories')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (error) throw error
@@ -61,13 +62,13 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false)
     }
-  }, [supabase, params.id, router])
+  }, [supabase, id, router])
 
   useEffect(() => {
     if (user) {
       fetchStory()
     }
-  }, [user, params.id, fetchStory])
+  }, [user, id, fetchStory])
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -143,11 +144,11 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
           status,
           category: category || null,
         })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (updateError) throw updateError
 
-      router.push(`/app/stories/${params.id}`)
+      router.push(`/app/stories/${id}`)
     } catch (err: any) {
       console.error('Error updating story:', err)
       setError(err.message || 'Failed to update story')
@@ -173,7 +174,7 @@ export default function EditStoryPage({ params }: { params: { id: string } }) {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
-            href={`/app/stories/${params.id}`}
+            href={`/app/stories/${id}`}
             className="flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />

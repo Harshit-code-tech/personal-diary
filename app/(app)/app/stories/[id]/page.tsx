@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { use, useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
@@ -36,7 +36,8 @@ interface Entry {
   word_count: number
 }
 
-export default function StoryDetailPage({ params }: { params: { id: string } }) {
+export default function StoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [story, setStory] = useState<Story | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [allEntries, setAllEntries] = useState<Entry[]>([])
@@ -56,7 +57,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       const { data: storyData, error: storyError } = await supabase
         .from('stories')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single()
 
       if (storyError) throw storyError
@@ -70,7 +71,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
             id, title, content, entry_date, mood, word_count
           )
         `)
-        .eq('story_id', params.id)
+        .eq('story_id', id)
         .order('order_index')
 
       if (storyEntriesError) throw storyEntriesError
@@ -100,13 +101,13 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
     } finally {
       setLoading(false)
     }
-  }, [supabase, params.id, user?.id, router])
+  }, [supabase, id, user?.id, router])
 
   useEffect(() => {
     if (user) {
       fetchStoryData()
     }
-  }, [user, params.id, fetchStoryData])
+  }, [user, id, fetchStoryData])
 
   const toggleFavorite = async () => {
     if (!story) return
@@ -115,7 +116,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       const { error } = await supabase
         .from('stories')
         .update({ is_favorite: !story.is_favorite })
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -131,7 +132,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       const { error } = await supabase
         .from('stories')
         .delete()
-        .eq('id', params.id)
+        .eq('id', id)
 
       if (error) throw error
 
@@ -149,7 +150,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
 
     try {
       const links = selectedEntries.map((entryId, index) => ({
-        story_id: params.id,
+        story_id: id,
         entry_id: entryId,
         order_index: entries.length + index,
       }))
@@ -175,7 +176,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       const { error } = await supabase
         .from('story_entries')
         .delete()
-        .eq('story_id', params.id)
+        .eq('story_id', id)
         .eq('entry_id', entryId)
 
       if (error) throw error
@@ -240,7 +241,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
 
           <div className="flex gap-3">
             <Link
-              href={`/app/stories/${params.id}/edit`}
+              href={`/app/stories/${id}/edit`}
               className="p-3 border border-charcoal/20 dark:border-white/20 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
             >
               <Edit className="w-5 h-5 text-charcoal/60 dark:text-white/60" />
@@ -259,7 +260,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
               />
             </button>
             <Link
-              href={`/app/stories/${params.id}/edit`}
+              href={`/app/stories/${id}/edit`}
               className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
             >
               <Edit className="w-5 h-5" />
