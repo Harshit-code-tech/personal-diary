@@ -26,6 +26,19 @@ serve(async (req) => {
   }
 
   try {
+    // Validate authorization
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('❌ Unauthorized: Missing or invalid Authorization header')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 401 
+        }
+      )
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -90,7 +103,7 @@ serve(async (req) => {
       reminders.map(async (reminder: any) => {
         try {
           const userEmail = userEmailMap.get(reminder.user_id)
-          const userTimezone = userTimezoneMap.get(reminder.user_id) || 'UTC'
+          const userTimezone: string = (userTimezoneMap.get(reminder.user_id) as string) || 'UTC'
           
           if (!userEmail) {
             console.error(`No email found for user ${reminder.user_id}`)

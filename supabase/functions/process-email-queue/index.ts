@@ -29,6 +29,307 @@ interface EmailQueueItem {
   last_error: string | null
 }
 
+// Generate HTML content by querying database directly (when database function fails)
+async function generateHTMLContent(
+  supabase: any,
+  userId: string,
+  emailType: string,
+  recipientEmail: string
+): Promise<string> {
+  // Get user's actual name from profiles
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('id', userId)
+    .single()
+  
+  const userName = profileData?.name || recipientEmail.split('@')[0]
+  
+  if (emailType === 'weekly_summary') {
+    // Query actual user data
+    const { data: streakData } = await supabase
+      .from('streaks')
+      .select('current_streak')
+      .eq('user_id', userId)
+      .single()
+    
+    // Get actual count of entries this week
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    
+    const { data: entriesData } = await supabase
+      .from('entries')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', weekAgo.toISOString())
+      .is('deleted_at', null)
+    
+    const currentStreak = streakData?.current_streak || 0
+    const entriesThisWeek = entriesData?.length || 0
+    
+    const streakMessage = currentStreak >= 7 
+      ? `<tr>
+          <td style="padding: 0 40px 20px 40px;">
+            <div style="background: #FFF3E0; border-left: 4px solid #FF9800; padding: 20px; border-radius: 8px;">
+              <p style="margin: 0; color: #E65100; font-size: 15px; line-height: 1.6;">
+                🔥 <strong>Amazing!</strong> You're on a ${currentStreak}-day streak! Keep the momentum going!
+              </p>
+            </div>
+          </td>
+        </tr>`
+      : ''
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Summary</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f2f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 48px 40px; text-align: center;">
+              <div style="font-size: 56px; margin-bottom: 16px;">📊</div>
+              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Your Weekly Summary</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px;">
+              <p style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px 0; font-weight: 500;">
+                Hi <strong>${userName}</strong>,
+              </p>
+              <p style="font-size: 16px; color: #666; margin: 0 0 32px 0; line-height: 1.6;">
+                Here's how your journaling week went. Keep up the great work!
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="50%" style="padding: 24px; background: #f8f9ff; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 48px; color: #667eea; font-weight: 700; margin-bottom: 8px;">${entriesThisWeek}</div>
+                    <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Entries This Week</div>
+                  </td>
+                  <td width="16"></td>
+                  <td width="50%" style="padding: 24px; background: #faf8ff; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 48px; color: #764ba2; font-weight: 700; margin-bottom: 8px;">🔥 ${currentStreak}</div>
+                    <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Day Streak</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ${streakMessage}
+          <tr>
+            <td style="padding: 0 40px 40px 40px; text-align: center;">
+              <a href="${APP_URL}/app" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                📝 Continue Journaling →
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #f8f9fa; padding: 24px 40px; border-top: 1px solid #e9ecef;">
+              <p style="margin: 0 0 8px 0; color: #999; font-size: 13px; text-align: center;">
+                You're receiving this because you enabled weekly summaries.
+              </p>
+              <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
+                Sent from Noted - Your Personal Diary
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+  }
+  
+  if (emailType === 'streak_milestone') {
+    // Get streak data
+    const { data: streakData } = await supabase
+      .from('streaks')
+      .select('current_streak')
+      .eq('user_id', userId)
+      .single()
+    
+    const currentStreak = streakData?.current_streak || 0
+    
+    let emoji = '🔥'
+    let title = 'Streak Milestone!'
+    let message = 'Keep the fire burning!'
+    let color = '#FF6B35'
+    
+    if (currentStreak >= 365) {
+      emoji = '🎉'
+      title = 'ONE YEAR STREAK!'
+      message = 'An entire year of journaling! You\'re a legend!'
+      color = '#FFD700'
+    } else if (currentStreak >= 90) {
+      emoji = '👑'
+      title = '90-Day Streak!'
+      message = 'Three months of dedication! You\'re a journaling champion!'
+      color = '#9b59b6'
+    } else if (currentStreak >= 30) {
+      emoji = '🏆'
+      title = '30-Day Streak!'
+      message = 'A full month! This is becoming second nature!'
+      color = '#e67e22'
+    } else if (currentStreak >= 14) {
+      emoji = '💎'
+      title = '2-Week Streak!'
+      message = 'Two weeks strong! You\'re building a great habit!'
+      color = '#3498db'
+    } else if (currentStreak >= 7) {
+      emoji = '🌟'
+      title = '7-Day Streak!'
+      message = 'One week of consistent journaling!'
+      color = '#2ecc71'
+    }
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f2f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+          <tr>
+            <td style="background: ${color}; padding: 48px 40px; text-align: center;">
+              <div style="font-size: 72px; margin-bottom: 16px;">${emoji}</div>
+              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${title}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px;">
+              <p style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px 0; font-weight: 500;">
+                Hi <strong>${userName}</strong>,
+              </p>
+              <p style="font-size: 16px; color: #666; margin: 0 0 32px 0; line-height: 1.6;">
+                ${message}
+              </p>
+              <div style="text-align: center; padding: 32px; background: #f8f9ff; border-radius: 12px;">
+                <div style="font-size: 64px; color: ${color}; font-weight: 700; margin-bottom: 8px;">${currentStreak}</div>
+                <div style="font-size: 18px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">Days in a Row!</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0 40px 40px 40px; text-align: center;">
+              <a href="${APP_URL}/app" style="display: inline-block; background: ${color}; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                Keep Going! →
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #f8f9fa; padding: 24px 40px; border-top: 1px solid #e9ecef;">
+              <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
+                Sent from Noted - Your Personal Diary
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+  }
+  
+  if (emailType === 'daily_reminder') {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Reminder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f2f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+          <tr>
+            <td style="background: linear-gradient(135deg, #FFA500 0%, #FF6B35 100%); padding: 48px 40px; text-align: center;">
+              <div style="font-size: 56px; margin-bottom: 16px;">✍️</div>
+              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Time to Journal</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 40px;">
+              <p style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px 0; font-weight: 500;">
+                Hi <strong>${userName}</strong>,
+              </p>
+              <p style="font-size: 16px; color: #666; margin: 0 0 24px 0; line-height: 1.6;">
+                This is your daily reminder to capture today's moments. Even a few lines can preserve memories that would otherwise fade away.
+              </p>
+              <div style="background: #fff7ed; border-left: 4px solid #FFA500; padding: 20px; border-radius: 8px; margin-bottom: 32px;">
+                <p style="margin: 0; color: #c2410c; font-size: 14px; line-height: 1.6;">
+                  💡 <strong>Quick Tip:</strong> Start by writing about one thing that happened today, no matter how small.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0 40px 40px 40px; text-align: center;">
+              <a href="${APP_URL}/app/new" style="display: inline-block; background: linear-gradient(135deg, #FFA500 0%, #FF6B35 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                📝 Write an Entry →
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="background: #f8f9fa; padding: 24px 40px; border-top: 1px solid #e9ecef;">
+              <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
+                Sent from Noted - Your Personal Diary
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+  }
+  
+  // Simple fallback for other email types
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f2f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 16px 0; color: #1a1a1a; font-size: 24px; font-weight: 600;">Notification from Noted</h2>
+              <p style="font-size: 16px; color: #666; margin: 0 0 24px 0; line-height: 1.6;">
+                Hi <strong>${userName}</strong>, you have a new notification from your personal diary.
+              </p>
+              <a href="${APP_URL}/app" style="display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">
+                View Your Diary →
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+}
+
 // Create SMTP client on-demand with timeout
 async function sendEmailWithTimeout(
   recipient: string,
@@ -36,6 +337,23 @@ async function sendEmailWithTimeout(
   htmlBody: string,
   timeoutMs = 8000 // 8 second timeout
 ): Promise<void> {
+  // Validate inputs before creating SMTP client
+  if (!recipient || !recipient.includes('@')) {
+    throw new Error(`Invalid recipient email: ${recipient}`)
+  }
+  
+  if (!subject || subject.trim() === '') {
+    throw new Error('Email subject is empty')
+  }
+  
+  if (!htmlBody || htmlBody.trim() === '') {
+    throw new Error('Email HTML body is empty or null')
+  }
+
+  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+    throw new Error('SMTP credentials not configured (GMAIL_USER or GMAIL_APP_PASSWORD missing)')
+  }
+
   const smtpClient = new SMTPClient({
     connection: {
       hostname: 'smtp.gmail.com',
@@ -50,9 +368,10 @@ async function sendEmailWithTimeout(
 
   try {
     const sendPromise = smtpClient.send({
-      from: `Noted <${GMAIL_USER}>`, // Display name "Noted" with valid email
+      from: `Noted <${GMAIL_USER}>`,
       to: recipient,
       subject: subject,
+      content: `Please view this email in an HTML-capable email client.\n\n${subject}`,
       html: htmlBody,
     })
 
@@ -78,6 +397,19 @@ serve(async (req) => {
   }
 
   try {
+    // Validate authorization (accept either service_role key or anon key with proper auth)
+    const authHeader = req.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('❌ Unauthorized: Missing or invalid Authorization header')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 401 
+        }
+      )
+    }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
 
@@ -108,18 +440,56 @@ serve(async (req) => {
 
     console.log(`Processing ${pendingEmails.length} pending emails...`)
 
+    // Log what we received for debugging
+    console.log('Sample email data:', {
+      id: pendingEmails[0]?.id,
+      email_type: pendingEmails[0]?.email_type,
+      recipient: pendingEmails[0]?.recipient_email,
+      subject: pendingEmails[0]?.subject,
+      html_body_length: pendingEmails[0]?.html_body?.length || 0,
+      html_body_is_null: pendingEmails[0]?.html_body === null,
+      html_body_preview: pendingEmails[0]?.html_body?.substring(0, 100) || 'NULL',
+    })
+
     // Process each email
     const results = await Promise.allSettled(
       pendingEmails.map(async (emailItem: EmailQueueItem) => {
         try {
+          // CHECK: If html_body is missing, generate it by querying database
+          let htmlToSend = emailItem.html_body
+          let usedFallback = false
+          
+          if (!htmlToSend || htmlToSend.trim() === '') {
+            console.warn(`⚠️ Email ID ${emailItem.id} has NULL html_body. Generating HTML from database. Email type: ${emailItem.email_type}`)
+            
+            // Query database and generate real HTML content
+            htmlToSend = await generateHTMLContent(
+              supabase,
+              emailItem.user_id,
+              emailItem.email_type,
+              emailItem.recipient_email
+            )
+            usedFallback = true
+            
+            // Update the email_queue with the generated HTML
+            await supabase
+              .from('email_queue')
+              .update({ html_body: htmlToSend })
+              .eq('id', emailItem.id)
+          }
+
+          if (!emailItem.recipient_email || !emailItem.subject) {
+            throw new Error(`Email missing required fields (recipient or subject). ID: ${emailItem.id}`)
+          }
+
           // Send email with timeout protection
           await sendEmailWithTimeout(
             emailItem.recipient_email,
             emailItem.subject,
-            emailItem.html_body
+            htmlToSend
           )
 
-          console.log(`✅ Email sent successfully to ${emailItem.recipient_email}`)
+          console.log(`✅ Email sent successfully to ${emailItem.recipient_email}${usedFallback ? ' (generated HTML from database)' : ''}`)
 
           // Update email status to 'sent'
           await supabase

@@ -31,6 +31,16 @@ interface EmailJob {
 serve(async (req) => {
   console.log('📧 Email reminders function called')
   
+  // Validate authorization
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.error('❌ Unauthorized: Missing or invalid Authorization header')
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+  
   try {
     // Validate environment variables first
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
