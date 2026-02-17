@@ -113,10 +113,11 @@ export interface UserSettings {
   theme: 'light' | 'dark' | 'system'
   timezone: string
   email_reminders_enabled: boolean
-  email_daily_reminder: boolean
-  email_weekly_summary: boolean
-  email_inactive_reminder: boolean
+  weekly_summary_enabled: boolean
+  inactivity_emails_enabled: boolean
+  milestone_notifications_enabled: boolean
   reminder_time: string | null
+  reminder_days: string[] | null
   created_at: string
   updated_at: string
 }

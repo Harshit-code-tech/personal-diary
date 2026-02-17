@@ -26,13 +26,24 @@ export function stripHtmlTags(html: string): string {
   if (!html) return ''
   
   // Use regex to strip HTML tags (server-side safe, no DOM needed)
-  // This avoids jsdom/parse5 issues in Vercel serverless
+  // Loop until stable to prevent bypass via nested tags like <scr<script>ipt>
   let text = html
+  let prev = ''
+  
+  // Iteratively remove script/style tags and all HTML tags until no changes
+  do {
+    prev = text
     // Remove script and style tags with their content
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+    text = text
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+    // Remove HTML comments (can hide malicious content)
+    text = text.replace(/<!--[\s\S]*?-->/g, '')
     // Remove all other HTML tags
-    .replace(/<[^>]*>/g, '')
+    text = text.replace(/<\/?[a-z][^>]*>/gi, '')
+    // Remove any remaining angle-bracket fragments (e.g. orphaned < or >)
+    text = text.replace(/<[^>]*$/g, '').replace(/^[^<]*>/g, '')
+  } while (text !== prev)
   
   // Decode HTML entities using a safe approach
   const entityMap: Record<string, string> = {
