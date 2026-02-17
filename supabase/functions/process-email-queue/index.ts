@@ -397,10 +397,19 @@ serve(async (req) => {
   }
 
   try {
-    // Validate authorization (accept either service_role key or anon key with proper auth)
+    // Simple auth check - just ensure a Bearer token is present
+    // This function is internal and should only be called by:
+    // 1. Vercel cron job (with service role key)
+    // 2. Supabase pg_cron (internal)
     const authHeader = req.headers.get('authorization')
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.error('❌ Unauthorized: Missing or invalid Authorization header')
+      console.error('❌ Unauthorized: Missing Authorization header')
+      console.error('Headers received:', {
+        hasAuth: !!authHeader,
+        authPrefix: authHeader?.substring(0, 10),
+        hasApiKey: !!req.headers.get('apikey'),
+      })
       return new Response(
         JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
         { 
@@ -410,6 +419,7 @@ serve(async (req) => {
       )
     }
 
+    console.log('✅ Authorization header present')
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
 

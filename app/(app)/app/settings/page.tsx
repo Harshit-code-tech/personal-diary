@@ -124,6 +124,9 @@ export default function SettingsPage() {
         }
         return
       }
+
+      // Also sync to auth metadata so it stays consistent everywhere
+      await supabase.auth.updateUser({ data: { username } })
       
       toastNotify.success('Username Updated', 'Your username has been saved')
     } catch (error: any) {

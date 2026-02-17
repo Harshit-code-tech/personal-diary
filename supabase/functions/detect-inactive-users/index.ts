@@ -186,14 +186,14 @@ serve(async (req) => {
 
     for (const user of users || []) {
       try {
-        // Check if user has email reminders enabled
+        // Check if user has inactivity/streak notifications enabled
         const { data: settings } = await supabase
           .from('user_settings')
-          .select('email_reminders_enabled, email_frequency')
+          .select('inactivity_emails_enabled')
           .eq('user_id', user.id)
           .single()
 
-        if (!settings?.email_reminders_enabled) {
+        if (!settings?.inactivity_emails_enabled) {
           continue
         }
 

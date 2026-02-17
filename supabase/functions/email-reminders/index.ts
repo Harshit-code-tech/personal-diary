@@ -119,10 +119,10 @@ serve(async (req) => {
     const results = await Promise.all(
       (pendingEmails || []).map(async (emailJob: any) => {
         try {
-          // Get user settings and profile (including email)
+          // Get user settings to check notification preferences
           const { data: settings } = await supabase
             .from('user_settings')
-            .select('email_reminders_enabled, email_frequency')
+            .select('email_reminders_enabled, weekly_summary_enabled, inactivity_emails_enabled, milestone_notifications_enabled')
             .eq('user_id', emailJob.user_id)
             .single()
 
@@ -141,11 +141,22 @@ serve(async (req) => {
             return { success: false, reason: 'no_email' }
           }
 
-          // Skip if user disabled reminders
-          if (!settings?.email_reminders_enabled) {
+          // Check the correct toggle based on the email type
+          const isEnabled = (() => {
+            switch (emailJob.email_type) {
+              case 'daily_reminder': return settings?.email_reminders_enabled !== false
+              case 'weekly_summary': return settings?.weekly_summary_enabled !== false
+              case 'inactivity_reminder': return settings?.inactivity_emails_enabled !== false
+              case 'milestone': return settings?.milestone_notifications_enabled !== false
+              case 'reminder_notification': return true // custom reminders are always sent if active
+              default: return true // unknown types pass through
+            }
+          })()
+
+          if (!isEnabled) {
             await supabase
               .from('email_queue')
-              .update({ status: 'failed', error_message: 'User disabled reminders' })
+              .update({ status: 'failed', error_message: `User disabled ${emailJob.email_type} notifications` })
               .eq('id', emailJob.id)
             return { success: false, reason: 'disabled' }
           }

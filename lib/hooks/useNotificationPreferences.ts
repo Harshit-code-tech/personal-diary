@@ -91,8 +91,9 @@ export function useNotificationPreferences() {
     try {
       const updated = { ...preferences, ...newPreferences }
       
-      // Always use current browser timezone (handles travel/timezone changes)
-      const currentTimezone = getBrowserTimezone()
+      // Use the timezone the user explicitly selected in settings,
+      // falling back to browser-detected timezone only if not set
+      const effectiveTimezone = updated.timezone || getBrowserTimezone()
 
       // Use UPSERT to handle both insert and update
       const { error } = await supabase
@@ -105,7 +106,7 @@ export function useNotificationPreferences() {
           milestone_notifications_enabled: updated.milestoneNotifications,
           reminder_time: updated.reminderTime,
           reminder_days: updated.reminderDays,
-          timezone: currentTimezone,
+          timezone: effectiveTimezone,
         }, {
           onConflict: 'user_id'
         })

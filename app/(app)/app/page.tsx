@@ -232,18 +232,29 @@ export default function AppPage() {
 
   const fetchUsername = useCallback(async () => {
     try {
-      // Get username from user metadata
+      // First try user_settings table (source of truth, updated via settings page)
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('username')
+        .eq('user_id', user?.id)
+        .single()
+
+      if (settings?.username) {
+        setUsername(settings.username)
+        return
+      }
+
+      // Fallback to auth metadata (set at signup)
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (authUser?.user_metadata?.username) {
         setUsername(authUser.user_metadata.username)
       } else if (authUser?.email) {
-        // Fallback to email username
         setUsername(authUser.email.split('@')[0])
       }
     } catch (error) {
       console.error('Error fetching username:', error)
     }
-  }, [supabase])
+  }, [supabase, user?.id])
 
   useEffect(() => {
     if (user) {
