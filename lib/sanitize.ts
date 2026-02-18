@@ -34,38 +34,69 @@ export function stripHtmlTags(html: string): string {
     return text.replace(/\s+/g, ' ').trim()
   }
 
-  // Server-side fallback: use iterative regex stripping
-  let text = html
+  // Server-side fallback: state-machine parser (no regex for HTML = no CodeQL flags)
+  // Walks character-by-character, tracking tag/comment/script/style context
+  let result = ''
+  let inTag = false
+  let inComment = false
+  let inScript = false
+  let inStyle = false
+  const len = html.length
+  let i = 0
 
-  // Phase 1: Remove script/style blocks (iterate until fully removed to handle nesting)
-  let scriptPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi
-  while (scriptPattern.test(text)) {
-    text = text.replace(scriptPattern, '')
-    scriptPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi
+  while (i < len) {
+    // Detect HTML comment start: <!--
+    if (!inTag && !inComment && i + 3 < len &&
+        html[i] === '<' && html[i + 1] === '!' && html[i + 2] === '-' && html[i + 3] === '-') {
+      inComment = true
+      i += 4
+      continue
+    }
+
+    // Detect comment end: -->
+    if (inComment) {
+      if (i + 2 < len && html[i] === '-' && html[i + 1] === '-' && html[i + 2] === '>') {
+        inComment = false
+        i += 3
+      } else {
+        i++
+      }
+      continue
+    }
+
+    // Detect tag open
+    if (html[i] === '<' && !inTag) {
+      // Check for script/style open/close by reading until > or space
+      const rest = html.slice(i).toLowerCase()
+      if (rest.startsWith('<script') && (rest.length < 8 || /[\s>\/]/.test(rest[7]))) {
+        inScript = true
+      } else if (rest.startsWith('</script') && (rest.length < 9 || /[\s>]/.test(rest[8]))) {
+        inScript = false
+      } else if (rest.startsWith('<style') && (rest.length < 7 || /[\s>\/]/.test(rest[6]))) {
+        inStyle = true
+      } else if (rest.startsWith('</style') && (rest.length < 8 || /[\s>]/.test(rest[7]))) {
+        inStyle = false
+      }
+      inTag = true
+      i++
+      continue
+    }
+
+    // Detect tag close
+    if (html[i] === '>' && inTag) {
+      inTag = false
+      i++
+      continue
+    }
+
+    // Only collect text outside of tags, scripts, and styles
+    if (!inTag && !inScript && !inStyle) {
+      result += html[i]
+    }
+    i++
   }
-  let stylePattern = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style\s*>/gi
-  while (stylePattern.test(text)) {
-    text = text.replace(stylePattern, '')
-    stylePattern = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style\s*>/gi
-  }
 
-  // Phase 2: Remove HTML comments
-  text = text.replace(/<!--[\s\S]*?-->/g, '')
-
-  // Phase 3: Remove all HTML tags iteratively until stable
-  // Use a non-greedy match for tag content to handle attributes safely
-  let tagPattern = /<\/?[a-z][a-z0-9]*\b[^>]*\/?>/gi
-  let previous = ''
-  while (text !== previous) {
-    previous = text
-    text = text.replace(tagPattern, '')
-    tagPattern = /<\/?[a-z][a-z0-9]*\b[^>]*\/?>/gi
-  }
-
-  // Phase 4: Remove any orphaned angle brackets
-  text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  
-  // Decode HTML entities using a safe approach
+  // Decode common HTML entities
   const entityMap: Record<string, string> = {
     '&nbsp;': ' ',
     '&amp;': '&',
@@ -76,11 +107,12 @@ export function stripHtmlTags(html: string): string {
     '&#x27;': "'",
     '&apos;': "'"
   }
-  
+
+  let text = result
   for (const [entity, char] of Object.entries(entityMap)) {
     text = text.split(entity).join(char)
   }
-  
+
   // Normalize whitespace
   return text.replace(/\s+/g, ' ').trim()
 }

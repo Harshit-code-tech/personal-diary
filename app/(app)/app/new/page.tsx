@@ -342,7 +342,7 @@ export default function NewEntryPage() {
 
           <div className="flex items-center gap-3">
             {/* Draft Status Indicator */}
-            {hasDraft && (
+            {(hasDraft || isDirty) && (
               <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-sm">
                 {isDirty ? (
                   <>
