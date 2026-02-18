@@ -24,26 +24,46 @@ function getClientPurifier() {
  */
 export function stripHtmlTags(html: string): string {
   if (!html) return ''
-  
-  // Use regex to strip HTML tags (server-side safe, no DOM needed)
-  // Loop until stable to prevent bypass via nested tags like <scr<script>ipt>
+
+  // On the client side, use the DOM for reliable HTML stripping
+  if (typeof document !== 'undefined') {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    // Remove script and style elements entirely
+    doc.querySelectorAll('script, style').forEach(el => el.remove())
+    const text = doc.body.textContent || ''
+    return text.replace(/\s+/g, ' ').trim()
+  }
+
+  // Server-side fallback: use iterative regex stripping
   let text = html
-  let prev = ''
-  
-  // Iteratively remove script/style tags and all HTML tags until no changes
-  do {
-    prev = text
-    // Remove script and style tags with their content
-    text = text
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
-    // Remove HTML comments (can hide malicious content)
-    text = text.replace(/<!--[\s\S]*?-->/g, '')
-    // Remove all other HTML tags
-    text = text.replace(/<\/?[a-z][^>]*>/gi, '')
-    // Remove any remaining angle-bracket fragments (e.g. orphaned < or >)
-    text = text.replace(/<[^>]*$/g, '').replace(/^[^<]*>/g, '')
-  } while (text !== prev)
+
+  // Phase 1: Remove script/style blocks (iterate until fully removed to handle nesting)
+  let scriptPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi
+  while (scriptPattern.test(text)) {
+    text = text.replace(scriptPattern, '')
+    scriptPattern = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script\s*>/gi
+  }
+  let stylePattern = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style\s*>/gi
+  while (stylePattern.test(text)) {
+    text = text.replace(stylePattern, '')
+    stylePattern = /<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style\s*>/gi
+  }
+
+  // Phase 2: Remove HTML comments
+  text = text.replace(/<!--[\s\S]*?-->/g, '')
+
+  // Phase 3: Remove all HTML tags iteratively until stable
+  // Use a non-greedy match for tag content to handle attributes safely
+  let tagPattern = /<\/?[a-z][a-z0-9]*\b[^>]*\/?>/gi
+  let previous = ''
+  while (text !== previous) {
+    previous = text
+    text = text.replace(tagPattern, '')
+    tagPattern = /<\/?[a-z][a-z0-9]*\b[^>]*\/?>/gi
+  }
+
+  // Phase 4: Remove any orphaned angle brackets
+  text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;')
   
   // Decode HTML entities using a safe approach
   const entityMap: Record<string, string> = {
@@ -57,11 +77,8 @@ export function stripHtmlTags(html: string): string {
     '&apos;': "'"
   }
   
-  // Replace entities in a single pass to avoid double-escaping
-  // Use a more robust replacement that handles entities properly
   for (const [entity, char] of Object.entries(entityMap)) {
-    // Use a regex with global flag to replace all occurrences
-    text = text.replace(new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), char)
+    text = text.split(entity).join(char)
   }
   
   // Normalize whitespace

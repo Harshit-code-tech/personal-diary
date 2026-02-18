@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { stripHtmlTags } from '@/lib/sanitize'
+import { stripHtmlTags, sanitizeHtml } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Save, X } from 'lucide-react'
@@ -229,7 +229,7 @@ export default function EntryPage({ params }: { params: { id: string } }) {
             <div className="prose prose-lg max-w-none dark:prose-invert">
               <div 
                 className="text-charcoal/90 dark:text-white/90 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: entry.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.content) }}
               />
             </div>
           </div>
