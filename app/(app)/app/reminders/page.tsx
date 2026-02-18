@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useReminderRateLimit } from '@/lib/hooks/useReminderRateLimit'
 import Link from 'next/link'
-import { ArrowLeft, Bell, Plus, Check, X, Calendar, Repeat, Trash2, Shield } from 'lucide-react'
+import { ArrowLeft, Bell, Plus, Check, Calendar, Repeat, Trash2, Shield } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
@@ -25,12 +25,24 @@ const getUserTimezone = () => {
   }
 }
 
+const WEEKDAYS = [
+  { key: 'monday', label: 'Mon' },
+  { key: 'tuesday', label: 'Tue' },
+  { key: 'wednesday', label: 'Wed' },
+  { key: 'thursday', label: 'Thu' },
+  { key: 'friday', label: 'Fri' },
+  { key: 'saturday', label: 'Sat' },
+  { key: 'sunday', label: 'Sun' },
+]
+
 type Reminder = {
   id: string
   title: string
   description: string | null
   next_reminder_at: string
   reminder_type: 'once' | 'daily' | 'weekly' | 'custom'
+  custom_days: string[] | null
+  repeat_until: string | null
   is_active: boolean
   created_at?: string
   updated_at?: string
@@ -57,8 +69,23 @@ export default function RemindersPage() {
     title: '',
     description: '',
     next_reminder_at: '',
-    reminder_type: 'once' as 'once' | 'daily' | 'weekly' | 'custom'
+    reminder_type: 'once' as 'once' | 'daily' | 'weekly' | 'custom',
+    custom_days: [] as string[],
+    repeat_forever: true,
+    repeat_until: ''
   })
+
+  const defaultFormData = { title: '', description: '', next_reminder_at: '', reminder_type: 'once' as const, custom_days: [] as string[], repeat_forever: true, repeat_until: '' }
+
+  // Lock body scroll when modal is open (prevents background scrolling on mobile)
+  useEffect(() => {
+    if (showAddModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showAddModal])
 
   const fetchReminders = useCallback(async () => {
     setLoading(true)
@@ -93,6 +120,16 @@ export default function RemindersPage() {
       return
     }
 
+    if (formData.reminder_type === 'custom' && formData.custom_days.length < 2) {
+      toastNotify.error('Missing Days', 'Please select at least two days for custom reminders')
+      return
+    }
+
+    if (['daily', 'weekly', 'custom'].includes(formData.reminder_type) && !formData.repeat_forever && !formData.repeat_until) {
+      toastNotify.error('Missing End Date', 'Please set a repeat end date or choose "Repeat forever"')
+      return
+    }
+
     try {
       // Convert user's timezone datetime to UTC
       // User picks time in their local timezone
@@ -103,6 +140,11 @@ export default function RemindersPage() {
       const localDate = toZonedTime(localDateTimeString, userTimezone)
       const utcDateTime = localDate.toISOString()
 
+      // Compute repeat_until as UTC ISO string (only for recurring types, only if not forever)
+      const repeatUntilUtc = ['daily', 'weekly', 'custom'].includes(formData.reminder_type) && !formData.repeat_forever && formData.repeat_until
+        ? new Date(formData.repeat_until + 'T23:59:59').toISOString()
+        : null
+
       if (editingId) {
         const { error } = await supabase
           .from('reminders')
@@ -110,7 +152,9 @@ export default function RemindersPage() {
             title: formData.title.trim(),
             description: formData.description.trim() || null,
             next_reminder_at: utcDateTime,
-            reminder_type: formData.reminder_type
+            reminder_type: formData.reminder_type,
+            custom_days: formData.reminder_type === 'custom' ? formData.custom_days : null,
+            repeat_until: repeatUntilUtc
           })
           .eq('id', editingId)
 
@@ -125,6 +169,8 @@ export default function RemindersPage() {
             description: formData.description.trim() || null,
             next_reminder_at: utcDateTime,
             reminder_type: formData.reminder_type,
+            custom_days: formData.reminder_type === 'custom' ? formData.custom_days : null,
+            repeat_until: repeatUntilUtc,
             is_active: true
           })
 
@@ -132,7 +178,7 @@ export default function RemindersPage() {
         toastNotify.success('Reminder Created', 'Your new reminder has been added')
       }
 
-      setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
+      setFormData(defaultFormData)
       setEditingId(null)
       setShowAddModal(false)
       fetchReminders()
@@ -199,15 +245,23 @@ export default function RemindersPage() {
     
     // Convert UTC from database to user's timezone for datetime-local input
     const utcDate = new Date(reminder.next_reminder_at)
-    
-    // Format UTC date in user's timezone for datetime-local input
     const localDateTimeString = formatInTimeZone(utcDate, userTimezone, "yyyy-MM-dd'T'HH:mm")
+    
+    // Determine repeat_until state
+    const hasRepeatUntil = !!reminder.repeat_until
+    let repeatUntilLocal = ''
+    if (hasRepeatUntil) {
+      repeatUntilLocal = formatInTimeZone(new Date(reminder.repeat_until!), userTimezone, 'yyyy-MM-dd')
+    }
     
     setFormData({
       title: reminder.title,
       description: reminder.description || '',
       next_reminder_at: localDateTimeString,
-      reminder_type: reminder.reminder_type
+      reminder_type: reminder.reminder_type,
+      custom_days: reminder.custom_days || [],
+      repeat_forever: !hasRepeatUntil,
+      repeat_until: repeatUntilLocal
     })
     setShowAddModal(true)
   }
@@ -248,7 +302,7 @@ export default function RemindersPage() {
                   return
                 }
                 setEditingId(null)
-                setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
+                setFormData(defaultFormData)
                 setShowAddModal(true)
               }}
               disabled={rateLimit && !rateLimit.can_create_more}
@@ -287,8 +341,8 @@ export default function RemindersPage() {
               <p className="font-semibold mb-1">⏰ How Reminders Work</p>
               <p className="text-blue-700 dark:text-blue-200">
                 Times are in <strong>your timezone ({userTimezone})</strong>. 
-                Reminders are checked <strong>every 15 minutes</strong>. 
-                You&apos;ll receive your reminder within <strong>15 minutes</strong> of the scheduled time.
+                Reminders are checked <strong>once daily at ~6:00 AM UTC</strong>. 
+                Set your reminder time before that for same-day delivery.
               </p>
             </div>
           </div>
@@ -429,9 +483,23 @@ export default function RemindersPage() {
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-2xl max-w-lg w-full p-6">
-            <h3 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
+        <div
+          className="fixed inset-0 bg-black/50 z-50 overflow-y-auto"
+          onClick={(e) => {
+            // Close modal when clicking the backdrop (not the modal content)
+            if (e.target === e.currentTarget) {
+              setShowAddModal(false)
+              setEditingId(null)
+              setFormData(defaultFormData)
+            }
+          }}
+        >
+          <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+            <div
+              className="bg-white dark:bg-graphite rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <h3 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white mb-4 sm:mb-6">
               {editingId ? 'Edit Reminder' : 'New Reminder'}
             </h3>
 
@@ -487,10 +555,99 @@ export default function RemindersPage() {
                 >
                   <option value="once">Once</option>
                   <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="custom">Custom</option>
+                  <option value="weekly">Weekly (every 7 days)</option>
+                  <option value="custom">Custom (select days)</option>
                 </select>
+                <p className="text-xs text-charcoal/50 dark:text-white/50 mt-1">
+                  {formData.reminder_type === 'once' && '⏱ Fires once at the scheduled time, then deactivates.'}
+                  {formData.reminder_type === 'daily' && '🔁 Repeats every day at the same time.'}
+                  {formData.reminder_type === 'weekly' && '🔁 Repeats every 7 days at the same time.'}
+                  {formData.reminder_type === 'custom' && '🔁 Pick specific days of the week to repeat on.'}
+                </p>
               </div>
+
+              {/* Custom Day Selection */}
+              {formData.reminder_type === 'custom' && (
+                <div className="bg-gold/5 dark:bg-teal/5 border border-gold/20 dark:border-teal/20 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-3">
+                    Select Days *
+                  </label>
+                  <div className="flex gap-2 flex-wrap">
+                    {WEEKDAYS.map(day => {
+                      const isSelected = formData.custom_days.includes(day.key)
+                      return (
+                        <button
+                          key={day.key}
+                          type="button"
+                          onClick={() => {
+                            const newDays = isSelected
+                              ? formData.custom_days.filter(d => d !== day.key)
+                              : [...formData.custom_days, day.key]
+                            setFormData({ ...formData, custom_days: newDays })
+                          }}
+                          className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-md'
+                              : 'bg-charcoal/10 dark:bg-white/10 text-charcoal/70 dark:text-white/70 hover:bg-charcoal/20 dark:hover:bg-white/20'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {formData.custom_days.length < 2 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                      ⚠️ Select at least two days for better reminder delivery chances.
+                    </p>
+                  )}
+                  <p className="text-xs text-charcoal/50 dark:text-white/50 mt-2">
+                    💡 Reminder fires on selected days at the time chosen above.
+                  </p>
+                </div>
+              )}
+
+              {/* Repeat Duration (for all recurring types) */}
+              {['daily', 'weekly', 'custom'].includes(formData.reminder_type) && (
+                <div className="bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-charcoal dark:text-white mb-3">
+                    Repeat Duration
+                  </label>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="repeat_duration"
+                        checked={formData.repeat_forever}
+                        onChange={() => setFormData({ ...formData, repeat_forever: true, repeat_until: '' })}
+                        className="w-4 h-4 text-gold dark:text-teal accent-amber-600 dark:accent-teal"
+                      />
+                      <span className="text-sm text-charcoal dark:text-white font-medium">Repeat forever</span>
+                      <span className="text-xs text-charcoal/50 dark:text-white/50">∞</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="repeat_duration"
+                        checked={!formData.repeat_forever}
+                        onChange={() => setFormData({ ...formData, repeat_forever: false })}
+                        className="w-4 h-4 text-gold dark:text-teal accent-amber-600 dark:accent-teal"
+                      />
+                      <span className="text-sm text-charcoal dark:text-white font-medium">Repeat until</span>
+                    </label>
+                    {!formData.repeat_forever && (
+                      <input
+                        type="date"
+                        value={formData.repeat_until}
+                        onChange={(e) => setFormData({ ...formData, repeat_until: e.target.value })}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal sm:ml-7"
+                        required
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
@@ -498,7 +655,7 @@ export default function RemindersPage() {
                   onClick={() => {
                     setShowAddModal(false)
                     setEditingId(null)
-                    setFormData({ title: '', description: '', next_reminder_at: '', reminder_type: 'once' })
+                    setFormData(defaultFormData)
                   }}
                   className="flex-1 px-4 py-2.5 border border-charcoal/20 dark:border-white/20 rounded-lg font-medium hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
                 >
@@ -512,6 +669,7 @@ export default function RemindersPage() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
         </div>
       )}
@@ -575,7 +733,7 @@ function ReminderCard({ reminder, onToggle, onEdit, onDelete, isPast }: {
             </p>
           )}
 
-          <div className="flex items-center gap-4 text-xs text-charcoal/50 dark:text-white/50">
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap text-xs text-charcoal/50 dark:text-white/50">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -583,13 +741,24 @@ function ReminderCard({ reminder, onToggle, onEdit, onDelete, isPast }: {
             {reminder.reminder_type !== 'once' && (
               <span className="flex items-center gap-1">
                 <Repeat className="w-3 h-3" />
-                {reminder.reminder_type}
+                {reminder.reminder_type === 'custom' && reminder.custom_days?.length
+                  ? reminder.custom_days.map(d => d.charAt(0).toUpperCase() + d.slice(1, 3)).join(', ')
+                  : reminder.reminder_type === 'daily' ? 'Daily'
+                  : reminder.reminder_type === 'weekly' ? 'Weekly'
+                  : reminder.reminder_type}
+              </span>
+            )}
+            {reminder.reminder_type !== 'once' && (
+              <span className="text-xs">
+                {reminder.repeat_until
+                  ? `until ${new Date(reminder.repeat_until).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+                  : '∞ forever'}
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 sm:gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(reminder)}
             className="p-2 hover:bg-gold/10 dark:hover:bg-teal/10 rounded-lg transition-colors"

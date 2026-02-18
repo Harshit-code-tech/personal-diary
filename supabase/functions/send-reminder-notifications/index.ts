@@ -16,6 +16,8 @@ interface Reminder {
   description: string | null
   next_reminder_at: string
   reminder_type: 'once' | 'daily' | 'weekly' | 'custom'
+  custom_days: string[] | null
+  repeat_until: string | null
   is_active: boolean
 }
 
@@ -51,7 +53,7 @@ serve(async (req) => {
     // This catches any reminders that were missed or are currently due
     const { data: reminders, error } = await supabaseClient
       .from('reminders')
-      .select('id, user_id, title, description, next_reminder_at, reminder_type, is_active')
+      .select('id, user_id, title, description, next_reminder_at, reminder_type, custom_days, repeat_until, is_active')
       .eq('is_active', true)
       .lte('next_reminder_at', now.toISOString())
 
@@ -182,8 +184,8 @@ serve(async (req) => {
               .eq('id', reminder.id)
             
             console.log(`Deactivated one-time reminder: ${reminder.id}`)
-          } else if (reminder.reminder_type !== 'custom') {
-            // For recurring reminders, calculate next occurrence
+          } else {
+            // For recurring reminders (daily, weekly, custom), calculate next occurrence
             const nextDate = new Date(reminder.next_reminder_at)
             
             switch (reminder.reminder_type) {
@@ -193,17 +195,51 @@ serve(async (req) => {
               case 'weekly':
                 nextDate.setDate(nextDate.getDate() + 7)
                 break
+              case 'custom': {
+                // Find the next selected weekday from custom_days
+                if (reminder.custom_days && reminder.custom_days.length > 0) {
+                  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+                  const currentDayIndex = nextDate.getDay() // 0=Sun through 6=Sat
+                  const selectedIndices = reminder.custom_days
+                    .map(d => dayNames.indexOf(d.toLowerCase()))
+                    .filter(i => i >= 0)
+                    .sort((a, b) => a - b)
+                  
+                  if (selectedIndices.length > 0) {
+                    // Find next selected day AFTER current day
+                    const nextIndex = selectedIndices.find(i => i > currentDayIndex)
+                    const daysToAdd = nextIndex !== undefined
+                      ? nextIndex - currentDayIndex
+                      : 7 - currentDayIndex + selectedIndices[0] // Wrap to next week
+                    nextDate.setDate(nextDate.getDate() + daysToAdd)
+                  } else {
+                    // Fallback: treat as daily
+                    nextDate.setDate(nextDate.getDate() + 1)
+                  }
+                } else {
+                  // No days selected, treat as daily
+                  nextDate.setDate(nextDate.getDate() + 1)
+                }
+                break
+              }
             }
 
-            // Update next occurrence
-            await supabaseClient
-              .from('reminders')
-              .update({ 
-                next_reminder_at: nextDate.toISOString(),
-              })
-              .eq('id', reminder.id)
-            
-            console.log(`Updated recurring reminder ${reminder.id} to ${nextDate.toISOString()}`)
+            // Check repeat_until before scheduling next occurrence
+            if (reminder.repeat_until && nextDate > new Date(reminder.repeat_until)) {
+              // Past the end date — deactivate instead of rescheduling
+              await supabaseClient
+                .from('reminders')
+                .update({ is_active: false })
+                .eq('id', reminder.id)
+              console.log(`Deactivated expired recurring reminder: ${reminder.id} (repeat_until: ${reminder.repeat_until})`)
+            } else {
+              // Schedule next occurrence
+              await supabaseClient
+                .from('reminders')
+                .update({ next_reminder_at: nextDate.toISOString() })
+                .eq('id', reminder.id)
+              console.log(`Updated recurring reminder ${reminder.id} (${reminder.reminder_type}) to ${nextDate.toISOString()}`)
+            }
           }
 
           return {

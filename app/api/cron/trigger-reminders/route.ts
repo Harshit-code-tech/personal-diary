@@ -20,10 +20,12 @@ export async function GET(request: NextRequest) {
 
     console.log('🔄 Vercel cron triggered at', new Date().toISOString())
 
-    // Call both Supabase edge functions
-    // Note: 'quick-handler' is the slug for the 'email-reminders' function
-    const [quickHandlerResponse, emailQueueResponse] = await Promise.all([
-      // Process reminders via quick-handler (slug for email-reminders function)
+    // Call all three Supabase edge functions:
+    // 1. quick-handler (email-reminders): processes daily/weekly email reminders from settings
+    // 2. send-reminder-notifications: processes user-created reminders (once/daily/weekly/custom)
+    // 3. process-email-queue: sends all queued emails via SMTP
+    const [quickHandlerResponse, reminderNotifResponse, emailQueueResponse] = await Promise.all([
+      // Process email reminders via quick-handler (slug for email-reminders function)
       fetch(
         `${supabaseUrl}/functions/v1/quick-handler`,
         {
@@ -36,7 +38,20 @@ export async function GET(request: NextRequest) {
           body: JSON.stringify({ timestamp: new Date().toISOString() }),
         }
       ),
-      // Process email queue
+      // Process user-created reminders (once, daily, weekly, custom)
+      fetch(
+        `${supabaseUrl}/functions/v1/send-reminder-notifications`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+            'apikey': serviceKey,
+          },
+          body: JSON.stringify({ timestamp: new Date().toISOString() }),
+        }
+      ),
+      // Process email queue (sends all pending emails)
       fetch(
         `${supabaseUrl}/functions/v1/process-email-queue`,
         {
@@ -51,9 +66,11 @@ export async function GET(request: NextRequest) {
     ])
 
     const quickHandlerData = await quickHandlerResponse.json()
+    const reminderNotifData = await reminderNotifResponse.json()
     const emailQueueData = await emailQueueResponse.json()
 
     console.log('✅ Quick-handler response:', quickHandlerData)
+    console.log('✅ Reminder notifications response:', reminderNotifData)
     console.log('✅ Email queue response:', emailQueueData)
 
     return NextResponse.json({
@@ -62,6 +79,10 @@ export async function GET(request: NextRequest) {
       quickHandler: {
         status: quickHandlerResponse.status,
         data: quickHandlerData,
+      },
+      reminderNotifications: {
+        status: reminderNotifResponse.status,
+        data: reminderNotifData,
       },
       emailQueue: {
         status: emailQueueResponse.status,
