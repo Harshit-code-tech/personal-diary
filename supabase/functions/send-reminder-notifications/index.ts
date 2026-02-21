@@ -117,6 +117,80 @@ serve(async (req) => {
             }
           }
           
+          // Format date for display
+          const formattedDate = new Date(reminder.next_reminder_at).toLocaleString('en-US', {
+            timeZone: userTimezone,
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })
+
+          // Build description HTML if present
+          const descriptionHtml = reminder.description
+            ? `<p style="margin:8px 0 0 0;color:#546E7A;font-size:15px;line-height:1.6;">${reminder.description}</p>`
+            : ''
+
+          // Build the reminder notification email HTML
+          const appUrl = Deno.env.get('APP_URL') || 'https://personal-diary-three.vercel.app'
+          const reminderHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reminder: ${reminder.title}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #FF8C42 0%, #FFD166 100%); padding: 36px 30px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 12px;">🔔</div>
+              <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 600;">Reminder: ${reminder.title}</h1>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px 30px 20px 30px;">
+              <p style="margin: 0 0 16px; color: #2C3E50; font-size: 17px; line-height: 1.6;">Hi there,</p>
+              <p style="margin: 0 0 20px; color: #546E7A; font-size: 16px; line-height: 1.6;">This is your reminder:</p>
+              <div style="background: #F8F9FA; border-radius: 12px; padding: 20px 24px; margin: 0 0 24px 0; border-left: 4px solid #FF8C42;">
+                <p style="margin: 0; color: #2C3E50; font-size: 17px; font-weight: 600; line-height: 1.5;">${reminder.title}</p>${descriptionHtml}
+              </div>
+              <p style="margin: 0 0 24px; color: #90A4AE; font-size: 14px;">Set for: ${formattedDate}</p>
+            </td>
+          </tr>
+          <!-- CTA -->
+          <tr>
+            <td style="padding: 0 30px 32px 30px; text-align: center;">
+              <a href="${appUrl}/app" style="display: inline-block; background: linear-gradient(135deg, #FF8C42 0%, #FFD166 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(255, 140, 66, 0.3);">
+                Open Diary &rarr;
+              </a>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F8F9FA; padding: 20px 30px; text-align: center; border-top: 1px solid #E0E0E0;">
+              <p style="margin: 0 0 8px; color: #90A4AE; font-size: 13px;">
+                Sent from <span style="color: #FF8C42; font-weight: 600;">Noted</span> - Your Personal Diary
+              </p>
+              <p style="margin: 0; color: #90A4AE; font-size: 12px;">
+                <a href="${appUrl}/app/settings" style="color: #FF8C42; text-decoration: none;">Manage notification settings</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
+
           // Add reminder to email queue for processing
           const { error: queueError } = await supabaseClient
             .from('email_queue')
@@ -125,38 +199,7 @@ serve(async (req) => {
               recipient_email: userEmail,
               email_type: 'reminder_notification',
               subject: `🔔 Reminder: ${reminder.title}`,
-              html_body: `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                  <meta charset="UTF-8">
-                  <title>Reminder</title>
-                </head>
-                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px; background-color: #ffffff;">
-                  <div style="max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #2C3E50; margin: 0 0 16px 0;">🔔 Reminder: ${reminder.title}</h2>
-                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">Hi there,</p>
-                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0;">This is your reminder:</p>
-                    <p style="color: #2C3E50; font-size: 16px; line-height: 1.5; margin: 0 0 16px 0; font-weight: 600;">${reminder.title}</p>
-                    ${reminder.description ? `<p style="color: #546E7A; font-size: 16px; line-height: 1.5; margin: 0 0 24px 0;">${reminder.description}</p>` : ''}
-                    <p style="color: #90A4AE; font-size: 14px; margin: 0 0 24px 0;">
-                      Set for: ${new Date(reminder.next_reminder_at).toLocaleString('en-US', { 
-                        timeZone: userTimezone,
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                      })} (${userTimezone})
-                    </p>
-                    <p style="color: #90A4AE; font-size: 12px; margin: 40px 0 0 0;">
-                      Sent from Noted - Your Personal Diary
-                    </p>
-                  </div>
-                </body>
-                </html>
-              `,
+              html_body: reminderHtml,
               status: 'pending',
               scheduled_for: new Date().toISOString(),
             })

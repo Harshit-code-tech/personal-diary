@@ -243,50 +243,107 @@ async function generateHTMLContent(
   }
   
   if (emailType === 'daily_reminder') {
+    // Random writing prompt
+    const prompts = [
+      'What was the highlight of your day? What are you grateful for?',
+      'What are three things you\'re grateful for today?',
+      'What went well today? Celebrate your wins, big or small.',
+      'What did you learn about yourself today?',
+      'What are your intentions for tomorrow?',
+      'How do you want to feel by the end of the week?',
+      'What\'s one small thing that brought you joy recently?',
+      'What challenges did you face, and how did you overcome them?',
+      'Describe a moment today that made you smile.',
+      'What would you tell your future self about today?'
+    ]
+    const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+
+    // Get streak data
+    const { data: streakData } = await supabase
+      .from('streaks')
+      .select('current_streak')
+      .eq('user_id', userId)
+      .single()
+    
+    const currentStreak = streakData?.current_streak || 0
+    
+    const streakHtml = currentStreak > 0
+      ? `
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <div style="background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%); border-radius: 12px; padding: 20px; text-align: center;">
+                <span style="font-size: 28px;">🔥</span>
+                <p style="margin: 8px 0 0 0; color: #2C3E50; font-size: 18px; font-weight: 600;">${currentStreak}-day streak!</p>
+                <p style="margin: 4px 0 0 0; color: #2C3E50; font-size: 13px;">Keep the momentum going!</p>
+              </div>
+            </td>
+          </tr>`
+      : ''
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Reminder</title>
+  <title>Daily Journal Reminder</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f2f5;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f2f5; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: white; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden;">
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #FFA500 0%, #FF6B35 100%); padding: 48px 40px; text-align: center;">
-              <div style="font-size: 56px; margin-bottom: 16px;">✍️</div>
-              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">Time to Journal</h1>
+            <td style="background: linear-gradient(135deg, #D4AF37 0%, #F4E4C1 100%); padding: 40px 30px; text-align: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+              <h1 style="margin: 0; color: #2C3E50; font-size: 28px; font-weight: 600;">Daily Journal Reminder</h1>
             </td>
           </tr>
+          <!-- Content -->
           <tr>
-            <td style="padding: 40px;">
-              <p style="font-size: 18px; color: #1a1a1a; margin: 0 0 12px 0; font-weight: 500;">
-                Hi <strong>${userName}</strong>,
+            <td style="padding: 32px 32px 20px 32px;">
+              <p style="margin: 0 0 20px; color: #2C3E50; font-size: 18px; line-height: 1.6;">Hi ${userName}! 👋</p>
+              <p style="margin: 0 0 24px; color: #546E7A; font-size: 16px; line-height: 1.6;">
+                It's time to reflect on your day and write in your journal.
+                Taking a few moments to document your thoughts, feelings, and experiences can help you:
               </p>
-              <p style="font-size: 16px; color: #666; margin: 0 0 24px 0; line-height: 1.6;">
-                This is your daily reminder to capture today's moments. Even a few lines can preserve memories that would otherwise fade away.
-              </p>
-              <div style="background: #fff7ed; border-left: 4px solid #FFA500; padding: 20px; border-radius: 8px; margin-bottom: 32px;">
-                <p style="margin: 0; color: #c2410c; font-size: 14px; line-height: 1.6;">
-                  💡 <strong>Quick Tip:</strong> Start by writing about one thing that happened today, no matter how small.
+              <ul style="color: #546E7A; line-height: 2; font-size: 15px; padding-left: 20px; margin: 0 0 24px 0;">
+                <li>Process your emotions and gain clarity</li>
+                <li>Track your personal growth over time</li>
+                <li>Preserve memories and important moments</li>
+                <li>Reduce stress and improve mental wellbeing</li>
+              </ul>
+            </td>
+          </tr>${streakHtml}
+          <!-- Writing Prompt -->
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <div style="background: #FFF9E6; border-left: 4px solid #D4AF37; padding: 16px 20px; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0; color: #7A6A2E; font-size: 14px; line-height: 1.6;">
+                  <strong>💡 Writing Prompt:</strong> ${prompt}
                 </p>
               </div>
             </td>
           </tr>
+          <!-- CTA -->
           <tr>
-            <td style="padding: 0 40px 40px 40px; text-align: center;">
-              <a href="${APP_URL}/app/new" style="display: inline-block; background: linear-gradient(135deg, #FFA500 0%, #FF6B35 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600;">
-                📝 Write an Entry →
+            <td style="padding: 0 32px 32px 32px; text-align: center;">
+              <a href="${APP_URL}/app/new" style="display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #B8941A 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 6px rgba(212, 175, 55, 0.3);">
+                Start Writing &rarr;
               </a>
             </td>
           </tr>
           <tr>
-            <td style="background: #f8f9fa; padding: 24px 40px; border-top: 1px solid #e9ecef;">
-              <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
-                Sent from Noted - Your Personal Diary
+            <td style="padding: 8px 32px 20px 32px; text-align: center;">
+              <p style="margin: 0; color: #90A4AE; font-size: 14px;">Take a moment for yourself today 💙</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #F8F9FA; padding: 24px 30px; text-align: center; border-top: 1px solid #E0E0E0;">
+              <p style="margin: 0 0 8px; color: #90A4AE; font-size: 13px;">You're receiving this because you enabled daily reminders</p>
+              <p style="margin: 0; color: #90A4AE; font-size: 13px;">
+                <a href="${APP_URL}/app/settings" style="color: #D4AF37; text-decoration: none;">Manage notification settings</a>
               </p>
             </td>
           </tr>
@@ -367,12 +424,15 @@ async function sendEmailWithTimeout(
   })
 
   try {
+    // Strip trailing whitespace from all lines to prevent =20 in quoted-printable encoding
+    const cleanedHtml = htmlBody.replace(/ +$/gm, '').replace(/\t+$/gm, '')
+    
     const sendPromise = smtpClient.send({
       from: `Noted <${GMAIL_USER}>`,
       to: recipient,
       subject: subject,
-      content: `Please view this email in an HTML-capable email client.\n\n${subject}`,
-      html: htmlBody,
+      content: `${subject}\n\nPlease view this email in an HTML-capable email client.`,
+      html: cleanedHtml,
     })
 
     // Race between send and timeout
