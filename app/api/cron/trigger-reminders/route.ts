@@ -21,9 +21,11 @@ export async function GET(request: NextRequest) {
     console.log('🔄 Vercel cron triggered at', new Date().toISOString())
 
     // Call all three Supabase edge functions:
-    // 1. quick-handler (email-reminders): processes daily/weekly email reminders from settings
+    // 1. quick-handler (email-reminders): processes daily/weekly email reminders from email_queue
     // 2. send-reminder-notifications: processes user-created reminders (once/daily/weekly/custom)
     // 3. process-email-queue: sends all queued emails via SMTP
+    // NOTE: This runs once/day on Vercel free tier as a safety net.
+    //       Primary email processing is handled by Supabase pg_cron (every 5 min).
     const [quickHandlerResponse, reminderNotifResponse, emailQueueResponse] = await Promise.all([
       // Process email reminders via quick-handler (slug for email-reminders function)
       fetch(

@@ -63,8 +63,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   reactStrictMode: true,
-  // Turbopack configuration (Next.js 16+)
-  turbopack: {},
   // Reduce compilation time
   modularizeImports: {
     'lucide-react': {

@@ -16,18 +16,7 @@ const INACTIVITY_THRESHOLDS = {
   FINAL_CHECK_IN: 30      // 1 month
 }
 
-// Configure Gmail SMTP client
-const smtpClient = new SMTPClient({
-  connection: {
-    hostname: 'smtp.gmail.com',
-    port: 465,
-    tls: true,
-    auth: {
-      username: GMAIL_USER,
-      password: GMAIL_APP_PASSWORD,
-    },
-  },
-})
+// SMTP client created per-request inside handler to avoid module-level boot failures
 
 function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number, appUrl: string): { subject: string; html: string } {
   let subject = ''
@@ -141,6 +130,19 @@ serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
+
+    // Create SMTP client per-request (avoids module-level boot failures)
+    const smtpClient = new SMTPClient({
+      connection: {
+        hostname: 'smtp.gmail.com',
+        port: 465,
+        tls: true,
+        auth: {
+          username: GMAIL_USER,
+          password: GMAIL_APP_PASSWORD,
+        },
+      },
+    })
     
     // Calculate dates for different thresholds
     const dates = {
@@ -220,13 +222,20 @@ serve(async (req) => {
         }
 
         // Check if we already sent an email recently for this threshold
-        const { data: recentEmail } = await supabase
-          .from('email_logs')
-          .select('sent_at, email_type')
-          .eq('user_id', user.id)
-          .eq('email_type', 'inactive_user')
-          .gte('sent_at', new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()) // Last 2 days
-          .single()
+        let recentEmail = null
+        try {
+          const { data } = await supabase
+            .from('email_logs')
+            .select('sent_at, email_type')
+            .eq('user_id', user.id)
+            .eq('email_type', 'inactive_user')
+            .gte('sent_at', new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()) // Last 2 days
+            .single()
+          recentEmail = data
+        } catch (e) {
+          // email_logs table may not exist yet - proceed without dedup check
+          console.warn('⚠️ Could not check email_logs for recent sends:', e)
+        }
 
         if (recentEmail) {
           continue // Already sent recently
@@ -247,14 +256,19 @@ serve(async (req) => {
           html: html,
         })
 
-        // Log the email
-        await supabase.from('email_logs').insert({
-          user_id: user.id,
-          email_type: 'inactive_user',
-          subject: subject,
-          sent_at: now.toISOString(),
-          status: 'sent'
-        })
+        // Log the email (non-critical, don't fail if table doesn't exist)
+        try {
+          await supabase.from('email_logs').insert({
+            user_id: user.id,
+            email_type: 'inactive_user',
+            recipient: profile.email,
+            subject: subject,
+            sent_at: now.toISOString(),
+            status: 'sent'
+          })
+        } catch (e) {
+          console.warn('⚠️ Could not log email to email_logs:', e)
+        }
 
         emailsSent.push({ userId: user.id, email: profile.email, daysSince: daysSinceLastEntry })
 
@@ -265,6 +279,9 @@ serve(async (req) => {
     }
 
     console.log(`✅ Process complete: ${emailsSent.length} emails sent, ${errors.length} errors`)
+
+    // Close SMTP connection
+    try { await smtpClient.close() } catch (_) { /* ignore */ }
 
     return new Response(
       JSON.stringify({

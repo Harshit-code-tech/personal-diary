@@ -300,18 +300,24 @@ export default function NewEntryPage() {
 
       // Link selected people to this entry
       if (selectedPeople.length > 0) {
-        const peopleLinks = selectedPeople.map(personId => ({
-          entry_id: data.id,
-          person_id: personId,
-        }))
+        const peopleLinks = selectedPeople
+          .filter(personId => personId) // Filter out null/undefined values
+          .map(personId => ({
+            entry_id: data.id,
+            person_id: personId,
+          }))
 
-        const { error: linkError } = await supabase
-          .from('entry_people')
-          .insert(peopleLinks)
+        if (peopleLinks.length === 0) {
+          console.warn('No valid people to link after filtering')
+        } else {
+          const { error: linkError } = await supabase
+            .from('entry_people')
+            .upsert(peopleLinks, { onConflict: 'entry_id,person_id', ignoreDuplicates: true })
 
-        if (linkError) {
-          console.error('Error linking people:', linkError)
-          // Don't throw - entry is saved, just log the error
+          if (linkError) {
+            console.error('Error linking people:', linkError)
+            // Don't throw - entry is saved, just log the error
+          }
         }
       }
 

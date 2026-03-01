@@ -641,7 +641,7 @@ export default function RemindersPage() {
                         value={formData.repeat_until}
                         onChange={(e) => setFormData({ ...formData, repeat_until: e.target.value })}
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal sm:ml-7"
+                        className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
                         required
                       />
                     )}

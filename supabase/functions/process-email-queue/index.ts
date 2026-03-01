@@ -571,16 +571,20 @@ serve(async (req) => {
             })
             .eq('id', emailItem.id)
 
-          // Log successful delivery
-          await supabase
-            .from('email_logs')
-            .insert({
-              user_id: emailItem.user_id,
-              email_type: emailItem.email_type,
-              recipient: emailItem.recipient_email,
-              status: 'sent',
-              subject: emailItem.subject,
-            })
+          // Log successful delivery (non-critical)
+          try {
+            await supabase
+              .from('email_logs')
+              .insert({
+                user_id: emailItem.user_id,
+                email_type: emailItem.email_type,
+                recipient: emailItem.recipient_email,
+                status: 'sent',
+                subject: emailItem.subject,
+              })
+          } catch (logErr) {
+            console.warn('⚠️ Could not log email delivery:', logErr)
+          }
 
           return { success: true, email: emailItem.recipient_email, id: emailItem.id }
         } catch (error) {
@@ -600,17 +604,21 @@ serve(async (req) => {
             })
             .eq('id', emailItem.id)
 
-          // Log failed delivery
-          await supabase
-            .from('email_logs')
-            .insert({
-              user_id: emailItem.user_id,
-              email_type: emailItem.email_type,
-              recipient: emailItem.recipient_email,
-              status: 'failed',
-              subject: emailItem.subject,
-              error_message: errorMessage,
-            })
+          // Log failed delivery (non-critical)
+          try {
+            await supabase
+              .from('email_logs')
+              .insert({
+                user_id: emailItem.user_id,
+                email_type: emailItem.email_type,
+                recipient: emailItem.recipient_email,
+                status: 'failed',
+                subject: emailItem.subject,
+                error_message: errorMessage,
+              })
+          } catch (logErr) {
+            console.warn('⚠️ Could not log email failure:', logErr)
+          }
 
           return { 
             success: false, 
