@@ -5,15 +5,15 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { Book } from 'lucide-react'
+import { Book, Eye, EyeOff } from 'lucide-react'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 import { authLimiter } from '@/lib/rate-limit'
-import { retryWithJitter } from '@/lib/retry-utils'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -51,37 +51,48 @@ export default function LoginPage() {
       return
     }
 
-    // Use retry logic for network resilience (optimized for mobile)
-    // Shorter delays to avoid perceived timeouts on mobile networks
-    const { error: signInError } = await retryWithJitter(
-      () => supabase.auth.signInWithPassword({
+    // Direct login without complex retry logic - simplify for mobile compatibility
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
-      }),
-      {
-        maxAttempts: 2,  // Reduced from 3 to 2 - fail faster for UX
-        initialDelayMs: 100,  // Reduced from 300ms for mobile
-        maxDelayMs: 500,  // Reduced from 2000ms - mobile optimization
-      }
-    )
+      })
 
-    if (signInError) {
-      // Provide better error messages based on error type
-      let errorMessage = 'Invalid email or password'
-      
-      if (signInError.message?.includes('rate limit') || signInError.message?.includes('too many')) {
-        errorMessage = 'Too many login attempts. Please wait a moment and try again.'
-      } else if (signInError.message?.includes('timeout') || signInError.message?.includes('network')) {
-        errorMessage = 'Network connection issue. Please check your internet and try again.'
-      } else if (signInError.message?.includes('Invalid URL')) {
-        errorMessage = 'Configuration error. Please refresh and try again.'
+      if (signInError) {
+        // Provide better error messages based on error type
+        let errorMessage = 'Invalid email or password'
+        
+        if (signInError.message?.includes('rate limit') || signInError.message?.includes('too many')) {
+          errorMessage = 'Too many login attempts. Please wait a moment and try again.'
+        } else if (signInError.message?.includes('timeout') || signInError.message?.includes('network')) {
+          errorMessage = 'Network connection issue. Please check your internet and try again.'
+        } else if (signInError.message?.includes('Invalid URL')) {
+          errorMessage = 'Configuration error. Please refresh and try again.'
+        } else if (signInError.message?.includes('CORS')) {
+          errorMessage = 'Connection error. Please try again in a moment.'
+        } else if (signInError.message?.includes('Not Found')) {
+          errorMessage = 'Invalid email address. Please check and try again.'
+        } else if (signInError.message?.includes('fetch') || signInError.message?.includes('Failed to fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.'
+        }
+        
+        setError(errorMessage)
+        setLoading(false)
+        console.error('Sign in error:', {
+          message: signInError.message,
+          status: signInError.status,
+          fullError: signInError,
+        })
+      } else {
+        router.push('/app')
       }
-      
-      setError(errorMessage)
+    } catch (err: any) {
+      const errorMessage = err?.message || 'An unexpected error occurred'
+      setError(errorMessage.includes('fetch') || errorMessage.includes('network') 
+        ? 'Network error. Please check your internet connection and try again.'
+        : 'Unable to sign in. Please try again.')
       setLoading(false)
-      console.error('Sign in error:', signInError)
-    } else {
-      router.push('/app')
+      console.error('Unexpected login error:', err)
     }
   }
 
@@ -173,25 +184,39 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value)
-                handleChange('password', e.target.value)
-              }}
-              onBlur={(e) => handleBlur('password', e.target.value)}
-              required
-              className={`w-full px-4 py-3 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
-                touched.password && errors.password
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
-                  : 'border-charcoal/10 dark:border-white/10 focus:border-gold dark:focus:border-teal focus:ring-gold/20 dark:focus:ring-teal/20'
-              }`}
-              placeholder="••••••••"
-              aria-invalid={touched.password && errors.password ? 'true' : 'false'}
-              aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  handleChange('password', e.target.value)
+                }}
+                onBlur={(e) => handleBlur('password', e.target.value)}
+                required
+                className={`w-full px-4 py-3 pr-12 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
+                  touched.password && errors.password
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                    : 'border-charcoal/10 dark:border-white/10 focus:border-gold dark:focus:border-teal focus:ring-gold/20 dark:focus:ring-teal/20'
+                }`}
+                placeholder="••••••••"
+                aria-invalid={touched.password && errors.password ? 'true' : 'false'}
+                aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/50 dark:text-white/50 hover:text-charcoal dark:hover:text-white transition-colors focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
             {touched.password && errors.password && (
               <div id="password-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
                 <span className="inline-block w-1 h-1 rounded-full bg-red-500" />

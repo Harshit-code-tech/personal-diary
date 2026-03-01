@@ -5,18 +5,19 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { Book } from 'lucide-react'
+import { Book, Eye, EyeOff } from 'lucide-react'
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 import { authLimiter } from '@/lib/rate-limit'
-import { retryWithJitter } from '@/lib/retry-utils'
 
 export default function SignupPage() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -70,25 +71,18 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      // Use retry logic for network resilience
-      const { data, error: signupError } = await retryWithJitter(
-        () => supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: {
-              username: username,
-              display_name: username,
-            },
+      // Direct signup without retry wrapper for mobile compatibility
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            username: username,
+            display_name: username,
           },
-        }),
-        {
-          maxAttempts: 3,
-          initialDelayMs: 300,
-          maxDelayMs: 2000,
-        }
-      )
+        },
+      })
 
       if (signupError) throw signupError
 
@@ -116,6 +110,10 @@ export default function SignupPage() {
         setError('Please enter a valid email address.')
       } else if (err.message?.includes('Password')) {
         setError('Password does not meet requirements. Use at least 8 characters with uppercase, number, and special character.')
+      } else if (err.message?.includes('fetch') || err.message?.includes('network')) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else if (err.message?.includes('CORS')) {
+        setError('Connection error. Please try again in a moment.')
       } else {
         setError(err.message || 'Failed to create account. Please try again.')
       }
@@ -235,28 +233,42 @@ export default function SignupPage() {
               <label htmlFor="password" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
                 Password <span className="text-red-500">*</span>
               </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  handleChange('password', e.target.value)
-                }}
-                onBlur={(e) => handleBlur('password', e.target.value)}
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
-                  touched.password && errors.password
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
-                    : touched.password && !errors.password && password
-                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
-                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
-                }`}
-                disabled={loading}
-                required
-                aria-invalid={touched.password && errors.password ? 'true' : 'false'}
-                aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    handleChange('password', e.target.value)
+                  }}
+                  onBlur={(e) => handleBlur('password', e.target.value)}
+                  placeholder="••••••••"
+                  className={`w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                    touched.password && errors.password
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                      : touched.password && !errors.password && password
+                      ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                      : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                  }`}
+                  disabled={loading}
+                  required
+                  aria-invalid={touched.password && errors.password ? 'true' : 'false'}
+                  aria-describedby={touched.password && errors.password ? 'password-error' : undefined}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/50 dark:text-white/50 hover:text-charcoal dark:hover:text-white transition-colors focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
               {touched.password && errors.password && (
                 <div id="password-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
                   <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
@@ -271,28 +283,42 @@ export default function SignupPage() {
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-charcoal dark:text-white/90 mb-2">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value)
-                  handleChange('confirmPassword', e.target.value)
-                }}
-                onBlur={(e) => handleBlur('confirmPassword', e.target.value)}
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
-                  touched.confirmPassword && errors.confirmPassword
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
-                    : touched.confirmPassword && !errors.confirmPassword && confirmPassword
-                    ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
-                    : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
-                }`}
-                disabled={loading}
-                required
-                aria-invalid={touched.confirmPassword && errors.confirmPassword ? 'true' : 'false'}
-                aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirmPassword-error' : undefined}
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value)
+                    handleChange('confirmPassword', e.target.value)
+                  }}
+                  onBlur={(e) => handleBlur('confirmPassword', e.target.value)}
+                  placeholder="••••••••"
+                  className={`w-full px-4 py-3 pr-12 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                    touched.confirmPassword && errors.confirmPassword
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
+                      : touched.confirmPassword && !errors.confirmPassword && confirmPassword
+                      ? 'border-green-500 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-900'
+                      : 'border-gray-200 dark:border-gray-700 focus:ring-gold dark:focus:ring-teal focus:border-gold dark:focus:border-teal'
+                  }`}
+                  disabled={loading}
+                  required
+                  aria-invalid={touched.confirmPassword && errors.confirmPassword ? 'true' : 'false'}
+                  aria-describedby={touched.confirmPassword && errors.confirmPassword ? 'confirmPassword-error' : undefined}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/50 dark:text-white/50 hover:text-charcoal dark:hover:text-white transition-colors focus:outline-none"
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
               {touched.confirmPassword && errors.confirmPassword && (
                 <div id="confirmPassword-error" className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 mt-2 animate-slideDown" role="alert">
                   <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
