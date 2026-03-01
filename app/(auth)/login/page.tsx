@@ -51,22 +51,35 @@ export default function LoginPage() {
       return
     }
 
-    // Use retry logic for network resilience
+    // Use retry logic for network resilience (optimized for mobile)
+    // Shorter delays to avoid perceived timeouts on mobile networks
     const { error: signInError } = await retryWithJitter(
       () => supabase.auth.signInWithPassword({
         email,
         password,
       }),
       {
-        maxAttempts: 3,
-        initialDelayMs: 300,
-        maxDelayMs: 2000,
+        maxAttempts: 2,  // Reduced from 3 to 2 - fail faster for UX
+        initialDelayMs: 100,  // Reduced from 300ms for mobile
+        maxDelayMs: 500,  // Reduced from 2000ms - mobile optimization
       }
     )
 
     if (signInError) {
-      setError('Invalid email or password')
+      // Provide better error messages based on error type
+      let errorMessage = 'Invalid email or password'
+      
+      if (signInError.message?.includes('rate limit') || signInError.message?.includes('too many')) {
+        errorMessage = 'Too many login attempts. Please wait a moment and try again.'
+      } else if (signInError.message?.includes('timeout') || signInError.message?.includes('network')) {
+        errorMessage = 'Network connection issue. Please check your internet and try again.'
+      } else if (signInError.message?.includes('Invalid URL')) {
+        errorMessage = 'Configuration error. Please refresh and try again.'
+      }
+      
+      setError(errorMessage)
       setLoading(false)
+      console.error('Sign in error:', signInError)
     } else {
       router.push('/app')
     }

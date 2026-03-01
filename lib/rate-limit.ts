@@ -90,11 +90,12 @@ export const apiLimiter = rateLimit({
   limit: 20, // 20 requests per minute (conservative)
 })
 
-// Auth limiter: More lenient to handle legitimate retries
-// Supabase limit: 30 per 5 min, we allow 4 per 1 min = 240 per 2 hours (safe)
+// Auth limiter: Lenient for legitimate user retries on mobile
+// Supabase limit: 30 per 5 min, we allow 8 per 1 min = 480 per 1 hour (safe)
+// Mobile users often retry on slow networks, so we're lenient
 export const authLimiter = rateLimit({
   interval: 60 * 1000, // 1 minute
-  limit: 4, // 4 attempts per minute
+  limit: 8, // 8 attempts per minute per IP - more generous for mobile
 })
 
 export const uploadLimiter = rateLimit({

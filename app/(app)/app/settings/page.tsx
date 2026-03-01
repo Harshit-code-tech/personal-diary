@@ -330,15 +330,15 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/app"
               className="p-2 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-charcoal dark:text-white" />
             </Link>
-            <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal">
+            <h1 className="font-serif text-xl sm:text-3xl font-bold text-charcoal dark:text-teal">
               Settings
             </h1>
           </div>
@@ -347,13 +347,13 @@ export default function SettingsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-6 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="space-y-6">
           {/* Profile Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <User className="w-6 h-6 text-gold dark:text-teal" />
-              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
                 Profile
               </h2>
             </div>
@@ -361,10 +361,10 @@ export default function SettingsPage() {
             <div className="space-y-6">
               {/* Username Section */}
               <div>
-                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-charcoal dark:text-white mb-2">
                   Username
                 </label>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <input
                     type="text"
                     value={username}
@@ -373,12 +373,12 @@ export default function SettingsPage() {
                       setUsernameError('')
                     }}
                     placeholder="your-username"
-                    className="flex-1 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal text-sm"
                   />
                   <button
                     onClick={handleUpdateUsername}
                     disabled={usernameLoading}
-                    className="flex items-center gap-2 px-4 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 text-sm whitespace-nowrap sm:w-auto w-full"
                   >
                     {usernameLoading ? 'Saving...' : 'Save'}
                   </button>
@@ -395,21 +395,21 @@ export default function SettingsPage() {
 
               {/* Email Section */}
               <div>
-                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-charcoal dark:text-white mb-2">
                   Email Address
                 </label>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <input
                     type="email"
                     value={email}
                     readOnly
-                    className="flex-1 px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed text-sm"
                   />
                   <button
                     onClick={handleStartChangeEmail}
-                    className="flex items-center gap-2 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                    className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white text-sm whitespace-nowrap sm:w-auto w-full"
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail className="w-4 h-4 flex-shrink-0" />
                     Change
                   </button>
                 </div>
@@ -466,21 +466,21 @@ export default function SettingsPage() {
 
               {/* Password Section */}
               <div>
-                <label className="block text-sm font-medium text-charcoal dark:text-white mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-charcoal dark:text-white mb-2">
                   Password
                 </label>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <input
                     type="password"
                     value="••••••••••••"
                     readOnly
-                    className="flex-1 px-4 py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-charcoal/5 dark:bg-white/5 border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white cursor-not-allowed text-sm"
                   />
                   <button
                     onClick={handleStartChangePassword}
-                    className="flex items-center gap-2 px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                    className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white text-sm whitespace-nowrap sm:w-auto w-full"
                   >
-                    <Lock className="w-4 h-4" />
+                    <Lock className="w-4 h-4 flex-shrink-0" />
                     Change
                   </button>
                 </div>
@@ -544,28 +544,28 @@ export default function SettingsPage() {
           </div>
 
           {/* Appearance Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               {theme === 'dark' ? (
                 <Moon className="w-6 h-6 text-gold dark:text-teal" />
               ) : (
                 <Sun className="w-6 h-6 text-gold dark:text-teal" />
               )}
-              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
                 Appearance
               </h2>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <p className="font-medium text-charcoal dark:text-white">Theme</p>
-                <p className="text-sm text-charcoal/60 dark:text-white/60">
+                <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Theme</p>
+                <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                   Choose between light and dark mode
                 </p>
               </div>
               <button
                 onClick={toggleTheme}
-                className="px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-md text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
               >
                 {theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
               </button>
@@ -573,71 +573,71 @@ export default function SettingsPage() {
           </div>
 
           {/* Data & Privacy Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <Shield className="w-6 h-6 text-gold dark:text-teal" />
-              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
                 Data & Privacy
               </h2>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
-                <div>
-                  <p className="font-medium text-charcoal dark:text-white">Import Entries</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Import Entries</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Import entries from a JSON backup file
                   </p>
                 </div>
                 <button
                   onClick={() => setShowImportModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-500 dark:bg-green-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-green-500 dark:bg-green-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
                 >
-                  <Download className="w-5 h-5 rotate-180" />
+                  <Download className="w-5 h-5 rotate-180 flex-shrink-0" />
                   Import
                 </button>
               </div>
 
-              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
-                <div>
-                  <p className="font-medium text-charcoal dark:text-white">Export Entries</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Export Entries</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Download your entries as Markdown or PDF
                   </p>
                 </div>
                 <Link
                   href="/app/export"
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-500 dark:bg-blue-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 dark:bg-blue-400 text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-md text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-5 h-5 flex-shrink-0" />
                   Export
                 </Link>
               </div>
 
-              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
-                <div>
-                  <p className="font-medium text-charcoal dark:text-white">Export All Data (JSON)</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Export All Data (JSON)</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Download all your diary entries, people, and stories
                   </p>
                 </div>
                 <button
                   onClick={handleExportData}
-                  className="flex items-center gap-2 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
                 >
-                  <Download className="w-5 h-5" />
+                  <Download className="w-5 h-5 flex-shrink-0" />
                   Export JSON
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-charcoal dark:text-white">Data Storage</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Data Storage</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Your data is securely stored and encrypted
                   </p>
                 </div>
-                <div className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
+                <div className="px-3 sm:px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap">
                   Secure
                 </div>
               </div>
@@ -645,51 +645,51 @@ export default function SettingsPage() {
           </div>
 
           {/* Notification Settings Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
             <NotificationSettings />
           </div>
 
           {/* Account Actions Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-6">
+          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <LogOut className="w-6 h-6 text-gold dark:text-teal" />
-              <h2 className="text-xl font-semibold text-charcoal dark:text-white">
+              <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
                 Account Actions
               </h2>
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-charcoal/10 dark:border-white/10">
-                <div>
-                  <p className="font-medium text-charcoal dark:text-white">Sign Out</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pb-4 border-b border-charcoal/10 dark:border-white/10">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-charcoal dark:text-white">Sign Out</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Sign out of your account
                   </p>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white"
+                  className="px-4 sm:px-6 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg font-semibold hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all text-charcoal dark:text-white text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
                 >
                   Sign Out
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-red-600 dark:text-red-400">Delete Account</p>
-                  <p className="text-sm text-charcoal/60 dark:text-white/60">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div className="flex-1">
+                  <p className="text-sm sm:text-base font-medium text-red-600 dark:text-red-400">Delete Account</p>
+                  <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
                     Permanently delete your account and all data
                   </p>
                 </div>
                 <button
                   onClick={handleDeleteAccount}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  className={`flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all text-sm sm:text-base whitespace-nowrap w-full sm:w-auto ${
                     showDeleteConfirm
                       ? 'bg-red-600 text-white hover:bg-red-700'
                       : 'border border-red-600 dark:border-red-400 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
                   }`}
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                   {showDeleteConfirm ? 'Confirm Delete' : 'Delete Account'}
                 </button>
               </div>
