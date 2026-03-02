@@ -87,6 +87,42 @@ export interface TimelineEvent {
   updated_at: string
 }
 
+// Life event as stored in the life_events table
+export interface LifeEvent {
+  id: string
+  user_id?: string
+  title: string
+  description: string | null
+  event_date: string
+  category: string        // preset key (e.g. "milestone") or custom string
+  icon: string            // emoji icon
+  color: string           // hex color
+  is_major: boolean
+  related_entries: number  // count of linked entries
+  created_at?: string
+  updated_at?: string
+}
+
+// User's custom category for autocomplete suggestions
+export interface UserCategory {
+  id: string
+  user_id: string
+  name: string
+  icon: string
+  color: string
+  usage_count: number
+  created_at?: string
+  updated_at?: string
+}
+
+// Preset category definition (used in UI)
+export interface PresetCategory {
+  value: string
+  label: string
+  icon: string
+  color: string
+}
+
 export interface MemoryAlbum {
   id: string
   user_id: string
