@@ -125,8 +125,14 @@ export default function SettingsPage() {
         return
       }
 
-      // Also sync to auth metadata so it stays consistent everywhere
+      // Sync to auth metadata so it stays consistent everywhere
       await supabase.auth.updateUser({ data: { username } })
+
+      // Sync profiles.name so emails use the updated name
+      await supabase
+        .from('profiles')
+        .update({ name: username })
+        .eq('id', user?.id)
       
       toastNotify.success('Username Updated', 'Your username has been saved')
     } catch (error: any) {

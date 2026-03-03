@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import {
   ArrowLeft, Star, Plus, Calendar, Trash2, Search,
-  ChevronDown, ChevronRight, Eye, Pencil, X,
+  ChevronDown, ChevronRight, Eye, Pencil, X, Target,
 } from 'lucide-react'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
@@ -25,6 +25,15 @@ interface LinkedEntry {
   title: string
   entry_date: string
   mood: string | null
+}
+
+/** A goal linked to a life event */
+interface LinkedGoal {
+  id: string
+  title: string
+  category: string | null
+  progress: number
+  is_completed: boolean
 }
 
 /** Group of events within a single month */
@@ -129,6 +138,12 @@ export default function LifeTimelinePage() {
   // ── Delete confirmation ────────────────────────────────────────────────────
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
+  // ── Goal linking ───────────────────────────────────────────────────────────
+  const [allGoals, setAllGoals] = useState<LinkedGoal[]>([])
+  const [linkedGoalMap, setLinkedGoalMap] = useState<Map<string, LinkedGoal[]>>(new Map())
+  const [showGoalPicker, setShowGoalPicker] = useState<string | null>(null) // eventId or null
+  const [selectedGoalIds, setSelectedGoalIds] = useState<string[]>([])
+
   // ═══════════════════════════════════════════════════════════════════════════
   //  Data Fetching
   // ═══════════════════════════════════════════════════════════════════════════
@@ -174,10 +189,101 @@ export default function LifeTimelinePage() {
     }
   }, [user?.id, supabase])
 
+  /** Fetch all user goals for the goal-linking picker */
+  const fetchAllGoals = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const { data, error } = await supabase
+        .from('goals')
+        .select('id, title, category, progress, is_completed')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (!error && data) setAllGoals(data)
+    } catch (err) {
+      console.error('Error fetching goals:', err)
+    }
+  }, [user?.id, supabase])
+
+  /** Fetch linked goals for a specific event (populate map) */
+  const fetchLinkedGoals = useCallback(async (eventId: string) => {
+    try {
+      // Get goal IDs linked to this event
+      const { data: links, error: linkError } = await supabase
+        .from('life_event_goals')
+        .select('goal_id')
+        .eq('life_event_id', eventId)
+
+      if (linkError) throw linkError
+
+      const goalIds = (links || []).map((l: any) => l.goal_id).filter(Boolean)
+
+      if (goalIds.length === 0) {
+        setLinkedGoalMap(prev => new Map(prev).set(eventId, []))
+        return
+      }
+
+      const { data: goals, error: goalsError } = await supabase
+        .from('goals')
+        .select('id, title, category, progress, is_completed')
+        .in('id', goalIds)
+
+      if (!goalsError && goals) {
+        setLinkedGoalMap(prev => new Map(prev).set(eventId, goals))
+      }
+    } catch (err) {
+      console.error('Error fetching linked goals:', err)
+    }
+  }, [supabase])
+
+  /** Link selected goals to a life event */
+  const linkGoals = async (eventId: string) => {
+    if (selectedGoalIds.length === 0) return
+
+    try {
+      const { error } = await supabase
+        .from('life_event_goals')
+        .insert(selectedGoalIds.map(goalId => ({
+          life_event_id: eventId,
+          goal_id: goalId,
+        })))
+
+      if (error) throw error
+
+      toast.success('Goals linked!')
+      setShowGoalPicker(null)
+      setSelectedGoalIds([])
+      fetchLinkedGoals(eventId)
+    } catch (err: any) {
+      console.error('Error linking goals:', err)
+      toast.error(err.message || 'Failed to link goals')
+    }
+  }
+
+  /** Unlink a goal from a life event */
+  const unlinkGoal = async (eventId: string, goalId: string) => {
+    try {
+      const { error } = await supabase
+        .from('life_event_goals')
+        .delete()
+        .eq('life_event_id', eventId)
+        .eq('goal_id', goalId)
+
+      if (error) throw error
+
+      toast.success('Goal unlinked')
+      fetchLinkedGoals(eventId)
+    } catch (err) {
+      console.error('Error unlinking goal:', err)
+      toast.error('Failed to unlink goal')
+    }
+  }
+
   useEffect(() => {
     if (user) {
       fetchEvents()
       fetchUserCategories()
+      fetchAllGoals()
     }
   }, [user, fetchEvents, fetchUserCategories])
 
@@ -196,21 +302,32 @@ export default function LifeTimelinePage() {
     setExpandedEventId(eventId)
     setLoadingEntries(true)
     try {
-      const { data, error } = await supabase
+      // Step 1: Get entry IDs linked to this life event
+      const { data: links, error: linkError } = await supabase
         .from('entry_life_events')
-        .select('entries:entry_id ( id, title, entry_date, mood )')
+        .select('entry_id')
         .eq('life_event_id', eventId)
 
-      if (error) throw error
+      if (linkError) throw linkError
 
-      const entries: LinkedEntry[] = (data || [])
-        .map((row: any) => row.entries)
-        .filter(Boolean)
-        .sort((a: LinkedEntry, b: LinkedEntry) =>
-          new Date(b.entry_date).getTime() - new Date(a.entry_date).getTime()
-        )
+      const entryIds = (links || []).map((l: any) => l.entry_id).filter(Boolean)
 
-      setLinkedEntries(entries)
+      if (entryIds.length === 0) {
+        setLinkedEntries([])
+        setLoadingEntries(false)
+        return
+      }
+
+      // Step 2: Fetch the actual entries
+      const { data: entriesData, error: entriesError } = await supabase
+        .from('entries')
+        .select('id, title, entry_date, mood')
+        .in('id', entryIds)
+        .order('entry_date', { ascending: false })
+
+      if (entriesError) throw entriesError
+
+      setLinkedEntries(entriesData || [])
     } catch (err) {
       console.error('Error fetching linked entries:', err)
       setLinkedEntries([])
@@ -646,6 +763,29 @@ export default function LifeTimelinePage() {
                                 onToggleEntries={() => fetchLinkedEntries(event.id)}
                                 onEdit={() => startEdit(event)}
                                 onDelete={() => setConfirmDeleteId(event.id)}
+                                linkedGoals={linkedGoalMap.get(event.id) || []}
+                                allGoals={allGoals}
+                                showGoalPicker={showGoalPicker === event.id}
+                                selectedGoalIds={selectedGoalIds}
+                                onToggleGoalPicker={() => {
+                                  if (showGoalPicker === event.id) {
+                                    setShowGoalPicker(null)
+                                    setSelectedGoalIds([])
+                                  } else {
+                                    fetchLinkedGoals(event.id)
+                                    setShowGoalPicker(event.id)
+                                    setSelectedGoalIds([])
+                                  }
+                                }}
+                                onSelectGoal={(goalId) => {
+                                  setSelectedGoalIds(prev =>
+                                    prev.includes(goalId)
+                                      ? prev.filter(id => id !== goalId)
+                                      : [...prev, goalId]
+                                  )
+                                }}
+                                onLinkGoals={() => linkGoals(event.id)}
+                                onUnlinkGoal={(goalId) => unlinkGoal(event.id, goalId)}
                               />
                             ))}
                           </div>
@@ -804,6 +944,14 @@ interface EventCardProps {
   onToggleEntries: () => void
   onEdit: () => void
   onDelete: () => void
+  linkedGoals: LinkedGoal[]
+  allGoals: LinkedGoal[]
+  showGoalPicker: boolean
+  selectedGoalIds: string[]
+  onToggleGoalPicker: () => void
+  onSelectGoal: (goalId: string) => void
+  onLinkGoals: () => void
+  onUnlinkGoal: (goalId: string) => void
 }
 
 function EventCard({
@@ -815,6 +963,14 @@ function EventCard({
   onToggleEntries,
   onEdit,
   onDelete,
+  linkedGoals,
+  allGoals,
+  showGoalPicker,
+  selectedGoalIds,
+  onToggleGoalPicker,
+  onSelectGoal,
+  onLinkGoals,
+  onUnlinkGoal,
 }: EventCardProps) {
   const display = getCategoryDisplay(event.category, userCategories)
   const date = new Date(event.event_date)
@@ -909,6 +1065,96 @@ function EventCard({
                 : 'No linked entries'
               }
             </button>
+
+            {/* Linked goals row */}
+            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+              {linkedGoals.map(goal => (
+                <span
+                  key={goal.id}
+                  className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-xs rounded-full group/goal"
+                >
+                  <Target className="w-2.5 h-2.5 shrink-0" />
+                  <span className="max-w-[100px] truncate">{goal.title}</span>
+                  {goal.is_completed && <span>✅</span>}
+                  <button
+                    onClick={() => onUnlinkGoal(goal.id)}
+                    className="ml-0.5 hidden group-hover/goal:inline text-emerald-400 hover:text-red-400"
+                    title="Unlink goal"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={onToggleGoalPicker}
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full transition-colors"
+                title="Link a goal"
+              >
+                <Plus className="w-2.5 h-2.5" />
+                <span>Goal</span>
+              </button>
+            </div>
+
+            {/* Goal picker (inline dropdown) */}
+            {showGoalPicker && (
+              <div className="mt-2 p-2.5 bg-charcoal/[0.03] dark:bg-white/[0.03] border border-charcoal/10 dark:border-white/10 rounded-lg">
+                <p className="text-[10px] sm:text-xs font-bold text-charcoal/50 dark:text-white/50 uppercase tracking-wider mb-1.5">
+                  Select goals to link
+                </p>
+                {(() => {
+                  const alreadyLinkedIds = new Set(linkedGoals.map(g => g.id))
+                  const available = allGoals.filter(g => !alreadyLinkedIds.has(g.id))
+                  if (available.length === 0) {
+                    return (
+                      <p className="text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40">
+                        No goals available to link.
+                      </p>
+                    )
+                  }
+                  return (
+                    <>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {available.map(goal => (
+                          <label
+                            key={goal.id}
+                            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-charcoal/5 dark:hover:bg-white/5 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedGoalIds.includes(goal.id)}
+                              onChange={() => onSelectGoal(goal.id)}
+                              className="w-3.5 h-3.5 rounded border-charcoal/20 dark:border-white/20 text-emerald-500"
+                            />
+                            <Target className="w-3 h-3 text-emerald-500 shrink-0" />
+                            <span className="text-[10px] sm:text-xs text-charcoal dark:text-white truncate">
+                              {goal.title}
+                            </span>
+                            {goal.is_completed && (
+                              <span className="text-[10px] text-emerald-500">✅</span>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={onToggleGoalPicker}
+                          className="px-2 py-1 text-[10px] sm:text-xs text-charcoal/50 dark:text-white/50 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={onLinkGoals}
+                          disabled={selectedGoalIds.length === 0}
+                          className="px-2 py-1 text-[10px] sm:text-xs font-bold bg-emerald-500 text-white rounded hover:bg-emerald-600 disabled:opacity-40 transition-colors"
+                        >
+                          Link {selectedGoalIds.length > 0 ? `(${selectedGoalIds.length})` : ''}
+                        </button>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            )}
           </div>
         </div>
       </div>

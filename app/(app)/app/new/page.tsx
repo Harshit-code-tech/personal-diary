@@ -312,7 +312,8 @@ export default function NewEntryPage() {
         } else {
           const { error: linkError } = await supabase
             .from('entry_people')
-            .upsert(peopleLinks, { onConflict: 'entry_id,person_id', ignoreDuplicates: true })
+            .insert(peopleLinks)
+            .select()
 
           if (linkError) {
             console.error('Error linking people:', linkError)

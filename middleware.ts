@@ -48,27 +48,32 @@ export async function middleware(req: NextRequest) {
   
   const supabase = createMiddlewareClient({ req, res })
 
-  // Get session with exponential backoff for rate limit errors
+  // Get session — handle network failures gracefully
   let session = null
+  let isNetworkFailure = false
   try {
     const {
       data: { session: currentSession },
       error,
     } = await supabase.auth.getSession()
 
-    // If there's an auth error, handle it gracefully
     if (error) {
-      // Log only critical errors to avoid spam
-      if (error.message !== 'Request rate limit reached' && error.message !== 'Invalid Refresh Token: Refresh Token Not Found') {
-        console.error('Auth error in middleware:', error.message)
+      const msg = error.message || ''
+      const isNetwork = msg.includes('fetch failed') || msg.includes('Failed to fetch') || msg.includes('timeout') || msg.includes('ECONNREFUSED')
+      const isRateLimit = msg === 'Request rate limit reached'
+      const isTokenError = msg === 'Invalid Refresh Token: Refresh Token Not Found'
+
+      // Log only unexpected errors (skip rate limits and known token errors)
+      if (!isRateLimit && !isTokenError && !isNetwork) {
+        console.error('Auth error in middleware:', msg)
       }
-      
-      // For rate limit errors, just continue without blocking
-      if (error.message === 'Request rate limit reached') {
-        // Let the request through but without session
+
+      if (isRateLimit || isNetwork) {
+        // Network failures / rate limits: let request through, preserve cookies
         session = null
+        isNetworkFailure = isNetwork
       } else {
-        // For other auth errors (invalid token, etc.), clear cookies
+        // Genuine auth errors (invalid token, expired, etc.) — clear cookies
         const response = req.nextUrl.pathname.startsWith('/app')
           ? NextResponse.redirect(new URL('/login', req.url))
           : NextResponse.next()
@@ -82,15 +87,24 @@ export async function middleware(req: NextRequest) {
       session = currentSession
     }
   } catch (error: any) {
-    // Silently handle rate limit and token errors
-    if (error?.message !== 'Request rate limit reached') {
+    const msg = error?.message || ''
+    const isNetwork = msg.includes('fetch failed') || msg.includes('Failed to fetch') || msg.includes('timeout') || msg.includes('ECONNREFUSED')
+    
+    if (!isNetwork && msg !== 'Request rate limit reached') {
       console.error('Unexpected error in middleware:', error)
     }
     session = null
+    isNetworkFailure = isNetwork
   }
 
-  // If user is not signed in and trying to access protected routes, redirect to login
+  // If user is not signed in and trying to access protected routes
   if (!session && req.nextUrl.pathname.startsWith('/app')) {
+    // On network failure, let the request through — the user likely has valid
+    // cookies that will work once Supabase is reachable again.
+    // The client-side auth will handle showing login if truly unauthenticated.
+    if (isNetworkFailure) {
+      return res
+    }
     return NextResponse.redirect(new URL('/login', req.url))
   }
 
