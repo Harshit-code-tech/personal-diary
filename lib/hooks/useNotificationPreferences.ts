@@ -53,6 +53,27 @@ export function useNotificationPreferences() {
         if (error) throw error
 
         if (data) {
+          // Auto-detect and fix timezone:
+          // DB default is 'UTC'. If the browser reports a specific timezone
+          // (e.g., 'Asia/Kolkata') and the DB still has 'UTC', auto-update it.
+          // This prevents reminders from being sent at the wrong time.
+          const browserTz = getBrowserTimezone()
+          const storedTz = data.timezone || 'UTC'
+          const shouldAutoFixTz = storedTz === 'UTC' && browserTz !== 'UTC'
+          const effectiveTimezone = shouldAutoFixTz ? browserTz : storedTz
+
+          // Silently persist the corrected timezone
+          if (shouldAutoFixTz) {
+            supabase
+              .from('user_settings')
+              .update({ timezone: browserTz })
+              .eq('user_id', user.id)
+              .then(({ error }) => {
+                if (error) console.error('Failed to auto-fix timezone:', error)
+                else console.log(`Auto-fixed timezone: UTC → ${browserTz}`)
+              })
+          }
+
           // Map database columns to UI state
           setPreferences({
             dailyReminder: data.email_reminders_enabled ?? false,
@@ -61,7 +82,7 @@ export function useNotificationPreferences() {
             streakNotifications: data.inactivity_emails_enabled ?? true,
             reminderTime: data.reminder_time ?? '20:00',
             reminderDays: data.reminder_days ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-            timezone: data.timezone || getBrowserTimezone(),
+            timezone: effectiveTimezone,
           })
         } else {
           // No settings row exists yet, create one with defaults
