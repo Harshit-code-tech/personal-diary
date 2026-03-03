@@ -55,7 +55,7 @@ const DASHBOARD_VARIANTS: DashboardContent[] = [
   },
   {
     title: '📅 All your important dates, one place',
-    body: 'Anniversaries, graduations, name days, festivals — add any event and get reminded well before it arrives. Never scramble for a gift or a message at the last minute again.',
+    body: 'Anniversaries, graduations, name days, festivals: add any event and get reminded well before it arrives. Never scramble for a gift or a message at the last minute again.',
     cta: 'Start tracking',
     badge: 'FREE',
     pills: [
@@ -77,7 +77,7 @@ const DASHBOARD_VARIANTS: DashboardContent[] = [
   },
   {
     title: '🌟 Made by the same person who built Noted',
-    body: 'Reminder App is a free companion tool for keeping the people in your life feeling remembered. Birthdays, anniversaries, custom events — tracked, reminded, and celebrated.',
+    body: 'Reminder App is a free companion tool for keeping the people in your life feeling remembered. Birthdays, anniversaries, custom events, all tracked, reminded, and celebrated.',
     cta: 'Explore Reminder App',
     badge: 'FREE',
     pills: [
@@ -99,7 +99,7 @@ const PEOPLE_VARIANTS: Array<{ title: string; body: string }> = [
   },
   {
     title: '🔔 Early reminders, every occasion',
-    body: 'Birthdays, anniversaries, custom events — get email alerts days in advance so you are never caught off guard.',
+    body: 'Birthdays, anniversaries, custom events: get email alerts days in advance so you are never caught off guard.',
   },
   {
     title: '🎁 A free card for every celebration',
@@ -125,11 +125,13 @@ const PillIcon = ({ type }: { type: DashboardContent['pills'][number]['icon'] })
  */
 export default function DiscoverCard({ variant = 'dashboard' }: DiscoverCardProps) {
   const [visible, setVisible] = useState(false)
-  // Pick a random variant once on mount — stable across re-renders
-  const [dashIdx] = useState(() => Math.floor(Math.random() * DASHBOARD_VARIANTS.length))
-  const [peopleIdx] = useState(() => Math.floor(Math.random() * PEOPLE_VARIANTS.length))
+  // Re-rolled on every mount so a refresh shows a different variant
+  const [dashIdx, setDashIdx] = useState(0)
+  const [peopleIdx, setPeopleIdx] = useState(0)
 
   useEffect(() => {
+    setDashIdx(Math.floor(Math.random() * DASHBOARD_VARIANTS.length))
+    setPeopleIdx(Math.floor(Math.random() * PEOPLE_VARIANTS.length))
     const dismissed = localStorage.getItem(DISCOVER_DISMISSED_KEY)
     if (dismissed) {
       const fourteenDays = 14 * 24 * 60 * 60 * 1000
