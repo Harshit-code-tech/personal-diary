@@ -153,11 +153,12 @@ export default function NotificationBell() {
 
   return (
     <div className="relative">
-      {/* Bell Icon Button */}
+      {/* Bell Icon Button — high-contrast border + bg so it's visible on mobile */}
       <button
         onClick={() => setShowPanel(!showPanel)}
-        className="relative p-2.5 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10"
+        className="relative p-2 sm:p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl border-2 border-charcoal/25 dark:border-white/25 bg-charcoal/5 dark:bg-white/5 hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95"
         title="Notifications"
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
@@ -176,8 +177,8 @@ export default function NotificationBell() {
             onClick={() => setShowPanel(false)}
           />
 
-          {/* Panel */}
-          <div className="absolute right-0 top-full mt-2 w-96 max-h-[600px] bg-white dark:bg-graphite rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 z-50 overflow-hidden">
+          {/* Panel — full width on mobile, capped on desktop */}
+          <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[60px] sm:top-full sm:mt-2 w-auto sm:w-96 max-h-[70vh] sm:max-h-[600px] bg-white dark:bg-graphite rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 z-50 overflow-hidden">
             {/* Header */}
             <div className="p-4 border-b border-charcoal/10 dark:border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-lg text-charcoal dark:text-white">

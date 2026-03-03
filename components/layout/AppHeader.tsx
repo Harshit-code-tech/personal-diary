@@ -110,20 +110,16 @@ export default function AppHeader() {
   }, [])
 
   useEffect(() => {
-    // Close menu on route change
     setMenuOpen(false)
   }, [pathname])
 
   useEffect(() => {
-    // Prevent body scroll when menu is open on mobile
     if (menuOpen) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'unset'
     }
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
+    return () => { document.body.style.overflow = 'unset' }
   }, [menuOpen])
 
   const handleSignOut = async () => {
@@ -132,32 +128,30 @@ export default function AppHeader() {
   }
 
   const isActive = (href: string) => {
-    if (href === '/app') {
-      return pathname === '/app'
-    }
+    if (href === '/app') return pathname === '/app'
     return pathname?.startsWith(href)
   }
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-lg">
-      <div className="max-w-full px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link 
-            href="/app" 
-            className="group flex items-center gap-3 flex-shrink-0"
+      <div className="max-w-full px-3 sm:px-6 lg:px-8 py-2.5 sm:py-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Logo — compact on mobile */}
+          <Link
+            href="/app"
+            className="group flex items-center gap-2 sm:gap-3 flex-shrink-0"
             aria-label="Go to home page"
           >
-            <div className="p-2 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
-              <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 text-gold dark:text-teal" />
+            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 text-gold dark:text-teal" />
             </div>
-            <span className="font-script text-3xl lg:text-4xl tracking-wide text-gold dark:text-teal">
-              Noted<span className="text-2xl lg:text-3xl">.</span>
+            <span className="font-script text-2xl sm:text-3xl lg:text-4xl tracking-wide text-gold dark:text-teal">
+              Noted<span className="text-xl sm:text-2xl lg:text-3xl">.</span>
             </span>
           </Link>
 
-          {/* Desktop Navigation - Show all items, hide on mobile */}
-          <nav 
+          {/* Desktop Navigation — hidden below md */}
+          <nav
             className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-1 justify-center max-w-5xl mx-2 lg:mx-4"
             aria-label="Main navigation"
           >
@@ -168,7 +162,7 @@ export default function AppHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-2 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-2 text-sm font-medium rounded-xl transition-all duration-300 whitespace-nowrap ${
                     active
                       ? `${link.color} bg-opacity-10 scale-105 shadow-sm`
                       : `text-charcoal dark:text-white ${link.hoverColor}`
@@ -185,20 +179,18 @@ export default function AppHeader() {
             })}
           </nav>
 
-          {/* Right Side Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Streak Badge - Show writing streak */}
-            <div className={menuOpen ? 'hidden sm:block' : 'block'}>
-              <StreakBadge />
-            </div>
+          {/* ── Right-side actions ──────────────────────────────────────── */}
+          {/* Mobile: only show streak + notification + hamburger.           */}
+          {/* Search, Theme, Settings, SignOut live inside the mobile menu.  */}
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+            {/* Streak Badge — always visible when active */}
+            <StreakBadge />
 
-            {/* Search - Always visible on desktop, hidden on mobile when menu open */}
-            <Tooltip content="Search entries">
+            {/* Search — desktop only (mobile: in hamburger menu) */}
+            <Tooltip content="Search entries" position="bottom">
               <Link
                 href="/app/search"
-                className={`p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95 ${
-                  menuOpen ? 'hidden sm:flex' : 'flex'
-                }`}
+                className="hidden md:flex p-2 md:p-2.5 min-w-[40px] min-h-[40px] items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95"
                 aria-label="Search entries"
                 data-tour="search"
               >
@@ -206,50 +198,44 @@ export default function AppHeader() {
               </Link>
             </Tooltip>
 
-            {/* Theme Switcher - Hide on mobile when menu open */}
-            <div className={menuOpen ? 'hidden sm:block' : 'block'}>
+            {/* Theme Switcher — desktop only */}
+            <div className="hidden md:block">
               <ThemeSwitcher />
             </div>
 
-            {/* Notification Bell - Hide on mobile when menu open */}
-            <div className={menuOpen ? 'hidden sm:block' : 'block'}>
-              <NotificationBell />
-            </div>
+            {/* Notification Bell — always visible, with visible ring */}
+            <NotificationBell />
 
-            {/* Settings - Hide on mobile when menu open */}
-            <Tooltip content="Settings">
+            {/* Settings — large desktop only */}
+            <Tooltip content="Settings" position="bottom">
               <Link
                 href="/app/settings"
-                className={`hidden lg:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95 ${
-                  menuOpen ? 'lg:hidden xl:flex' : ''
-                }`}
+                className="hidden lg:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 active:scale-95"
                 aria-label="Settings"
               >
                 <Settings className="w-5 h-5" />
               </Link>
             </Tooltip>
 
-            {/* Hamburger Menu Button - Visible only on mobile */}
-            <Tooltip content={menuOpen ? 'Close menu' : 'Open menu'}>
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="md:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gradient-to-r hover:from-gold/10 hover:to-gold/5 dark:hover:from-teal/10 dark:hover:to-teal/5 rounded-xl transition-all duration-300 group hover:scale-105 active:scale-95"
-                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={menuOpen}
-              >
-                {menuOpen ? (
-                  <X className="w-6 h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-                ) : (
-                  <Menu className="w-6 h-6 group-hover:text-gold dark:group-hover:text-teal transition-colors" />
-                )}
-              </button>
-            </Tooltip>
+            {/* Hamburger Menu — visible below md */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl border border-charcoal/15 dark:border-white/15 hover:bg-gold/10 dark:hover:bg-teal/10 transition-all duration-300 active:scale-95"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? (
+                <X className="w-5 h-5 text-charcoal dark:text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-charcoal dark:text-white" />
+              )}
+            </button>
 
-            {/* Sign Out - Hidden on xl+ when visible in desktop nav */}
-            <Tooltip content="Sign Out">
+            {/* Sign Out — desktop only */}
+            <Tooltip content="Sign Out" position="bottom">
               <button
                 onClick={handleSignOut}
-                className="hidden sm:flex lg:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95"
+                className="hidden md:flex p-2 md:p-2.5 min-w-[40px] min-h-[40px] items-center justify-center text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95"
                 aria-label="Sign out of your account"
               >
                 <LogOut className="w-5 h-5" />
@@ -259,14 +245,28 @@ export default function AppHeader() {
         </div>
       </div>
 
-      {/* Mobile/Tablet Dropdown Menu */}
+      {/* ── Mobile Dropdown Menu ─────────────────────────────────────────── */}
       {mounted && (
         <div
-          className={`xl:hidden absolute top-full left-0 right-0 bg-white dark:bg-midnight border-b border-gold/20 dark:border-teal/20 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
+          className={`md:hidden absolute top-full left-0 right-0 bg-white dark:bg-midnight border-b border-gold/20 dark:border-teal/20 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
             menuOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
-          <nav className="px-4 py-4 space-y-1 max-h-[calc(80vh-2rem)] overflow-y-auto">
+          <nav className="px-4 py-3 space-y-0.5 max-h-[calc(80vh-2rem)] overflow-y-auto">
+            {/* Quick-access row: Search + Theme on mobile */}
+            <div className="flex items-center gap-2 pb-3 mb-2 border-b border-charcoal/10 dark:border-white/10">
+              <Link
+                href="/app/search"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-charcoal dark:text-white bg-charcoal/5 dark:bg-white/5 rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 transition-colors"
+              >
+                <Search className="w-4 h-4" />
+                <span>Search</span>
+              </Link>
+              <div className="flex-shrink-0">
+                <ThemeSwitcher />
+              </div>
+            </div>
+
             {navLinks.map((link) => {
               const Icon = link.icon
               const active = isActive(link.href)
@@ -274,9 +274,9 @@ export default function AppHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-3 px-4 py-3 text-base font-bold rounded-xl transition-all duration-300 ${
+                  className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${
                     active
-                      ? `${link.color} bg-opacity-10 scale-[1.02] shadow-md`
+                      ? `${link.color} bg-opacity-10 scale-[1.02] shadow-sm`
                       : `text-charcoal dark:text-white ${link.hoverColor}`
                   }`}
                 >
@@ -286,19 +286,18 @@ export default function AppHeader() {
               )
             })}
 
-            {/* Additional mobile menu items */}
-            <div className="pt-4 mt-4 border-t border-charcoal/10 dark:border-white/10 space-y-1">
+            {/* Settings & Sign Out */}
+            <div className="pt-3 mt-2 border-t border-charcoal/10 dark:border-white/10 space-y-0.5">
               <Link
                 href="/app/settings"
-                className="flex items-center gap-3 px-4 py-3 text-base font-bold text-charcoal dark:text-white hover:text-gold dark:hover:text-teal rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 transition-all duration-300"
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal rounded-xl hover:bg-gold/10 dark:hover:bg-teal/10 transition-all duration-300"
               >
                 <Settings className="w-5 h-5" />
                 <span>Settings</span>
               </Link>
-
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-3 text-base font-bold text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-charcoal dark:text-white hover:text-red-500 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Sign Out</span>
@@ -308,10 +307,10 @@ export default function AppHeader() {
         </div>
       )}
 
-      {/* Overlay for mobile menu */}
+      {/* Overlay */}
       {menuOpen && (
         <div
-          className="xl:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-[-1] top-[73px] backdrop-blur-sm"
+          className="md:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-[-1] top-[60px] sm:top-[73px] backdrop-blur-sm"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />

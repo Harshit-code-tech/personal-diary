@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar } from 'lucide-react'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar, TrendingUp, FileText } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
@@ -25,6 +24,20 @@ type Goal = {
   progress: number
   is_completed: boolean
   milestones: Milestone[]
+}
+
+type LinkedEvent = {
+  id: string
+  title: string
+  event_date: string | null
+  category: string | null
+}
+
+type LinkedEntry = {
+  id: string
+  title: string | null
+  entry_date: string | null
+  mood: string | null
 }
 
 const categories = [
@@ -51,6 +64,8 @@ export default function GoalsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [linkedEventsMap, setLinkedEventsMap] = useState<Record<string, LinkedEvent[]>>({})
+  const [linkedEntriesMap, setLinkedEntriesMap] = useState<Record<string, LinkedEntry[]>>({})
   const [customCategory, setCustomCategory] = useState('')
   const [formData, setFormData] = useState({
     title: '',
@@ -101,6 +116,86 @@ export default function GoalsPage() {
       fetchGoals()
     }
   }, [user, fetchGoals])
+
+  // Fetch linked life events for all goals
+  const fetchLinkedEvents = useCallback(async (goalIds: string[]) => {
+    if (goalIds.length === 0) return
+    try {
+      const { data: links, error: linkError } = await supabase
+        .from('life_event_goals')
+        .select('goal_id, life_event_id')
+        .in('goal_id', goalIds)
+
+      if (linkError) throw linkError
+      if (!links || links.length === 0) return
+
+      const eventIds = [...new Set(links.map((l: any) => l.life_event_id))]
+      const { data: events, error: eventsError } = await supabase
+        .from('life_events')
+        .select('id, title, event_date, category')
+        .in('id', eventIds)
+
+      if (eventsError) throw eventsError
+
+      const map: Record<string, LinkedEvent[]> = {}
+      for (const link of links) {
+        const evt = events?.find((e: any) => e.id === link.life_event_id)
+        if (evt) {
+          if (!map[link.goal_id]) map[link.goal_id] = []
+          map[link.goal_id].push(evt)
+        }
+      }
+      setLinkedEventsMap(map)
+    } catch (err) {
+      console.error('Error fetching linked events:', err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      fetchLinkedEvents(goals.map(g => g.id))
+    }
+  }, [goals, fetchLinkedEvents])
+
+  // Fetch linked journal entries for all goals
+  const fetchLinkedEntries = useCallback(async (goalIds: string[]) => {
+    if (goalIds.length === 0) return
+    try {
+      const { data: links, error: linkError } = await supabase
+        .from('entry_goals')
+        .select('goal_id, entry_id')
+        .in('goal_id', goalIds)
+
+      if (linkError) throw linkError
+      if (!links || links.length === 0) return
+
+      const entryIds = [...new Set(links.map((l: any) => l.entry_id))]
+      const { data: entries, error: entriesError } = await supabase
+        .from('entries')
+        .select('id, title, entry_date, mood')
+        .in('id', entryIds)
+
+      if (entriesError) throw entriesError
+
+      const map: Record<string, LinkedEntry[]> = {}
+      for (const link of links) {
+        const entry = entries?.find((e: any) => e.id === link.entry_id)
+        if (entry) {
+          if (!map[link.goal_id]) map[link.goal_id] = []
+          map[link.goal_id].push(entry)
+        }
+      }
+      setLinkedEntriesMap(map)
+    } catch (err) {
+      console.error('Error fetching linked entries:', err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      fetchLinkedEntries(goals.map(g => g.id))
+    }
+  }, [goals, fetchLinkedEntries])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -339,35 +434,31 @@ export default function GoalsPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href="/app"
-              className="group flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
+              className="group flex items-center gap-1.5 sm:gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
             >
-              <div className="p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="font-bold text-sm sm:text-lg hidden xs:inline">Back</span>
             </Link>
-            <Target className="w-6 h-6 text-gold dark:text-teal shrink-0" />
-            <span className="font-bold text-lg text-charcoal dark:text-white hidden md:inline truncate">Goals</span>
+            <Target className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+            <span className="font-bold text-base sm:text-lg text-charcoal dark:text-white truncate">Goals</span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
-            <ThemeSwitcher />
-            <button
-              onClick={() => {
-                resetForm()
-                setShowAddModal(true)
-              }}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all"
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden xs:inline">New Goal</span>
-              <span className="xs:hidden">New</span>
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              resetForm()
+              setShowAddModal(true)
+            }}
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all shrink-0"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">New Goal</span>
+            <span className="xs:hidden">New</span>
+          </button>
         </div>
       </header>
 
@@ -554,6 +645,62 @@ export default function GoalsPage() {
                                 </span>
                               </label>
                             ))}
+                          </div>
+                        )}
+
+                        {/* Linked Life Events from Timeline */}
+                        {linkedEventsMap[goal.id] && linkedEventsMap[goal.id].length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-charcoal/10 dark:border-white/10">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <TrendingUp className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                              <span className="text-xs font-bold text-charcoal/60 dark:text-white/60 uppercase tracking-wide">
+                                Linked Timeline Events
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {linkedEventsMap[goal.id].map((evt) => (
+                                <Link
+                                  key={evt.id}
+                                  href="/app/timeline"
+                                  className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 rounded-md text-xs font-medium hover:bg-indigo-100 dark:hover:bg-indigo-800/30 transition-colors"
+                                >
+                                  <span className="truncate max-w-[120px] sm:max-w-[180px]">{evt.title}</span>
+                                  {evt.event_date && (
+                                    <span className="text-indigo-400 dark:text-indigo-500 shrink-0">
+                                      · {new Date(evt.event_date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
+                                    </span>
+                                  )}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Linked Journal Entries */}
+                        {linkedEntriesMap[goal.id] && linkedEntriesMap[goal.id].length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-charcoal/10 dark:border-white/10">
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <FileText className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                              <span className="text-xs font-bold text-charcoal/60 dark:text-white/60 uppercase tracking-wide">
+                                Linked Journal Entries
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {linkedEntriesMap[goal.id].map((entry) => (
+                                <Link
+                                  key={entry.id}
+                                  href={`/app/entry/${entry.id}`}
+                                  className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-md text-xs font-medium hover:bg-emerald-100 dark:hover:bg-emerald-800/30 transition-colors"
+                                >
+                                  <span className="truncate max-w-[120px] sm:max-w-[180px]">{entry.title || 'Untitled entry'}</span>
+                                  {entry.entry_date && (
+                                    <span className="text-emerald-400 dark:text-emerald-500 shrink-0">
+                                      · {new Date(entry.entry_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    </span>
+                                  )}
+                                </Link>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>

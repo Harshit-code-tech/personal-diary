@@ -41,7 +41,7 @@ const config: Config = {
         heading: ['"Cormorant Garamond"', 'Baskerville', 'serif'],
         sans: ['Inter', '"SF Pro Display"', '-apple-system', 'system-ui', 'sans-serif'],
         body: ['Inter', '"SF Pro Display"', 'sans-serif'],
-        script: ['"Dancing Script"', '"Brush Script MT"', 'cursive'],
+        script: ['var(--font-dancing)', '"Dancing Script"', '"Brush Script MT"', 'cursive'],
         mono: ['"JetBrains Mono"', '"Fira Code"', '"Courier New"', 'monospace'],
       },
       fontSize: {

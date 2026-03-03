@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, ArrowLeft, BookOpen, Calendar, FileText, Star, Archive, Search, Filter, X } from 'lucide-react'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 interface Story {
   id: string
@@ -156,48 +155,46 @@ export default function StoriesPage() {
     <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link
               href="/app"
-              className="flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors shrink-0"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Back to Diary</span>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-medium text-sm hidden sm:inline">Back</span>
             </Link>
-            <div className="h-6 w-px bg-charcoal/20 dark:bg-white/20" />
-            <h1 className="text-2xl font-display font-bold text-charcoal dark:text-teal flex items-center gap-2">
-              <BookOpen className="w-6 h-6" />
-              My Stories
+            <div className="h-5 w-px bg-charcoal/20 dark:bg-white/20 hidden sm:block" />
+            <h1 className="text-lg sm:text-2xl font-display font-bold text-charcoal dark:text-teal flex items-center gap-1.5 sm:gap-2 truncate">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+              <span>My Stories</span>
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeSwitcher />
-            <Link
-              href="/app/stories/new"
-              className="flex items-center gap-2 px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
-            >
-              <Plus className="w-5 h-5" />
-              New Story
-            </Link>
-          </div>
+          <Link
+            href="/app/stories/new"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 transition-all shadow-lg shrink-0"
+          >
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">New Story</span>
+            <span className="xs:hidden">New</span>
+          </Link>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
+        <div className="mb-4 sm:mb-8 space-y-3 sm:space-y-4">
           {/* Search Bar */}
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-charcoal/40 dark:text-white/40" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search stories by title or description..."
-              className="w-full pl-12 pr-12 py-4 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal shadow-sm"
+              placeholder="Search stories..."
+              className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm sm:text-base text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal shadow-sm"
             />
             {searchQuery && (
               <button
@@ -210,15 +207,15 @@ export default function StoriesPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2 sm:gap-4">
             {/* Category Pills */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Filter className="w-4 h-4 text-charcoal/60 dark:text-white/60" />
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <Filter className="w-4 h-4 text-charcoal/60 dark:text-white/60 shrink-0" />
               {categories.map(category => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                     selectedCategory === category
                       ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-md'
                       : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-charcoal/10 dark:hover:bg-white/10 border border-charcoal/20 dark:border-white/20'

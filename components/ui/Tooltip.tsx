@@ -9,6 +9,10 @@ interface TooltipProps {
   delay?: number;
 }
 
+/**
+ * Lightweight tooltip that appears on hover/focus.
+ * Hidden on touch devices (< 640 px) to avoid off-screen positioning issues.
+ */
 export default function Tooltip({ 
   content, 
   children, 
@@ -18,31 +22,20 @@ export default function Tooltip({
   const [isVisible, setIsVisible] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
-  const tooltipRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useEffect(() => { setIsMounted(true); }, []);
 
   const showTooltip = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsVisible(true);
-    }, delay);
+    timeoutRef.current = setTimeout(() => setIsVisible(true), delay);
   };
 
   const hideTooltip = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsVisible(false);
   };
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
+  useEffect(() => () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
   const positionClasses = {
@@ -71,15 +64,15 @@ export default function Tooltip({
     >
       {children}
       
+      {/* Hidden on mobile (<640px) to prevent off-screen overflow */}
       {isVisible && (
         <div
-          ref={tooltipRef}
           role="tooltip"
           className={`
             absolute z-50 px-3 py-2 text-sm font-medium text-white dark:text-midnight
             bg-charcoal dark:bg-white rounded-lg shadow-lg
             whitespace-nowrap pointer-events-none
-            animate-fadeIn
+            animate-fadeIn hidden sm:block
             ${positionClasses[position]}
           `}
         >

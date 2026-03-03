@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { ArrowLeft, Smile, TrendingUp, Calendar, BarChart3 } from 'lucide-react'
-import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 
 // Lazy load chart components
@@ -161,23 +160,18 @@ export default function MoodAnalysisPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
-        <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href="/app"
-              className="group flex items-center gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
+              className="group flex items-center gap-1.5 sm:gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
             >
-              <div className="p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
                 <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="font-bold text-sm sm:text-lg hidden xs:inline">Back</span>
             </Link>
-            <Smile className="w-6 h-6 text-gold dark:text-teal shrink-0" />
-            <span className="font-bold text-lg text-charcoal dark:text-white hidden md:inline truncate">Mood Analysis</span>
-          </div>
-
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-            <ThemeSwitcher />
+            <Smile className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+            <span className="font-bold text-base sm:text-lg text-charcoal dark:text-white truncate">Mood Analysis</span>
           </div>
         </div>
       </header>

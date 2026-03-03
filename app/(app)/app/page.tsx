@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AppHeader from '@/components/layout/AppHeader'
 import FolderNavigation from '@/components/folders/FolderNavigation'
+import DiscoverCard from '@/components/promo/DiscoverCard'
 import { Plus, Menu, X, Users, BookMarked, TrendingUp, FileText, Smile, Zap, Type, Star, Trash2 } from 'lucide-react'
 import { stripHtmlTags } from '@/lib/sanitize'
 import type { Entry, Folder, Stats } from '@/lib/types'
@@ -350,7 +351,7 @@ export default function AppPage() {
                   {folderName}
                 </h1>
                 <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 font-medium">
-                  Welcome back{username ? `, ${username}` : ''} ✨
+                  {(() => { const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening' })()}{username ? `, ${username}` : ''} ✨
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
@@ -471,13 +472,18 @@ export default function AppPage() {
               </div>
             )}
 
+            {/* Discover — inline promo for Reminder App */}
+            <div className="mb-6 sm:mb-8">
+              <DiscoverCard variant="dashboard" />
+            </div>
+
             {/* Tag Filter */}
             {allTags.length > 0 && (
               <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-xl sm:text-2xl">🏷️</span>
-                    <h3 className="text-base sm:text-lg font-bold text-charcoal dark:text-white">Filter by Tag</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-charcoal dark:text-white">Filter by Tag</h3>
                   </div>
                   {selectedTag && (
                     <button
@@ -558,7 +564,7 @@ export default function AppPage() {
                   >
                     <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-serif text-xl sm:text-2xl font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors duration-300 line-clamp-2">
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal mb-2 transition-colors duration-300 line-clamp-2">
                           {entry.title}
                         </h3>
                         {entry.mood && (
@@ -568,7 +574,7 @@ export default function AppPage() {
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <span className="text-xs sm:text-sm text-charcoal/70 dark:text-white/70 font-bold whitespace-nowrap">
+                        <span className="text-xs sm:text-sm text-charcoal/70 dark:text-white/70 font-normal whitespace-nowrap">
                           {new Date(entry.entry_date).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',

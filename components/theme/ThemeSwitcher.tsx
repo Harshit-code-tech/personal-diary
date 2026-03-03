@@ -56,7 +56,7 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="relative">
-      <Tooltip content={themes[currentTheme].name}>
+      <Tooltip content={themes[currentTheme].name} position="bottom">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-charcoal/20 dark:border-white/20 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors active:scale-95"

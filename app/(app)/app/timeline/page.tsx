@@ -510,7 +510,16 @@ export default function LifeTimelinePage() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div
+      className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite"
+      onClick={() => {
+        // Close any open goal picker when clicking outside
+        if (showGoalPicker) {
+          setShowGoalPicker(null)
+          setSelectedGoalIds([])
+        }
+      }}
+    >
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-sm">
@@ -583,19 +592,13 @@ export default function LifeTimelinePage() {
 
         {/* ── Filter Bar ──────────────────────────────────────────────────── */}
         <div className="mb-6 sm:mb-8 space-y-3">
-          {/* Title + filtered stats */}
-          <div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-charcoal dark:text-white flex items-center gap-2 sm:gap-3">
-              <Star className="w-6 h-6 sm:w-7 sm:h-7 text-gold dark:text-teal shrink-0" />
-              Life Timeline
-            </h2>
-            <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 mt-1">
-              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
-              {selectedYear !== 'all' && ` in ${selectedYear}`}
-              {selectedCategory !== 'all' && ` · ${getCategoryDisplay(selectedCategory, userCategories).label}`}
-              {searchQuery && ` · matching "${searchQuery}"`}
-            </p>
-          </div>
+          {/* Filtered event count */}
+          <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
+            {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
+            {selectedYear !== 'all' && ` in ${selectedYear}`}
+            {selectedCategory !== 'all' && ` · ${getCategoryDisplay(selectedCategory, userCategories).label}`}
+            {searchQuery && ` · matching "${searchQuery}"`}
+          </p>
 
           {/* Dropdowns row: year + category + clear */}
           <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
@@ -932,7 +935,7 @@ export default function LifeTimelinePage() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  EventCard — separated for clarity and potential reuse
+//  EventCard — displays a single life event with linked entries and goals
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface EventCardProps {
@@ -944,6 +947,7 @@ interface EventCardProps {
   onToggleEntries: () => void
   onEdit: () => void
   onDelete: () => void
+  // Goal linking
   linkedGoals: LinkedGoal[]
   allGoals: LinkedGoal[]
   showGoalPicker: boolean
@@ -975,20 +979,23 @@ function EventCard({
   const display = getCategoryDisplay(event.category, userCategories)
   const date = new Date(event.event_date)
   const dateStr = date.toLocaleDateString('en-US', {
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
   })
 
+  const alreadyLinkedIds = new Set(linkedGoals.map(g => g.id))
+  const availableGoals = allGoals.filter(g => !alreadyLinkedIds.has(g.id))
+
   return (
     <div
-      className={`bg-white dark:bg-graphite rounded-xl border transition-all ${
+      className={`group bg-white dark:bg-graphite rounded-xl border transition-all ${
         event.is_major
-          ? 'border-gold/30 dark:border-teal/30 shadow-md'
+          ? 'border-gold/30 dark:border-teal/30 shadow-md ring-1 ring-gold/10 dark:ring-teal/10'
           : 'border-charcoal/10 dark:border-white/10 shadow-sm'
       } hover:shadow-md`}
     >
-      {/* Card header */}
+      {/* ── Card header ───────────────────────────────────────────────── */}
       <div className="p-3 sm:p-4">
         <div className="flex items-start gap-2.5 sm:gap-3">
           {/* Icon circle */}
@@ -1001,6 +1008,7 @@ function EventCard({
 
           {/* Content */}
           <div className="flex-1 min-w-0">
+            {/* Title row */}
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-charcoal dark:text-white leading-snug">
@@ -1025,146 +1033,177 @@ function EventCard({
                 </div>
               </div>
 
-              {/* Action buttons */}
+              {/* Action buttons — always visible on mobile */}
               <div className="flex items-center gap-0.5 shrink-0">
-                <button
-                  onClick={onEdit}
-                  className="p-1.5 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors"
-                  title="Edit event"
-                >
-                  <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-charcoal/40 dark:text-white/40" />
+                <button onClick={onEdit} className="p-1.5 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded-lg transition-colors" title="Edit event">
+                  <Pencil className="w-3.5 h-3.5 text-charcoal/40 dark:text-white/40" />
                 </button>
-                <button
-                  onClick={onDelete}
-                  className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  title="Delete event"
-                >
-                  <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400" />
+                <button onClick={onDelete} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete event">
+                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
                 </button>
               </div>
             </div>
 
-            {/* Description preview */}
+            {/* Description */}
             {event.description && (
               <p className="mt-1.5 text-xs sm:text-sm text-charcoal/60 dark:text-white/60 line-clamp-2">
                 {event.description}
               </p>
             )}
 
-            {/* Linked entries toggle */}
-            <button
-              onClick={onToggleEntries}
-              className="mt-2 flex items-center gap-1 text-[10px] sm:text-xs font-medium text-gold dark:text-teal hover:opacity-80 transition-opacity"
-            >
-              {isExpanded
-                ? <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                : <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              }
-              {event.related_entries > 0
-                ? `${event.related_entries} linked entr${event.related_entries === 1 ? 'y' : 'ies'}`
-                : 'No linked entries'
-              }
-            </button>
-
-            {/* Linked goals row */}
-            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
-              {linkedGoals.map(goal => (
-                <span
-                  key={goal.id}
-                  className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-xs rounded-full group/goal"
-                >
-                  <Target className="w-2.5 h-2.5 shrink-0" />
-                  <span className="max-w-[100px] truncate">{goal.title}</span>
-                  {goal.is_completed && <span>✅</span>}
-                  <button
-                    onClick={() => onUnlinkGoal(goal.id)}
-                    className="ml-0.5 hidden group-hover/goal:inline text-emerald-400 hover:text-red-400"
-                    title="Unlink goal"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
+            {/* ── Action row: entries toggle + goal chips ─────────────── */}
+            <div className="mt-2.5 flex flex-col gap-2">
+              {/* Linked entries toggle */}
               <button
-                onClick={onToggleGoalPicker}
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full transition-colors"
-                title="Link a goal"
+                onClick={onToggleEntries}
+                className="self-start flex items-center gap-1 text-[10px] sm:text-xs font-medium text-gold dark:text-teal hover:opacity-80 transition-opacity"
               >
-                <Plus className="w-2.5 h-2.5" />
-                <span>Goal</span>
+                {isExpanded
+                  ? <ChevronDown className="w-3.5 h-3.5" />
+                  : <ChevronRight className="w-3.5 h-3.5" />
+                }
+                {event.related_entries > 0
+                  ? `${event.related_entries} linked entr${event.related_entries === 1 ? 'y' : 'ies'}`
+                  : 'No linked entries'
+                }
               </button>
-            </div>
 
-            {/* Goal picker (inline dropdown) */}
-            {showGoalPicker && (
-              <div className="mt-2 p-2.5 bg-charcoal/[0.03] dark:bg-white/[0.03] border border-charcoal/10 dark:border-white/10 rounded-lg">
-                <p className="text-[10px] sm:text-xs font-bold text-charcoal/50 dark:text-white/50 uppercase tracking-wider mb-1.5">
-                  Select goals to link
-                </p>
-                {(() => {
-                  const alreadyLinkedIds = new Set(linkedGoals.map(g => g.id))
-                  const available = allGoals.filter(g => !alreadyLinkedIds.has(g.id))
-                  if (available.length === 0) {
-                    return (
-                      <p className="text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40">
-                        No goals available to link.
-                      </p>
-                    )
-                  }
-                  return (
-                    <>
-                      <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {available.map(goal => (
-                          <label
-                            key={goal.id}
-                            className="flex items-center gap-2 px-2 py-1 rounded hover:bg-charcoal/5 dark:hover:bg-white/5 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedGoalIds.includes(goal.id)}
-                              onChange={() => onSelectGoal(goal.id)}
-                              className="w-3.5 h-3.5 rounded border-charcoal/20 dark:border-white/20 text-emerald-500"
-                            />
-                            <Target className="w-3 h-3 text-emerald-500 shrink-0" />
-                            <span className="text-[10px] sm:text-xs text-charcoal dark:text-white truncate">
-                              {goal.title}
-                            </span>
-                            {goal.is_completed && (
-                              <span className="text-[10px] text-emerald-500">✅</span>
-                            )}
-                          </label>
-                        ))}
+              {/* ── Goal chips row ────────────────────────────────────── */}
+              {(linkedGoals.length > 0 || allGoals.length > 0) && (
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {linkedGoals.map(goal => (
+                    <span
+                      key={goal.id}
+                      className="inline-flex items-center gap-1 pl-1.5 pr-1 sm:pl-2 sm:pr-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-xs rounded-full border border-emerald-200/50 dark:border-emerald-700/30"
+                    >
+                      <Target className="w-2.5 h-2.5 shrink-0" />
+                      <span className="max-w-[80px] sm:max-w-[120px] truncate">{goal.title}</span>
+                      {goal.is_completed && <span className="text-[10px]">✅</span>}
+                      <button
+                        onClick={() => onUnlinkGoal(goal.id)}
+                        className="ml-0.5 p-0.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-full transition-colors"
+                        title={`Unlink "${goal.title}"`}
+                      >
+                        <X className="w-2.5 h-2.5 text-emerald-400 hover:text-red-400" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {/* +Link Goal button */}
+                  <div className="relative">
+                    <button
+                      onClick={onToggleGoalPicker}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] sm:text-xs font-medium rounded-full border transition-colors ${
+                        showGoalPicker
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-600 text-emerald-600 dark:text-emerald-400'
+                          : 'border-dashed border-charcoal/20 dark:border-white/20 text-charcoal/40 dark:text-white/40 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-600'
+                      }`}
+                      title="Link this event to a goal you're working towards"
+                    >
+                      <Target className="w-2.5 h-2.5" />
+                      <span>{linkedGoals.length > 0 ? '+' : 'Link Goal'}</span>
+                    </button>
+
+                    {/* ── Goal picker dropdown ─────────────────────── */}
+                    {showGoalPicker && (
+                      <div
+                        className="absolute left-0 top-full mt-1 z-20 w-56 sm:w-64 bg-white dark:bg-graphite rounded-lg shadow-xl border border-charcoal/10 dark:border-white/10 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="px-3 py-2 border-b border-charcoal/5 dark:border-white/5">
+                          <p className="text-[10px] sm:text-xs font-bold text-charcoal/60 dark:text-white/60">
+                            Link to a Goal
+                          </p>
+                          <p className="text-[9px] sm:text-[10px] text-charcoal/40 dark:text-white/40 mt-0.5">
+                            Connect this event to goals it relates to
+                          </p>
+                        </div>
+
+                        {availableGoals.length === 0 ? (
+                          <div className="px-3 py-4 text-center">
+                            <Target className="w-5 h-5 mx-auto text-charcoal/20 dark:text-white/20 mb-1" />
+                            <p className="text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40">
+                              {allGoals.length === 0
+                                ? 'No goals yet. Create goals in the Goals page first.'
+                                : 'All goals already linked!'}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="max-h-40 overflow-y-auto py-1">
+                              {availableGoals.map(goal => {
+                                const selected = selectedGoalIds.includes(goal.id)
+                                return (
+                                  <button
+                                    key={goal.id}
+                                    onClick={() => onSelectGoal(goal.id)}
+                                    className={`w-full flex items-center gap-2 px-3 py-1.5 text-left transition-colors ${
+                                      selected
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/20'
+                                        : 'hover:bg-charcoal/5 dark:hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                                      selected
+                                        ? 'bg-emerald-500 border-emerald-500'
+                                        : 'border-charcoal/20 dark:border-white/20'
+                                    }`}>
+                                      {selected && (
+                                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] sm:text-xs text-charcoal dark:text-white truncate flex-1">
+                                      {goal.title}
+                                    </span>
+                                    {goal.is_completed && (
+                                      <span className="text-[10px] text-emerald-500 shrink-0">Done</span>
+                                    )}
+                                    {!goal.is_completed && goal.progress > 0 && (
+                                      <span className="text-[10px] text-charcoal/40 dark:text-white/40 shrink-0">
+                                        {goal.progress}%
+                                      </span>
+                                    )}
+                                  </button>
+                                )
+                              })}
+                            </div>
+
+                            {/* Footer: Cancel / Link */}
+                            <div className="flex items-center justify-between px-3 py-2 border-t border-charcoal/5 dark:border-white/5 bg-charcoal/[0.02] dark:bg-white/[0.02]">
+                              <button
+                                onClick={onToggleGoalPicker}
+                                className="text-[10px] sm:text-xs text-charcoal/50 dark:text-white/50 hover:text-charcoal dark:hover:text-white transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={onLinkGoals}
+                                disabled={selectedGoalIds.length === 0}
+                                className="px-3 py-1 text-[10px] sm:text-xs font-bold bg-emerald-500 text-white rounded-md hover:bg-emerald-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Link{selectedGoalIds.length > 0 ? ` (${selectedGoalIds.length})` : ''}
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <div className="flex gap-2 mt-2">
-                        <button
-                          onClick={onToggleGoalPicker}
-                          className="px-2 py-1 text-[10px] sm:text-xs text-charcoal/50 dark:text-white/50 hover:bg-charcoal/5 dark:hover:bg-white/5 rounded transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={onLinkGoals}
-                          disabled={selectedGoalIds.length === 0}
-                          className="px-2 py-1 text-[10px] sm:text-xs font-bold bg-emerald-500 text-white rounded hover:bg-emerald-600 disabled:opacity-40 transition-colors"
-                        >
-                          Link {selectedGoalIds.length > 0 ? `(${selectedGoalIds.length})` : ''}
-                        </button>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            )}
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Expanded: linked entries list */}
+      {/* ── Expanded: linked entries list ─────────────────────────────── */}
       {isExpanded && (
         <div className="border-t border-charcoal/5 dark:border-white/5 bg-charcoal/[0.02] dark:bg-white/[0.02] rounded-b-xl">
           {loadingEntries ? (
             <div className="p-3 sm:p-4 text-center text-[10px] sm:text-xs text-charcoal/40 dark:text-white/40">
-              Loading linked entries...
+              Loading linked entries…
             </div>
           ) : linkedEntries.length > 0 ? (
             <div className="p-2.5 sm:p-3 space-y-0.5 sm:space-y-1">

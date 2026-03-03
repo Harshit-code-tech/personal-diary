@@ -6,7 +6,6 @@ import OfflineIndicator from '@/components/ui/OfflineIndicator'
 import OnboardingTour from '@/components/ui/OnboardingTour'
 import { ToastProvider } from '@/components/ui/ToastContainer'
 import KeyboardShortcutsProvider from '@/components/providers/KeyboardShortcutsProvider'
-import ReminderAppPromo from '@/components/promo/ReminderAppPromo'
 
 // Force dynamic rendering for all /app routes (they use authentication/cookies)
 export const dynamic = 'force-dynamic'
@@ -31,7 +30,6 @@ export default async function AppLayout({
         {children}
         <KeyboardShortcutsHelp />
         <OfflineIndicator />
-        <ReminderAppPromo />
       </ToastProvider>
     </ErrorBoundary>
   )

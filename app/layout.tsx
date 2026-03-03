@@ -1,6 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter, Crimson_Pro, Playfair_Display } from 'next/font/google'
+import { Inter, Crimson_Pro, Playfair_Display, Dancing_Script } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import QueryProvider from '@/components/providers/QueryProvider'
 
@@ -20,6 +20,13 @@ const playfair = Playfair_Display({
   subsets: ['latin'],
   weight: ['400', '600', '700', '900'],
   variable: '--font-playfair',
+  display: 'swap',
+})
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-dancing',
   display: 'swap',
 })
 
@@ -83,7 +90,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${crimsonPro.variable} ${playfair.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${crimsonPro.variable} ${playfair.variable} ${dancingScript.variable} font-sans antialiased`}>
         <QueryProvider>
           {children}
         </QueryProvider>
