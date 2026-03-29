@@ -132,6 +132,12 @@ serve(async (req) => {
             .eq('id', emailJob.user_id)
             .single()
 
+          const { data: userSettings } = await supabase
+            .from('user_settings')
+            .select('username')
+            .eq('user_id', emailJob.user_id)
+            .single()
+
           // Skip if no email found
           if (!profile?.email) {
             await supabase
@@ -164,18 +170,24 @@ serve(async (req) => {
           // Get user's streak data
           const { data: streak } = await supabase
             .from('streaks')
-            .select('current_streak, total_entries')
+            .select('current_streak')
             .eq('user_id', emailJob.user_id)
             .single()
+
+          const { count: totalEntriesCount } = await supabase
+            .from('entries')
+            .select('id', { count: 'exact', head: true })
+            .eq('user_id', emailJob.user_id)
+            .is('deleted_at', null)
 
           // Generate beautiful HTML email content
           let emailHtml = ''
           let emailSubject = ''
           
           const templateProps = {
-            userName: profile?.name,
+            userName: userSettings?.username || profile?.name || profile?.email?.split('@')[0],
             currentStreak: streak?.current_streak || 0,
-            totalEntries: streak?.total_entries || 0,
+            totalEntries: totalEntriesCount || 0,
             appUrl: APP_URL,
           }
           

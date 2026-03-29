@@ -25,10 +25,16 @@ export default function AuthCallbackPage() {
             .single()
           
           if (!existingSettings) {
+            const metadataUsername =
+              (data.user.user_metadata?.username as string | undefined) ??
+              (data.user.user_metadata?.display_name as string | undefined) ??
+              (data.user.user_metadata?.name as string | undefined) ??
+              null
+
             await supabase.from('user_settings').insert({
               user_id: data.user.id,
-              theme: 'light',
               email_reminders_enabled: false,
+              ...(metadataUsername ? { username: metadataUsername.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_-]/g, '').slice(0, 30) } : {}),
             })
           }
           

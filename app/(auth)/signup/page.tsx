@@ -68,6 +68,18 @@ export default function SignupPage() {
       return
     }
 
+    const displayName = username.trim()
+    const normalizedUsername = displayName
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_-]/g, '')
+      .slice(0, 30)
+
+    if (normalizedUsername.length < 3) {
+      setError('Username must contain at least 3 valid characters (letters, numbers, _ or -).')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -78,8 +90,9 @@ export default function SignupPage() {
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
-            username: username,
-            display_name: username,
+            username: normalizedUsername,
+            name: displayName,
+            display_name: displayName,
           },
         },
       })

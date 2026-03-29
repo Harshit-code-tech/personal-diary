@@ -36,14 +36,20 @@ async function generateHTMLContent(
   emailType: string,
   recipientEmail: string
 ): Promise<string> {
-  // Get user's actual name from profiles
+  // Get user's actual name from profiles + settings fallback
   const { data: profileData } = await supabase
     .from('profiles')
     .select('name')
     .eq('id', userId)
     .single()
+
+  const { data: settingsData } = await supabase
+    .from('user_settings')
+    .select('username')
+    .eq('user_id', userId)
+    .single()
   
-  const userName = profileData?.name || recipientEmail.split('@')[0]
+  const userName = settingsData?.username || profileData?.name || recipientEmail.split('@')[0]
   
   if (emailType === 'weekly_summary') {
     // Query actual user data
@@ -525,11 +531,12 @@ serve(async (req) => {
     const results = await Promise.allSettled(
       pendingEmails.map(async (emailItem: EmailQueueItem) => {
         try {
-          // CHECK: If html_body is missing, generate it by querying database
+          // Always regenerate weekly summary HTML from live data to avoid stale/default values.
+          // For other email types, generate only when html_body is missing.
           let htmlToSend = emailItem.html_body
           let usedFallback = false
-          
-          if (!htmlToSend || htmlToSend.trim() === '') {
+
+          if (emailItem.email_type === 'weekly_summary' || !htmlToSend || htmlToSend.trim() === '') {
             console.warn(`⚠️ Email ID ${emailItem.id} has NULL html_body. Generating HTML from database. Email type: ${emailItem.email_type}`)
             
             // Query database and generate real HTML content
