@@ -2,6 +2,46 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const runtime = 'edge'
 
+async function parseJsonSafely(response: Response) {
+  try {
+    return await response.json()
+  } catch {
+    return { error: 'Non-JSON response body' }
+  }
+}
+
+async function callEmailReminderFunction(
+  supabaseUrl: string,
+  headers: Record<string, string>,
+  body: string
+) {
+  const configuredName = process.env.SUPABASE_EMAIL_REMINDERS_FUNCTION?.trim()
+  const candidates = [configuredName, 'quick-handler', 'email-reminders']
+    .filter((v): v is string => !!v)
+    .filter((name, index, all) => all.indexOf(name) === index)
+
+  let lastResponse: Response | null = null
+  let lastFunction = ''
+
+  for (const functionName of candidates) {
+    const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
+      method: 'POST',
+      headers,
+      body,
+    })
+
+    lastResponse = response
+    lastFunction = functionName
+
+    // Fallback only when the function endpoint is missing.
+    if (response.status !== 404) {
+      return { response, functionName }
+    }
+  }
+
+  return { response: lastResponse, functionName: lastFunction }
+}
+
 export async function GET(request: NextRequest) {
   // Verify the request is from Vercel Cron
   const authHeader = request.headers.get('authorization')
@@ -26,31 +66,24 @@ export async function GET(request: NextRequest) {
     // 3. process-email-queue: sends all queued emails via SMTP
     // NOTE: This runs once/day on Vercel free tier as a safety net.
     //       Primary email processing is handled by Supabase pg_cron (every 5 min).
-    const [quickHandlerResponse, reminderNotifResponse, emailQueueResponse] = await Promise.all([
-      // Process email reminders
-      fetch(
-        `${supabaseUrl}/functions/v1/email-reminders`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${serviceKey}`,
-            'Content-Type': 'application/json',
-            'apikey': serviceKey,
-          },
-          body: JSON.stringify({ timestamp: new Date().toISOString() }),
-        }
-      ),
+    const functionHeaders = {
+      'Authorization': `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+      'apikey': serviceKey,
+    }
+
+    const requestBody = JSON.stringify({ timestamp: new Date().toISOString() })
+
+    const [emailRemindersResult, reminderNotifResponse, emailQueueResponse] = await Promise.all([
+      // Process email reminders. Production may still use the old function path "quick-handler".
+      callEmailReminderFunction(supabaseUrl, functionHeaders, requestBody),
       // Process user-created reminders (once, daily, weekly, custom)
       fetch(
         `${supabaseUrl}/functions/v1/send-reminder-notifications`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${serviceKey}`,
-            'Content-Type': 'application/json',
-            'apikey': serviceKey,
-          },
-          body: JSON.stringify({ timestamp: new Date().toISOString() }),
+          headers: functionHeaders,
+          body: requestBody,
         }
       ),
       // Process email queue (sends all pending emails)
@@ -58,29 +91,33 @@ export async function GET(request: NextRequest) {
         `${supabaseUrl}/functions/v1/process-email-queue`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${serviceKey}`,
-            'Content-Type': 'application/json',
-            'apikey': serviceKey,
-          },
+          headers: functionHeaders,
         }
       ),
     ])
 
-    const quickHandlerData = await quickHandlerResponse.json()
-    const reminderNotifData = await reminderNotifResponse.json()
-    const emailQueueData = await emailQueueResponse.json()
+    const emailRemindersResponse = emailRemindersResult.response
+    const emailRemindersFunction = emailRemindersResult.functionName
 
-    console.log('✅ Quick-handler response:', quickHandlerData)
+    if (!emailRemindersResponse) {
+      throw new Error('Could not reach any email reminder function endpoint')
+    }
+
+    const emailRemindersData = await parseJsonSafely(emailRemindersResponse)
+    const reminderNotifData = await parseJsonSafely(reminderNotifResponse)
+    const emailQueueData = await parseJsonSafely(emailQueueResponse)
+
+    console.log(`✅ Email reminders response (${emailRemindersFunction}):`, emailRemindersData)
     console.log('✅ Reminder notifications response:', reminderNotifData)
     console.log('✅ Email queue response:', emailQueueData)
 
     return NextResponse.json({
       success: true,
       message: 'Reminders and email queue processed successfully',
-      quickHandler: {
-        status: quickHandlerResponse.status,
-        data: quickHandlerData,
+      emailReminders: {
+        function: emailRemindersFunction,
+        status: emailRemindersResponse.status,
+        data: emailRemindersData,
       },
       reminderNotifications: {
         status: reminderNotifResponse.status,

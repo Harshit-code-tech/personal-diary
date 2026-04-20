@@ -31,6 +31,10 @@ export async function middleware(req: NextRequest) {
     res.headers.set('X-RateLimit-Limit', limit.toString())
     res.headers.set('X-RateLimit-Remaining', remaining.toString())
     res.headers.set('X-RateLimit-Reset', reset.toString())
+
+    // API routes don't need session refresh logic in middleware.
+    // Returning early avoids refresh_token_not_found noise from server-to-server calls.
+    return res
   }
   
   // Strict rate limiting for auth routes
@@ -118,6 +122,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    '/api/:path*',
     '/app/:path*',
     '/login',
     '/signup',
@@ -129,6 +134,6 @@ export const config = {
      * - public folder
      * - api routes (handled separately)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
