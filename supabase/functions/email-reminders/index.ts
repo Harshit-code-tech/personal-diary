@@ -21,7 +21,7 @@ console.log('🔍 Environment check:', {
 interface EmailJob {
   user_id: string
   email: string
-  email_type: 'daily_reminder' | 'weekly_summary'
+  email_type: 'daily_reminder' | 'weekly_summary' | 'inactive_user' | 'streak_milestone' | 'reminder_notification'
 }
 
 // Don't create SMTP client globally - create on demand to avoid startup crashes
@@ -152,8 +152,8 @@ serve(async (req) => {
             switch (emailJob.email_type) {
               case 'daily_reminder': return settings?.email_reminders_enabled !== false
               case 'weekly_summary': return settings?.weekly_summary_enabled !== false
-              case 'inactivity_reminder': return settings?.inactivity_emails_enabled !== false
-              case 'milestone': return settings?.milestone_notifications_enabled !== false
+              case 'inactive_user': return settings?.inactivity_emails_enabled !== false
+              case 'streak_milestone': return settings?.milestone_notifications_enabled !== false
               case 'reminder_notification': return true // custom reminders are always sent if active
               default: return true // unknown types pass through
             }

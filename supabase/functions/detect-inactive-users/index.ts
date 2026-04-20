@@ -154,11 +154,11 @@ serve(async (req) => {
 
     console.log('📅 Checking for inactive users since:', dates.gentle.toISOString())
 
-    // Get all users with their last entry date using direct query instead of RPC
-    // This avoids the type mismatch error with varchar(255) vs text
+    // Get all entries and build a last-entry map.
     const { data: entries, error: entriesError } = await supabase
       .from('entries')
       .select('user_id, created_at')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (entriesError) {
@@ -176,12 +176,21 @@ serve(async (req) => {
       }
     })
 
-    console.log(`👥 Tracking ${userLastEntry.size} users with entries`)
+    // Include users with zero entries as well.
+    const { data: authUsers, error: listUsersError } = await supabase.auth.admin.listUsers()
+    if (listUsersError) {
+      console.error('❌ Error fetching auth users:', listUsersError)
+      throw listUsersError
+    }
 
-    const users = Array.from(userLastEntry.entries()).map(([user_id, last_entry_date]) => ({
-      id: user_id,
-      last_entry_date
+    const users = (authUsers?.users || []).map((u) => ({
+      id: u.id,
+      email: u.email || null,
+      created_at: u.created_at,
+      last_entry_date: userLastEntry.get(u.id) || null,
     }))
+
+    console.log(`👥 Tracking ${users.length} users total (${userLastEntry.size} with entries)`)
 
     const emailsSent = []
     const errors = []
@@ -195,7 +204,7 @@ serve(async (req) => {
           .eq('user_id', user.id)
           .single()
 
-        if (!settings?.inactivity_emails_enabled) {
+        if (settings && settings.inactivity_emails_enabled === false) {
           continue
         }
 
@@ -206,7 +215,8 @@ serve(async (req) => {
           .eq('id', user.id)
           .single()
 
-        if (!profile?.email) {
+        const recipientEmail = profile?.email || user.email
+        if (!recipientEmail) {
           continue
         }
 
@@ -214,7 +224,7 @@ serve(async (req) => {
         const lastEntryDate = user.last_entry_date ? new Date(user.last_entry_date) : null
         const daysSinceLastEntry = lastEntryDate 
           ? Math.floor((now.getTime() - lastEntryDate.getTime()) / (1000 * 60 * 60 * 24))
-          : 999 // If no entries, treat as very inactive
+          : Math.floor((now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
         // Only send if they cross a threshold
         if (daysSinceLastEntry < INACTIVITY_THRESHOLDS.GENTLE_REMINDER) {
@@ -230,7 +240,9 @@ serve(async (req) => {
             .eq('user_id', user.id)
             .eq('email_type', 'inactive_user')
             .gte('sent_at', new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()) // Last 2 days
-            .single()
+            .order('sent_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
           recentEmail = data
         } catch (e) {
           // email_logs table may not exist yet - proceed without dedup check
@@ -251,7 +263,7 @@ serve(async (req) => {
         // Send email
         await smtpClient.send({
           from: `Noted <${GMAIL_USER}>`, // Display name "Noted"
-          to: profile.email,
+          to: recipientEmail,
           subject: subject,
           html: html,
         })
@@ -261,7 +273,7 @@ serve(async (req) => {
           await supabase.from('email_logs').insert({
             user_id: user.id,
             email_type: 'inactive_user',
-            recipient: profile.email,
+            recipient: recipientEmail,
             subject: subject,
             sent_at: now.toISOString(),
             status: 'sent'
@@ -270,7 +282,7 @@ serve(async (req) => {
           console.warn('⚠️ Could not log email to email_logs:', e)
         }
 
-        emailsSent.push({ userId: user.id, email: profile.email, daysSince: daysSinceLastEntry })
+        emailsSent.push({ userId: user.id, email: recipientEmail, daysSince: daysSinceLastEntry })
 
       } catch (error: any) {
         console.error(`Error sending email to user ${user.id}:`, error)

@@ -223,13 +223,14 @@ export default function SettingsPage() {
 
   const executeDeleteAccount = async () => {
     try {
-      // Delete all user data
-      await Promise.all([
-        supabase.from('entries').delete().eq('user_id', user?.id),
-        supabase.from('people').delete().eq('user_id', user?.id),
-        supabase.from('stories').delete().eq('user_id', user?.id),
-        supabase.from('folders').delete().eq('user_id', user?.id),
-      ])
+      const response = await fetch('/api/account/delete', {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data?.error || 'Failed to delete account')
+      }
 
       // Sign out
       await supabase.auth.signOut()

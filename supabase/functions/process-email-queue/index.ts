@@ -19,7 +19,7 @@ const corsHeaders = {
 interface EmailQueueItem {
   id: string
   user_id: string
-  email_type: 'daily_reminder' | 'weekly_summary' | 'inactive_user' | 'reminder_notification'
+  email_type: 'daily_reminder' | 'weekly_summary' | 'inactive_user' | 'reminder_notification' | 'streak_milestone'
   recipient_email: string
   subject: string
   html_body: string
@@ -29,6 +29,92 @@ interface EmailQueueItem {
   last_error: string | null
 }
 
+async function getUserDisplayName(supabase: any, userId: string, recipientEmail: string): Promise<string> {
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('name, username')
+    .eq('id', userId)
+    .single()
+
+  return profileData?.username || profileData?.name || recipientEmail.split('@')[0]
+}
+
+async function getCurrentStreak(supabase: any, userId: string): Promise<number> {
+  const { data: streakData } = await supabase
+    .from('streaks')
+    .select('current_streak')
+    .eq('user_id', userId)
+    .single()
+
+  if (typeof streakData?.current_streak === 'number' && streakData.current_streak > 0) {
+    return streakData.current_streak
+  }
+
+  // Fallback when streak row is missing/outdated: calculate from entry_date.
+  const { data: entries } = await supabase
+    .from('entries')
+    .select('entry_date')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('entry_date', { ascending: false })
+
+  if (!entries || entries.length === 0) {
+    return 0
+  }
+
+  const uniqueDates = [...new Set(entries.map((e: any) => e.entry_date))]
+  const dateSet = new Set(uniqueDates)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  let currentStreak = 0
+  const checkDate = new Date(today)
+
+  while (true) {
+    const dateKey = checkDate.toISOString().split('T')[0]
+    if (dateSet.has(dateKey)) {
+      currentStreak += 1
+      checkDate.setDate(checkDate.getDate() - 1)
+      continue
+    }
+
+    if (currentStreak === 0) {
+      // Allow streak to continue if the user wrote yesterday but not yet today.
+      checkDate.setDate(checkDate.getDate() - 1)
+      const yesterdayKey = checkDate.toISOString().split('T')[0]
+      if (dateSet.has(yesterdayKey)) {
+        currentStreak += 1
+        checkDate.setDate(checkDate.getDate() - 1)
+        continue
+      }
+    }
+
+    break
+  }
+
+  return currentStreak
+}
+
+function getDefaultSubject(emailType: EmailQueueItem['email_type'], currentStreak = 0): string {
+  switch (emailType) {
+    case 'daily_reminder':
+      return '📝 Daily Journaling Reminder'
+    case 'weekly_summary':
+      return '📊 Your Weekly Journaling Summary'
+    case 'streak_milestone':
+      return currentStreak > 0
+        ? `🎉 ${currentStreak}-Day Streak Milestone!`
+        : '🎉 Streak Milestone!'
+    case 'inactive_user':
+      return 'We miss you! 🌟 Come back to your diary'
+    case 'reminder_notification':
+      return '🔔 Diary Reminder'
+    default:
+      return 'Notification from Noted'
+  }
+}
+
 // Generate HTML content by querying database directly (when database function fails)
 async function generateHTMLContent(
   supabase: any,
@@ -36,28 +122,11 @@ async function generateHTMLContent(
   emailType: string,
   recipientEmail: string
 ): Promise<string> {
-  // Get user's actual name from profiles + settings fallback
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('name')
-    .eq('id', userId)
-    .single()
-
-  const { data: settingsData } = await supabase
-    .from('user_settings')
-    .select('username')
-    .eq('user_id', userId)
-    .single()
-  
-  const userName = settingsData?.username || profileData?.name || recipientEmail.split('@')[0]
+  const userName = await getUserDisplayName(supabase, userId, recipientEmail)
   
   if (emailType === 'weekly_summary') {
     // Query actual user data
-    const { data: streakData } = await supabase
-      .from('streaks')
-      .select('current_streak')
-      .eq('user_id', userId)
-      .single()
+    const currentStreak = await getCurrentStreak(supabase, userId)
     
     // Get actual count of entries this week
     const weekAgo = new Date()
@@ -70,7 +139,6 @@ async function generateHTMLContent(
       .gte('created_at', weekAgo.toISOString())
       .is('deleted_at', null)
     
-    const currentStreak = streakData?.current_streak || 0
     const entriesThisWeek = entriesData?.length || 0
     
     const streakMessage = currentStreak >= 7 
@@ -154,13 +222,7 @@ async function generateHTMLContent(
   
   if (emailType === 'streak_milestone') {
     // Get streak data
-    const { data: streakData } = await supabase
-      .from('streaks')
-      .select('current_streak')
-      .eq('user_id', userId)
-      .single()
-    
-    const currentStreak = streakData?.current_streak || 0
+    const currentStreak = await getCurrentStreak(supabase, userId)
     
     let emoji = '🔥'
     let title = 'Streak Milestone!'
@@ -265,13 +327,7 @@ async function generateHTMLContent(
     const prompt = prompts[Math.floor(Math.random() * prompts.length)]
 
     // Get streak data
-    const { data: streakData } = await supabase
-      .from('streaks')
-      .select('current_streak')
-      .eq('user_id', userId)
-      .single()
-    
-    const currentStreak = streakData?.current_streak || 0
+    const currentStreak = await getCurrentStreak(supabase, userId)
     
     const streakHtml = currentStreak > 0
       ? `
@@ -530,11 +586,13 @@ serve(async (req) => {
     // Process each email
     const results = await Promise.allSettled(
       pendingEmails.map(async (emailItem: EmailQueueItem) => {
+        let subjectToSend = (emailItem.subject || '').trim()
         try {
           // Always regenerate weekly summary HTML from live data to avoid stale/default values.
           // For other email types, generate only when html_body is missing.
           let htmlToSend = emailItem.html_body
           let usedFallback = false
+          const currentStreak = await getCurrentStreak(supabase, emailItem.user_id)
 
           if (emailItem.email_type === 'weekly_summary' || !htmlToSend || htmlToSend.trim() === '') {
             console.warn(`⚠️ Email ID ${emailItem.id} has NULL html_body. Generating HTML from database. Email type: ${emailItem.email_type}`)
@@ -555,14 +613,22 @@ serve(async (req) => {
               .eq('id', emailItem.id)
           }
 
-          if (!emailItem.recipient_email || !emailItem.subject) {
+          if (!subjectToSend) {
+            subjectToSend = getDefaultSubject(emailItem.email_type, currentStreak)
+            await supabase
+              .from('email_queue')
+              .update({ subject: subjectToSend })
+              .eq('id', emailItem.id)
+          }
+
+          if (!emailItem.recipient_email || !subjectToSend) {
             throw new Error(`Email missing required fields (recipient or subject). ID: ${emailItem.id}`)
           }
 
           // Send email with timeout protection
           await sendEmailWithTimeout(
             emailItem.recipient_email,
-            emailItem.subject,
+            subjectToSend,
             htmlToSend
           )
 
@@ -587,7 +653,7 @@ serve(async (req) => {
                 email_type: emailItem.email_type,
                 recipient: emailItem.recipient_email,
                 status: 'sent',
-                subject: emailItem.subject,
+                subject: subjectToSend,
               })
           } catch (logErr) {
             console.warn('⚠️ Could not log email delivery:', logErr)
@@ -620,7 +686,7 @@ serve(async (req) => {
                 email_type: emailItem.email_type,
                 recipient: emailItem.recipient_email,
                 status: 'failed',
-                subject: emailItem.subject,
+                subject: subjectToSend,
                 error_message: errorMessage,
               })
           } catch (logErr) {
