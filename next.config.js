@@ -1,11 +1,3 @@
-/** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
-})
-
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
@@ -37,7 +29,13 @@ const securityHeaders = [
   }
 ]
 
+const devOrigins = process.env.NEXT_PUBLIC_DEV_ORIGINS
+  ? process.env.NEXT_PUBLIC_DEV_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  : []
+
+/** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: devOrigins.length ? devOrigins : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   async headers() {
     return [
       {
@@ -90,4 +88,4 @@ const nextConfig = {
   },
 }
 
-module.exports = withPWA(nextConfig)
+module.exports = nextConfig

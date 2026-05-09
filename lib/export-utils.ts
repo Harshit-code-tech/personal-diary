@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-import DOMPurify from 'isomorphic-dompurify'
+import { stripHtmlTags } from '@/lib/sanitize'
 
 type Entry = {
   id: string
@@ -15,15 +15,7 @@ type Entry = {
  * Strip HTML tags and return plain text with proper formatting
  */
 export function stripHtml(html: string): string {
-  // DOMPurify sanitizes and decodes entities automatically
-  // KEEP_CONTENT: true preserves text while removing all tags
-  const clean = DOMPurify.sanitize(html, { 
-    ALLOWED_TAGS: [],
-    KEEP_CONTENT: true 
-  })
-  
-  // Remove excessive whitespace only
-  return clean.replace(/\s+/g, ' ').trim()
+  return stripHtmlTags(html)
 }
 
 /**

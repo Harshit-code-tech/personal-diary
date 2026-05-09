@@ -31,10 +31,8 @@ const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'),
 
 const moods = ['😊 Happy', '😔 Sad', '😡 Angry', '😰 Anxious', '😌 Peaceful', '🎉 Excited', '😴 Tired', '💭 Thoughtful', '🤔 Others']
 
-export default function EntryPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  // Safely unwrap params whether it's a Promise or already resolved
-  const resolvedParams = params instanceof Promise ? use(params) : params
-  const { id } = resolvedParams
+export default function EntryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [entry, setEntry] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)

@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride'
+import { Joyride, STATUS, Step } from 'react-joyride'
 
 const steps: Step[] = [
   {
     target: 'body',
     content: '👋 Welcome to Noted.! Let me show you around.',
     placement: 'center',
-    disableBeacon: true,
+    skipBeacon: true,
   },
   {
     target: '[data-tour="new-entry"]',
@@ -53,6 +53,9 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const [run, setRun] = useState(false)
   const [mounted, setMounted] = useState(false)
 
+  // react-joyride v3 typing differs from runtime API; use an any-aliased component to avoid strict prop errors
+  const AnyJoyride: any = Joyride
+
   // Prevent hydration errors - only run client-side code after mount
   useEffect(() => {
     setMounted(true)
@@ -73,7 +76,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
     }
   }, [mounted])
 
-  const handleCallback = (data: CallBackProps) => {
+  const handleEvent = (data: any) => {
     const { status } = data
     
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
@@ -89,14 +92,14 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
   }
 
   return (
-    <Joyride
+    <AnyJoyride
       steps={steps}
       run={run}
       continuous
       showProgress
       showSkipButton
-      callback={handleCallback}
-      styles={{
+      onEvent={handleEvent}
+      styles={({
         options: {
           primaryColor: '#D4AF37',
           zIndex: 10000,
@@ -117,7 +120,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
         buttonSkip: {
           color: '#94a3b8',
         },
-      }}
+      } as any)}
       locale={{
         back: 'Back',
         close: 'Close',

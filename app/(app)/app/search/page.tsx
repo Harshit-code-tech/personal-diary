@@ -8,7 +8,6 @@ import { useSavedSearches } from '@/lib/hooks/useSavedSearches'
 import Link from 'next/link'
 import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile, Save, Star, Trash2, FolderOpen } from 'lucide-react'
 import { ListSkeleton } from '@/components/ui/LoadingSkeleton'
-import DOMPurify from 'isomorphic-dompurify'
 import { useSearchParams } from 'next/navigation'
 import confetti from 'canvas-confetti'
 
@@ -179,11 +178,7 @@ export default function SearchPage() {
   }
 
   const extractTextPreview = (html: string, maxLength: number = 200) => {
-    const sanitized = DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: [],
-      ALLOWED_ATTR: []
-    })
-    const text = stripHtmlTags(sanitized)
+    const text = stripHtmlTags(html)
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 

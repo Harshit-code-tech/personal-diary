@@ -4,7 +4,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function DELETE() {
   try {
-    const supabase = createUserClient()
+    const supabase = await createUserClient()
     const {
       data: { user },
       error: authError,

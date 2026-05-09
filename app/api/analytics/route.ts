@@ -11,7 +11,7 @@ import { getApiError } from '@/lib/api-utils'
 export const dynamic = 'force-dynamic'
 export async function GET(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()

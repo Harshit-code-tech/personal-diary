@@ -44,10 +44,8 @@ interface Memory {
   updated_at: string
 }
 
-export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  // Safely unwrap params whether it's a Promise or already resolved
-  const resolvedParams = params instanceof Promise ? use(params) : params
-  const { id } = resolvedParams
+export default function PersonDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [person, setPerson] = useState<Person | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [memories, setMemories] = useState<Memory[]>([])

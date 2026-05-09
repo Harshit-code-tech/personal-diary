@@ -19,10 +19,8 @@ interface Person {
 
 const relationships = ['Family', 'Friend', 'Partner', 'Colleague', 'Mentor', 'Acquaintance', 'Other']
 
-export default function EditPersonPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  // Safely unwrap params whether it's a Promise or already resolved
-  const resolvedParams = params instanceof Promise ? use(params) : params
-  const { id } = resolvedParams
+export default function EditPersonPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [person, setPerson] = useState<Person | null>(null)
   const [name, setName] = useState('')
   const [relationship, setRelationship] = useState('')

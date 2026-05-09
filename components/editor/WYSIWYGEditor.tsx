@@ -14,6 +14,7 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { 
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, 
   Quote, Heading2, Image as ImageIcon, Link as LinkIcon, Undo, Redo,
@@ -31,6 +32,8 @@ interface WYSIWYGEditorProps {
 }
 
 export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeholder }: WYSIWYGEditorProps) {
+  const sanitizedContent = sanitizeHtml(content)
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -85,7 +88,7 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
         placeholder: placeholder || 'Start writing your diary entry...',
       }),
     ],
-    content,
+    content: sanitizedContent,
     editorProps: {
       attributes: {
         class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px] text-charcoal dark:text-white',
@@ -99,10 +102,10 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
   // Sync editor content when content prop changes (e.g., from template selection)
   // MUST be called before any conditional returns to follow Rules of Hooks
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content)
+    if (editor && sanitizedContent !== editor.getHTML()) {
+      editor.commands.setContent(sanitizedContent)
     }
-  }, [content, editor])
+  }, [editor, sanitizedContent])
 
   if (!editor) {
     return null

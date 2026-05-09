@@ -1,8 +1,8 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter, Crimson_Pro, Playfair_Display, Dancing_Script } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/react'
 import QueryProvider from '@/components/providers/QueryProvider'
+import ServiceWorkerRegistration from '@/components/providers/ServiceWorkerRegistration'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -94,7 +94,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
         </QueryProvider>
-        <Analytics />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   )

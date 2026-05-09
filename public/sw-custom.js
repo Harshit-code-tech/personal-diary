@@ -4,11 +4,24 @@
 const SYNC_TAG = 'diary-entry-sync';
 const PENDING_QUEUE = 'pending-operations';
 
-// Background sync for offline entry changes
+// Background sync for offline entry changes + optional completion notification
 self.addEventListener('sync', (event) => {
-  if (event.tag === SYNC_TAG) {
-    event.waitUntil(syncPendingOperations());
-  }
+  if (event.tag !== SYNC_TAG) return;
+
+  event.waitUntil(
+    (async () => {
+      await syncPendingOperations();
+
+      if (self.Notification && Notification.permission === 'granted') {
+        await self.registration.showNotification('Diary Synced', {
+          body: 'Your offline changes have been synced successfully',
+          icon: '/icons/icon-192x192.svg',
+          badge: '/icons/icon-192x192.svg',
+          tag: 'sync-complete',
+        });
+      }
+    })()
+  );
 });
 
 async function syncPendingOperations() {
@@ -135,25 +148,6 @@ function addPendingOperation(db, operation) {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
-  }
-});
-
-// Notification for sync completion (optional)
-self.addEventListener('sync', async (event) => {
-  if (event.tag === SYNC_TAG) {
-    event.waitUntil(
-      syncPendingOperations().then(() => {
-        // Optionally notify user that sync completed
-        if (self.Notification && Notification.permission === 'granted') {
-          self.registration.showNotification('Diary Synced', {
-            body: 'Your offline changes have been synced successfully',
-            icon: '/icons/icon-192x192.svg',
-            badge: '/icons/icon-192x192.svg',
-            tag: 'sync-complete',
-          });
-        }
-      })
-    );
   }
 });
 

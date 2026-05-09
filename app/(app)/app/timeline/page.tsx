@@ -285,7 +285,7 @@ export default function LifeTimelinePage() {
       fetchUserCategories()
       fetchAllGoals()
     }
-  }, [user, fetchEvents, fetchUserCategories])
+  }, [user, fetchEvents, fetchUserCategories, fetchAllGoals])
 
   // ═══════════════════════════════════════════════════════════════════════════
   //  Linked Entries (inline expansion)

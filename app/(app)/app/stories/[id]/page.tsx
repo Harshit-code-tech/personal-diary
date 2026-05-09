@@ -36,10 +36,8 @@ interface Entry {
   word_count: number
 }
 
-export default function StoryDetailPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
-  // Safely unwrap params whether it's a Promise or already resolved
-  const resolvedParams = params instanceof Promise ? use(params) : params
-  const { id } = resolvedParams
+export default function StoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const [story, setStory] = useState<Story | null>(null)
   const [entries, setEntries] = useState<Entry[]>([])
   const [allEntries, setAllEntries] = useState<Entry[]>([])
