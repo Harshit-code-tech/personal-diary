@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient as createUserClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { getApiError, requireCsrf } from '@/lib/api-utils'
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
+    const csrfError = await requireCsrf(request)
+    if (csrfError) return csrfError
+
     const supabase = await createUserClient()
     const {
       data: { user },
@@ -39,11 +43,11 @@ export async function DELETE() {
 
     const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(user.id)
     if (deleteError) {
-      return NextResponse.json({ error: deleteError.message }, { status: 500 })
+      return NextResponse.json({ error: getApiError(deleteError) }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to delete account' }, { status: 500 })
+    return NextResponse.json({ error: getApiError(error) }, { status: 500 })
   }
 }

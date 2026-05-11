@@ -1,5 +1,5 @@
 // Custom error logging to Supabase
-import { createClient } from '@/lib/supabase/client'
+import { getClientCSRFToken } from '@/lib/csrf'
 
 export interface ErrorLog {
   error_type: string
@@ -59,31 +59,41 @@ export async function logError(error: Error | string, context?: {
   metadata?: Record<string, any>
 }) {
   try {
-    const supabase = createClient()
     const sanitized = sanitizeError(error)
+    const userId = context?.userId
     
     const errorLog: ErrorLog = {
       error_type: sanitized.type,
       error_message: sanitized.message,
       // Never include stack traces in production
       error_stack: process.env.NODE_ENV === 'development' && typeof error !== 'string' ? error.stack : undefined,
-      user_id: context?.userId,
+      user_id: userId,
       path: context?.path || (typeof window !== 'undefined' ? window.location.pathname : undefined),
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
       timestamp: new Date().toISOString(),
       metadata: context?.metadata,
     }
     
-    // Log to Supabase (only if not in development to avoid DB bloat)
     if (process.env.NODE_ENV !== 'development') {
-      const { error: dbError } = await supabase
-        .from('error_logs')
-        .insert(errorLog)
-      
-      if (dbError) {
-        // Fail silently in production
-        safeError('Failed to log error to Supabase:', dbError)
+      if (typeof window === 'undefined') {
+        return
       }
+
+      const csrfToken = getClientCSRFToken()
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+
+      if (csrfToken) {
+        headers['x-csrf-token'] = csrfToken
+      }
+
+      await fetch('/api/error-logs', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(errorLog),
+        keepalive: true,
+      })
     }
     
     // Only log to console in development

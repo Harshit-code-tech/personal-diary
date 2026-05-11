@@ -22,7 +22,7 @@ export async function setCSRFToken(): Promise<string> {
   const cookieStore = await cookies()
   
   cookieStore.set(CSRF_TOKEN_NAME, token, {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     maxAge: 60 * 60 * 24, // 24 hours

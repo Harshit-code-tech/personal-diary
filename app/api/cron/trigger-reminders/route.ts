@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getApiError } from '@/lib/api-utils'
 
 export const runtime = 'edge'
 
@@ -131,7 +132,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error('Error triggering reminders:', error)
     return NextResponse.json(
-      { error: 'Failed to trigger reminders', details: error.message },
+      { error: getApiError(error) },
       { status: 500 }
     )
   }

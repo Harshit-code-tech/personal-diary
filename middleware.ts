@@ -5,9 +5,32 @@ import { apiLimiter, authLimiter } from '@/lib/rate-limit'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
+  const pathname = req.nextUrl.pathname
+  const accept = req.headers.get('accept') || ''
+  const isHtmlRequest = req.method === 'GET' && accept.includes('text/html')
+  const hasCsrfCookie = Boolean(req.cookies.get('csrf_token'))
+
+  const generateCsrfToken = () => {
+    const bytes = new Uint8Array(32)
+    crypto.getRandomValues(bytes)
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+  }
+
+  const withCsrfCookie = (response: NextResponse) => {
+    if (isHtmlRequest && !hasCsrfCookie) {
+      response.cookies.set('csrf_token', generateCsrfToken(), {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24,
+        path: '/',
+      })
+    }
+    return response
+  }
   
   // Rate limiting for API routes
-  if (req.nextUrl.pathname.startsWith('/api/')) {
+  if (pathname.startsWith('/api/')) {
     const identifier = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? 'anonymous'
     const { success, limit, remaining, reset } = await apiLimiter.check(identifier)
     
@@ -34,13 +57,13 @@ export async function middleware(req: NextRequest) {
 
     // API routes don't need session refresh logic in middleware.
     // Returning early avoids refresh_token_not_found noise from server-to-server calls.
-    return res
+    return withCsrfCookie(res)
   }
   
   // Strict rate limiting for auth routes
-  if (req.nextUrl.pathname.startsWith('/login') || req.nextUrl.pathname.startsWith('/signup')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/signup')) {
     const identifier = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? 'anonymous'
-    const { success } = await authLimiter.check(`auth:${identifier}`)
+    const { success } = await authLimiter.check(identifier)
     
     if (!success) {
       return new NextResponse(
@@ -50,6 +73,26 @@ export async function middleware(req: NextRequest) {
     }
   }
   
+  const isProtectedRoute = pathname.startsWith('/app')
+  const isAuthRoute = pathname === '/login' || pathname === '/signup'
+  const hasSupabaseCookies = req.cookies.getAll().some((cookie) => cookie.name.startsWith('sb-'))
+
+  if (isProtectedRoute && !hasSupabaseCookies) {
+    return withCsrfCookie(NextResponse.redirect(new URL('/login', req.url)))
+  }
+
+  if (!isProtectedRoute && !(isAuthRoute && hasSupabaseCookies)) {
+    return withCsrfCookie(res)
+  }
+
+  const clearSupabaseCookies = (response: NextResponse) => {
+    req.cookies.getAll().forEach((cookie) => {
+      if (cookie.name.startsWith('sb-')) {
+        response.cookies.delete(cookie.name)
+      }
+    })
+  }
+
   const supabase = createMiddlewareClient({ req, res })
 
   // Get session — handle network failures gracefully
@@ -78,14 +121,13 @@ export async function middleware(req: NextRequest) {
         isNetworkFailure = isNetwork
       } else {
         // Genuine auth errors (invalid token, expired, etc.) — clear cookies
-        const response = req.nextUrl.pathname.startsWith('/app')
+        const response = isProtectedRoute
           ? NextResponse.redirect(new URL('/login', req.url))
           : NextResponse.next()
         
-        response.cookies.delete('sb-access-token')
-        response.cookies.delete('sb-refresh-token')
+        clearSupabaseCookies(response)
         
-        return response
+        return withCsrfCookie(response)
       }
     } else {
       session = currentSession
@@ -102,22 +144,22 @@ export async function middleware(req: NextRequest) {
   }
 
   // If user is not signed in and trying to access protected routes
-  if (!session && req.nextUrl.pathname.startsWith('/app')) {
+  if (!session && isProtectedRoute) {
     // On network failure, let the request through — the user likely has valid
     // cookies that will work once Supabase is reachable again.
     // The client-side auth will handle showing login if truly unauthenticated.
     if (isNetworkFailure) {
-      return res
+      return withCsrfCookie(res)
     }
-    return NextResponse.redirect(new URL('/login', req.url))
+    return withCsrfCookie(NextResponse.redirect(new URL('/login', req.url)))
   }
 
   // If user is signed in and trying to access auth pages, redirect to app
-  if (session && (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/app', req.url))
+  if (session && isAuthRoute) {
+    return withCsrfCookie(NextResponse.redirect(new URL('/app', req.url)))
   }
 
-  return res
+  return withCsrfCookie(res)
 }
 
 export const config = {
@@ -134,6 +176,6 @@ export const config = {
      * - public folder
      * - api routes (handled separately)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw-custom.js|robots.txt|sitemap.xml|icon|apple-icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|css|map|json|ico|txt|webmanifest)$).*)',
   ],
 }

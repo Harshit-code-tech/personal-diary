@@ -1,15 +1,23 @@
+const isProd = process.env.NODE_ENV === 'production'
+
+const cspDirectives = [
+  "default-src 'self'",
+  `script-src 'self'${isProd ? '' : " 'unsafe-eval'"} 'unsafe-inline' https://va.vercel-scripts.com`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' blob: data: https:",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  ...(isProd ? ['upgrade-insecure-requests'] : []),
+].join('; ')
+
 const securityHeaders = [
   {
     key: 'Content-Security-Policy',
-    value: `
-      default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https:;
-      font-src 'self' https://fonts.gstatic.com data:;
-      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com;
-      frame-ancestors 'none';
-    `.replace(/\s+/g, ' ').trim()
+    value: cspDirectives,
   },
   {
     key: 'X-Frame-Options',
@@ -29,6 +37,13 @@ const securityHeaders = [
   }
 ]
 
+if (isProd) {
+  securityHeaders.push({
+    key: 'Strict-Transport-Security',
+    value: 'max-age=63072000; includeSubDomains; preload',
+  })
+}
+
 const devOrigins = process.env.NEXT_PUBLIC_DEV_ORIGINS
   ? process.env.NEXT_PUBLIC_DEV_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
   : []
@@ -41,6 +56,15 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/icons/icon-192x192.svg',
+        permanent: false,
       },
     ]
   },

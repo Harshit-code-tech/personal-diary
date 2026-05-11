@@ -9,6 +9,8 @@ export function useCSRFToken() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     // Get CSRF token from cookie
     const getToken = () => {
       if (typeof document === 'undefined') return null;
@@ -23,7 +25,40 @@ export function useCSRFToken() {
       return null;
     };
 
-    setToken(getToken());
+    const ensureToken = async () => {
+      const existing = getToken();
+      if (existing) {
+        if (!cancelled) {
+          setToken(existing);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/csrf', {
+          method: 'GET',
+          credentials: 'same-origin',
+        });
+
+        if (response.ok) {
+          const data = await response.json().catch(() => ({}));
+          const nextToken = data?.token || getToken();
+          if (!cancelled) {
+            setToken(nextToken || null);
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setToken(getToken());
+        }
+      }
+    };
+
+    void ensureToken();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   /**

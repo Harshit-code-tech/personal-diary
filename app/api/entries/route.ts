@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cacheUtils, CACHE_KEYS, CACHE_TTL } from '@/lib/redis'
-
-/**
- * Sanitize error message for API response
- * In production, return generic messages to prevent information leakage
- */
-function getApiError(error: any): string {
-  if (process.env.NODE_ENV === 'production') {
-    return 'An error occurred while processing your request'
-  }
-  return error?.message || 'Unknown error'
-}
+import { entrySchema, formatZodErrors } from '@/lib/validation'
+import { stripHtmlTags } from '@/lib/sanitize'
+import { getApiError, requireCsrf } from '@/lib/api-utils'
 
 /**
  * GET /api/entries
@@ -47,7 +39,7 @@ export async function GET(request: Request) {
       .order('entry_date', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: getApiError(error) }, { status: 500 })
     }
 
     // Store in cache for 5 minutes
@@ -70,6 +62,9 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
+    const csrfError = await requireCsrf(request)
+    if (csrfError) return csrfError
+
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
@@ -78,11 +73,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
+    const parsed = entrySchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid entry data', details: formatZodErrors(parsed.error) },
+        { status: 400 }
+      )
+    }
+
+    const sanitizedTitle = stripHtmlTags(parsed.data.title)
+    const sanitizedContent = parsed.data.content.trim()
+    const entryPayload = {
+      ...parsed.data,
+      title: sanitizedTitle,
+      content: sanitizedContent,
+      user_id: user.id,
+    }
     
     // Create entry
     const { data: entry, error } = await supabase
       .from('entries')
-      .insert([{ ...body, user_id: user.id }])
+      .insert([entryPayload])
       .select()
       .single()
 

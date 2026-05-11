@@ -1,3 +1,6 @@
+import { NextResponse } from 'next/server'
+import { getCSRFHeaderName, validateCSRFToken } from '@/lib/csrf'
+
 /**
  * Sanitize error messages for API responses
  * Prevents exposing sensitive information in production
@@ -23,4 +26,33 @@ export function getApiErrorResponse(error: any, status: number = 500) {
     error: getApiError(error),
     status
   }
+}
+
+/**
+ * Enforce same-origin + CSRF token for state-changing requests
+ */
+export async function requireCsrf(request: Request) {
+  const origin = request.headers.get('origin')
+
+  if (origin) {
+    let requestOrigin = ''
+    try {
+      requestOrigin = new URL(request.url).origin
+    } catch {
+      requestOrigin = ''
+    }
+
+    if (requestOrigin && origin !== requestOrigin) {
+      return NextResponse.json({ error: 'Invalid origin' }, { status: 403 })
+    }
+  }
+
+  const headerToken = request.headers.get(getCSRFHeaderName()) || ''
+  const isValid = await validateCSRFToken(headerToken)
+
+  if (!isValid) {
+    return NextResponse.json({ error: 'Invalid CSRF token' }, { status: 403 })
+  }
+
+  return null
 }

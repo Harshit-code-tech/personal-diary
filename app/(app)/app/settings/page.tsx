@@ -11,6 +11,7 @@ import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import ReauthModal from '@/components/auth/ReauthModal'
 import NotificationSettings from '@/components/settings/NotificationSettings'
 import ImportModal from '@/components/import/ImportModal'
+import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 
 export default function SettingsPage() {
   const toastNotify = useToast()
@@ -45,6 +46,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
+  const { getCSRFHeaders } = useCSRFToken()
 
   const fetchUsername = useCallback(async () => {
     try {
@@ -225,6 +227,7 @@ export default function SettingsPage() {
     try {
       const response = await fetch('/api/account/delete', {
         method: 'DELETE',
+        headers: getCSRFHeaders(),
       })
 
       if (!response.ok) {

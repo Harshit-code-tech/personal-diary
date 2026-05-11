@@ -37,6 +37,7 @@ async function syncPendingOperations() {
           method: operation.method,
           headers: operation.headers,
           body: operation.body,
+          credentials: operation.credentials || 'include',
         });
 
         if (response.ok) {
@@ -95,6 +96,11 @@ function removePendingOperation(db, id) {
 self.addEventListener('fetch', (event) => {
   // Handle API requests specially
   if (event.request.url.includes('/api/')) {
+    const requestUrl = new URL(event.request.url);
+    if (requestUrl.origin !== self.location.origin) {
+      return;
+    }
+
     event.respondWith(
       fetch(event.request)
         .catch(async (error) => {
@@ -106,6 +112,7 @@ self.addEventListener('fetch', (event) => {
               method: event.request.method,
               headers: Object.fromEntries(event.request.headers.entries()),
               body: await event.request.clone().text(),
+              credentials: 'include',
               timestamp: Date.now(),
             };
             
