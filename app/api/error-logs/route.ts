@@ -10,7 +10,7 @@ const errorLogSchema = z.object({
   error_stack: z.string().max(4000).optional().nullable(),
   path: z.string().max(2048).optional().nullable(),
   user_agent: z.string().max(512).optional().nullable(),
-  metadata: z.record(z.any()).optional().nullable(),
+  metadata: z.record(z.string(), z.any()).optional().nullable(),
 })
 
 const truncate = (value: string | null | undefined, limit: number) => {
