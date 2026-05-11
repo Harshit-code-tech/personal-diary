@@ -1,8 +1,6 @@
 // Rate limiting utilities - optimized for Supabase Free Tier
 // Supabase free tier: 30 auth attempts per 5 minutes per IP
-// Strategy: Use Upstash Redis when configured, fallback to in-memory
-
-import { rateLimiter as upstashRateLimiter } from '@/lib/redis'
+// Strategy: In-memory limiter for edge/client safety
 
 interface RateLimitStore {
   [key: string]: {
@@ -12,9 +10,18 @@ interface RateLimitStore {
 }
 
 const store: RateLimitStore = {}
-const isUpstashConfigured = Boolean(
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-)
+
+const cleanupIntervalMs = 10 * 60 * 1000
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now()
+    Object.keys(store).forEach((key) => {
+      if (store[key].resetAt < now) {
+        delete store[key]
+      }
+    })
+  }, cleanupIntervalMs)
+}
 
 export interface RateLimitConfig {
   interval: number // in milliseconds
@@ -70,28 +77,6 @@ function inMemoryCheck(key: string, config: RateLimitConfig): RateLimitResult {
 export function rateLimit(config: RateLimitConfig, action: string) {
   return {
     check: async (identifier: string): Promise<RateLimitResult> => {
-      if (isUpstashConfigured) {
-        const windowSeconds = Math.max(1, Math.ceil(config.interval / 1000))
-        const result = await upstashRateLimiter.check(
-          identifier,
-          action,
-          config.limit,
-          windowSeconds
-        )
-
-        const retryAfter = result.success
-          ? undefined
-          : Math.max(0, Math.ceil((result.reset - Date.now()) / 1000))
-
-        return {
-          success: result.success,
-          limit: config.limit,
-          remaining: result.remaining,
-          reset: result.reset,
-          retryAfter,
-        }
-      }
-
       const key = `${identifier}:${action}`
       return inMemoryCheck(key, config)
     },

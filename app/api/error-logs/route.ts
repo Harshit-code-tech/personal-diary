@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient as createUserClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { getApiError, requireCsrf } from '@/lib/api-utils'
+import { getApiError } from '@/lib/api-utils'
+import { requireCsrf } from '@/lib/api-csrf'
 
 const errorLogSchema = z.object({
   error_type: z.string().min(1).max(100),

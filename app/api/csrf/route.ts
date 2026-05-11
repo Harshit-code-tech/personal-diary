@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { setCSRFToken } from '@/lib/csrf'
+import { setCSRFToken } from '@/lib/csrf-server'
 
 export async function GET() {
   const token = await setCSRFToken()

@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { cacheUtils, CACHE_KEYS, CACHE_TTL } from '@/lib/redis'
 import { entrySchema, formatZodErrors } from '@/lib/validation'
 import { stripHtmlTags } from '@/lib/sanitize'
-import { getApiError, requireCsrf } from '@/lib/api-utils'
+import { getApiError } from '@/lib/api-utils'
+import { requireCsrf } from '@/lib/api-csrf'
 
 /**
  * GET /api/entries

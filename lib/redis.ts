@@ -1,10 +1,15 @@
 import { Redis } from '@upstash/redis'
 
 // Initialize Redis client with Upstash
-export const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN ,
-})
+const upstashUrl = process.env.UPSTASH_REDIS_REST_URL
+const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+export const redis = upstashUrl && upstashToken
+  ? new Redis({
+    url: upstashUrl,
+    token: upstashToken,
+  })
+  : null
 
 // Cache key prefixes for organization
 export const CACHE_KEYS = {
@@ -37,6 +42,7 @@ export const cacheUtils = {
    */
   async set<T>(key: string, value: T, ttl: number = CACHE_TTL.MEDIUM): Promise<void> {
     try {
+      if (!redis) return
       await redis.setex(key, ttl, JSON.stringify(value))
     } catch (error) {
       console.error('Redis set error:', error)
@@ -49,6 +55,7 @@ export const cacheUtils = {
    */
   async get<T>(key: string): Promise<T | null> {
     try {
+      if (!redis) return null
       const data = await redis.get(key)
       return data ? (JSON.parse(data as string) as T) : null
     } catch (error) {
@@ -62,6 +69,7 @@ export const cacheUtils = {
    */
   async del(key: string): Promise<void> {
     try {
+      if (!redis) return
       await redis.del(key)
     } catch (error) {
       console.error('Redis del error:', error)
@@ -73,6 +81,7 @@ export const cacheUtils = {
    */
   async delPattern(pattern: string): Promise<void> {
     try {
+      if (!redis) return
       const keys = await redis.keys(pattern)
       if (keys.length > 0) {
         await redis.del(...keys)
@@ -87,6 +96,7 @@ export const cacheUtils = {
    */
   async invalidateUser(userId: string): Promise<void> {
     try {
+      if (!redis) return
       const keys = await redis.keys(`*:${userId}:*`)
       if (keys.length > 0) {
         await redis.del(...keys)
@@ -101,6 +111,7 @@ export const cacheUtils = {
    */
   async healthCheck(): Promise<boolean> {
     try {
+      if (!redis) return false
       await redis.ping()
       return true
     } catch (error) {
@@ -127,6 +138,14 @@ export const rateLimiter = {
     const windowMs = window * 1000
 
     try {
+      if (!redis) {
+        return {
+          success: true,
+          remaining: limit,
+          reset: now + windowMs,
+        }
+      }
+
       // Get current count
       const current = await redis.get(key)
       const count = current ? parseInt(current as string) : 0
