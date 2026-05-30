@@ -154,6 +154,9 @@ export interface UserSettings {
   milestone_notifications_enabled: boolean
   reminder_time: string | null
   reminder_days: string[] | null
+  goal_deadline_reminders_enabled: boolean | null
+  goal_deadline_reminder_days: number | null
+  goal_deadline_reminder_time: string | null
   created_at: string
   updated_at: string
 }

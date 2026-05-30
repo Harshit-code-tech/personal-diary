@@ -30,51 +30,93 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
   const { user } = useAuth()
   const supabase = createClient()
   const [importing, setImporting] = useState(false)
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
   const [preview, setPreview] = useState<ImportData | null>(null)
+  const [fileSummaries, setFileSummaries] = useState<Array<{
+    name: string
+    entries: number
+    people: number
+    stories: number
+    exportDate?: string
+  }>>([])
   const [error, setError] = useState<string>('')
 
   if (!isOpen) return null
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (!selectedFile) return
+    const selectedFiles = Array.from(e.target.files ?? [])
+    if (selectedFiles.length === 0) return
 
     setError('')
     setPreview(null)
+    setFileSummaries([])
 
-    // Validate file type
-    if (!selectedFile.name.endsWith('.json')) {
-      setError('Please select a valid JSON file')
+    // Validate file types
+    const invalidFile = selectedFiles.find(file => !file.name.endsWith('.json'))
+    if (invalidFile) {
+      setFiles([])
+      setError('Please select only JSON files')
       return
     }
 
-    setFile(selectedFile)
-
-    // Parse and preview
     try {
-      const text = await selectedFile.text()
-      const data = JSON.parse(text) as ImportData
+      const mergedEntries: ImportData['entries'] = []
+      const mergedPeople: any[] = []
+      const mergedStories: any[] = []
+      const exportDates: string[] = []
+      const summaries: Array<{ name: string; entries: number; people: number; stories: number; exportDate?: string }> = []
 
-      // Validate structure
-      if (!data.entries || !Array.isArray(data.entries)) {
-        setError('Invalid file format: missing entries array')
-        return
+      for (const file of selectedFiles) {
+        const text = await file.text()
+        const data = JSON.parse(text) as ImportData
+
+        // Validate structure
+        if (!data.entries || !Array.isArray(data.entries)) {
+          setFiles([])
+          setError(`Invalid file format in ${file.name}: missing entries array`)
+          return
+        }
+
+        // Validate each entry has required fields
+        const hasValidEntries = data.entries.every(
+          entry => entry.title && entry.content && entry.entry_date
+        )
+
+        if (!hasValidEntries) {
+          setFiles([])
+          setError(`Invalid entry format in ${file.name}: missing required fields (title, content, entry_date)`)
+          return
+        }
+
+        summaries.push({
+          name: file.name,
+          entries: data.entries.length,
+          people: data.people?.length || 0,
+          stories: data.stories?.length || 0,
+          exportDate: data.exportDate,
+        })
+
+        mergedEntries.push(...data.entries)
+        if (data.people?.length) mergedPeople.push(...data.people)
+        if (data.stories?.length) mergedStories.push(...data.stories)
+        if (data.exportDate) exportDates.push(data.exportDate)
       }
 
-      // Validate each entry has required fields
-      const hasValidEntries = data.entries.every(
-        entry => entry.title && entry.content && entry.entry_date
-      )
+      const latestExportDate = exportDates.length > 0
+        ? exportDates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[exportDates.length - 1]
+        : undefined
 
-      if (!hasValidEntries) {
-        setError('Invalid entry format: missing required fields (title, content, entry_date)')
-        return
-      }
-
-      setPreview(data)
+      setFiles(selectedFiles)
+      setFileSummaries(summaries)
+      setPreview({
+        entries: mergedEntries,
+        people: mergedPeople,
+        stories: mergedStories,
+        exportDate: latestExportDate,
+      })
     } catch (err) {
       console.error('Parse error:', err)
+      setFiles([])
       setError('Failed to parse JSON file. Please check the file format.')
     }
   }
@@ -136,8 +178,9 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
   }
 
   const handleClose = () => {
-    setFile(null)
+    setFiles([])
     setPreview(null)
+    setFileSummaries([])
     setError('')
     onClose()
   }
@@ -177,18 +220,20 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
               className="block w-full cursor-pointer"
             >
               <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                file
+                files.length > 0
                   ? 'border-gold dark:border-teal bg-gold/5 dark:bg-teal/5'
                   : 'border-charcoal/20 dark:border-white/20 hover:border-gold dark:hover:border-teal hover:bg-gold/5 dark:hover:bg-teal/5'
               }`}>
                 <FileJson className={`w-12 h-12 mx-auto mb-3 ${
-                  file ? 'text-gold dark:text-teal' : 'text-charcoal/40 dark:text-white/40'
+                  files.length > 0 ? 'text-gold dark:text-teal' : 'text-charcoal/40 dark:text-white/40'
                 }`} />
                 <p className="font-medium text-charcoal dark:text-white mb-1">
-                  {file ? file.name : 'Click to select a JSON file'}
+                  {files.length > 0
+                    ? (files.length === 1 ? files[0].name : `${files.length} files selected`)
+                    : 'Click to select a JSON file'}
                 </p>
                 <p className="text-sm text-charcoal/60 dark:text-white/60">
-                  {file ? 'Click to change file' : 'Or drag and drop your export file here'}
+                  {files.length > 0 ? 'Click to change files' : 'Or drag and drop your export file here'}
                 </p>
               </div>
             </label>
@@ -197,6 +242,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
               name="importFile"
               type="file"
               accept=".json"
+              multiple
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -227,13 +273,21 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
                     File validated successfully!
                   </p>
                   <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                    Ready to import {preview.entries?.length || 0} {preview.entries?.length === 1 ? 'entry' : 'entries'}
+                    Ready to import {preview.entries?.length || 0} {preview.entries?.length === 1 ? 'entry' : 'entries'} from {files.length} {files.length === 1 ? 'file' : 'files'}
                   </p>
                 </div>
               </div>
 
               {/* Import Details */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-charcoal/5 dark:bg-white/5 rounded-xl">
+                <div>
+                  <p className="text-sm text-charcoal/60 dark:text-white/60 mb-1">
+                    Files
+                  </p>
+                  <p className="text-2xl font-bold text-charcoal dark:text-white">
+                    {files.length}
+                  </p>
+                </div>
                 <div>
                   <p className="text-sm text-charcoal/60 dark:text-white/60 mb-1">
                     Entries
@@ -265,7 +319,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
                 {preview.exportDate && (
                   <div>
                     <p className="text-sm text-charcoal/60 dark:text-white/60 mb-1">
-                      Export Date
+                      Latest Export Date
                     </p>
                     <p className="text-sm font-medium text-charcoal dark:text-white">
                       {new Date(preview.exportDate).toLocaleDateString()}
@@ -273,6 +327,26 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
                   </div>
                 )}
               </div>
+
+              {fileSummaries.length > 0 && (
+                <div className="p-4 bg-white/60 dark:bg-white/5 rounded-xl border border-charcoal/10 dark:border-white/10">
+                  <p className="text-sm font-medium text-charcoal/70 dark:text-white/70 mb-2">
+                    Files included
+                  </p>
+                  <div className="space-y-1">
+                    {fileSummaries.slice(0, 5).map(summary => (
+                      <div key={summary.name} className="text-sm text-charcoal/70 dark:text-white/70">
+                        {summary.name} • {summary.entries} entries
+                      </div>
+                    ))}
+                    {fileSummaries.length > 5 && (
+                      <div className="text-xs text-charcoal/50 dark:text-white/50">
+                        +{fileSummaries.length - 5} more files
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Warning */}
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">

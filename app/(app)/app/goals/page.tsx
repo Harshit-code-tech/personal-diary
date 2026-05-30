@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar, TrendingUp, FileText } from 'lucide-react'
+import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar, TrendingUp, FileText, GripVertical } from 'lucide-react'
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
@@ -13,6 +13,13 @@ type Milestone = {
   id: string
   title: string
   is_completed: boolean
+  order_index: number | null
+}
+
+type MilestoneDraft = {
+  id?: string
+  title: string
+  clientId: string
 }
 
 type Goal = {
@@ -51,6 +58,48 @@ const categories = [
   { value: 'other', label: 'Other', icon: '⭐', color: '#607D8B' }
 ]
 
+const DEFAULT_GOAL_REMINDER_SETTINGS = {
+  enabled: true,
+  leadDays: 3,
+  reminderTime: '09:00'
+}
+
+const createMilestoneDraft = (title = '', id?: string): MilestoneDraft => ({
+  id,
+  title,
+  clientId: id ?? (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `tmp-${Date.now()}-${Math.random().toString(16).slice(2)}`),
+})
+
+const normalizeReminderTime = (value: string | null | undefined): string => {
+  if (!value || !/^\d{2}:\d{2}$/.test(value)) {
+    return DEFAULT_GOAL_REMINDER_SETTINGS.reminderTime
+  }
+  return value
+}
+
+const buildGoalTargetAt = (targetDate: string, reminderTime: string): Date | null => {
+  const [hours, minutes] = reminderTime.split(':').map(value => Number(value))
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return null
+
+  const targetDateTime = new Date(`${targetDate}T${reminderTime}:00`)
+  if (Number.isNaN(targetDateTime.getTime())) return null
+
+  targetDateTime.setHours(hours, minutes, 0, 0)
+  return targetDateTime
+}
+
+const buildGoalReminderAt = (targetDate: string | null, leadDays: number, reminderTime: string): Date | null => {
+  if (!targetDate) return null
+
+  const reminderDate = buildGoalTargetAt(targetDate, reminderTime)
+  if (!reminderDate) return null
+
+  reminderDate.setDate(reminderDate.getDate() - leadDays)
+  return reminderDate
+}
+
 export default function GoalsPage() {
   const { user, loading: authLoading } = useAuth()
   const supabase = createClient()
@@ -72,8 +121,12 @@ export default function GoalsPage() {
     description: '',
     category: 'personal',
     target_date: '',
-    milestones: ['']
+    milestones: [createMilestoneDraft()]
   })
+  const [goalReminderSettings, setGoalReminderSettings] = useState(DEFAULT_GOAL_REMINDER_SETTINGS)
+  const [bulkMilestones, setBulkMilestones] = useState('')
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const fetchGoals = useCallback(async () => {
     setLoading(true)
@@ -91,8 +144,9 @@ export default function GoalsPage() {
         (goalsData || []).map(async (goal) => {
           const { data: milestonesData } = await supabase
             .from('goal_milestones')
-            .select('id, title, is_completed')
+            .select('id, title, is_completed, order_index')
             .eq('goal_id', goal.id)
+            .order('order_index', { ascending: true })
             .order('created_at', { ascending: true })
 
           return {
@@ -116,6 +170,34 @@ export default function GoalsPage() {
       fetchGoals()
     }
   }, [user, fetchGoals])
+
+  const fetchGoalReminderSettings = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('goal_deadline_reminders_enabled, goal_deadline_reminder_days, goal_deadline_reminder_time')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (error) throw error
+
+      setGoalReminderSettings({
+        enabled: data?.goal_deadline_reminders_enabled ?? DEFAULT_GOAL_REMINDER_SETTINGS.enabled,
+        leadDays: data?.goal_deadline_reminder_days ?? DEFAULT_GOAL_REMINDER_SETTINGS.leadDays,
+        reminderTime: normalizeReminderTime(data?.goal_deadline_reminder_time),
+      })
+    } catch (err) {
+      console.error('Error fetching goal reminder settings:', err)
+      setGoalReminderSettings(DEFAULT_GOAL_REMINDER_SETTINGS)
+    }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    if (user) {
+      fetchGoalReminderSettings()
+    }
+  }, [user, fetchGoalReminderSettings])
 
   // Fetch linked life events for all goals
   const fetchLinkedEvents = useCallback(async (goalIds: string[]) => {
@@ -197,6 +279,86 @@ export default function GoalsPage() {
     }
   }, [goals, fetchLinkedEntries])
 
+  const syncGoalReminder = useCallback(async (goalId: string, goalTitle: string, targetDate: string | null, isCompleted: boolean) => {
+    if (!user?.id) return
+
+    const marker = `goal_id:${goalId}`
+    try {
+      const { data: existing, error: existingError } = await supabase
+        .from('reminders')
+        .select('id')
+        .eq('user_id', user.id)
+        .ilike('description', `%${marker}%`)
+        .limit(1)
+
+      if (existingError) throw existingError
+
+      const reminderTime = normalizeReminderTime(goalReminderSettings.reminderTime)
+      const leadDays = Math.max(0, Math.floor(goalReminderSettings.leadDays))
+      const targetAt = targetDate ? buildGoalTargetAt(targetDate, reminderTime) : null
+      const existingId = existing?.[0]?.id
+
+      if (!goalReminderSettings.enabled || !targetAt || isCompleted) {
+        if (existingId) {
+          await supabase.from('reminders').update({ is_active: false }).eq('id', existingId)
+        }
+        return
+      }
+
+      if (targetAt <= new Date()) {
+        if (existingId) {
+          await supabase.from('reminders').update({ is_active: false }).eq('id', existingId)
+        }
+        return
+      }
+
+      let reminderAt = buildGoalReminderAt(targetDate, leadDays, reminderTime)
+      if (!reminderAt) {
+        return
+      }
+
+      if (reminderAt <= new Date()) {
+        reminderAt = new Date()
+      }
+
+      const payload = {
+        user_id: user.id,
+        title: `Goal deadline: ${goalTitle}`,
+        description: `Goal deadline approaching for "${goalTitle}". (${marker})`,
+        next_reminder_at: reminderAt.toISOString(),
+        reminder_type: 'once',
+        custom_days: null,
+        repeat_until: null,
+        is_active: true,
+      }
+
+      if (existingId) {
+        const { error: updateError } = await supabase
+          .from('reminders')
+          .update(payload)
+          .eq('id', existingId)
+
+        if (updateError) throw updateError
+      } else {
+        const { error: insertError } = await supabase
+          .from('reminders')
+          .insert(payload)
+
+        if (insertError) throw insertError
+      }
+    } catch (err) {
+      console.error('Error syncing goal reminder:', err)
+    }
+  }, [goalReminderSettings, supabase, user?.id])
+
+  useEffect(() => {
+    if (!user || goals.length === 0) return
+
+    goals.forEach((goal) => {
+      syncGoalReminder(goal.id, goal.title, goal.target_date, goal.is_completed)
+    })
+  }, [goals, syncGoalReminder, user])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -227,11 +389,12 @@ export default function GoalsPage() {
 
         // Update milestones
         const existingMilestones = goals.find(g => g.id === editingId)?.milestones || []
-        
-        // Delete removed milestones
-        const keptMilestones = formData.milestones.filter(m => m.trim())
-        if (existingMilestones.length > keptMilestones.length) {
-          const toDelete = existingMilestones.slice(keptMilestones.length)
+
+        const keptMilestones = formData.milestones.filter(m => m.title.trim())
+        const keptIds = new Set(keptMilestones.filter(m => m.id).map(m => m.id as string))
+        const toDelete = existingMilestones.filter(m => !keptIds.has(m.id))
+
+        if (toDelete.length > 0) {
           await Promise.all(
             toDelete.map(m =>
               supabase.from('goal_milestones').delete().eq('id', m.id)
@@ -239,26 +402,32 @@ export default function GoalsPage() {
           )
         }
 
-        // Update or insert milestones
         await Promise.all(
-          formData.milestones
-            .filter(m => m.trim())
-            .map((milestone, index) => {
-              if (existingMilestones[index]) {
-                return supabase
-                  .from('goal_milestones')
-                  .update({ title: milestone.trim() })
-                  .eq('id', existingMilestones[index].id)
-              } else {
-                return supabase
-                  .from('goal_milestones')
-                  .insert({
-                    goal_id: editingId,
-                    title: milestone.trim(),
-                    is_completed: false
-                  })
-              }
-            })
+          keptMilestones.map((milestone, index) => {
+            if (milestone.id) {
+              return supabase
+                .from('goal_milestones')
+                .update({ title: milestone.title.trim(), order_index: index })
+                .eq('id', milestone.id)
+            }
+
+            return supabase
+              .from('goal_milestones')
+              .insert({
+                goal_id: editingId,
+                title: milestone.title.trim(),
+                is_completed: false,
+                order_index: index,
+              })
+          })
+        )
+
+        const editingGoal = goals.find(g => g.id === editingId)
+        await syncGoalReminder(
+          editingId,
+          formData.title.trim(),
+          formData.target_date || null,
+          editingGoal?.is_completed ?? false
         )
 
         toastNotify.success('Goal Updated', 'Your goal has been updated successfully')
@@ -281,20 +450,28 @@ export default function GoalsPage() {
         if (goalError) throw goalError
 
         // Add milestones
-        const milestones = formData.milestones.filter(m => m.trim())
+        const milestones = formData.milestones.filter(m => m.title.trim())
         if (milestones.length > 0) {
           const { error: milestonesError } = await supabase
             .from('goal_milestones')
             .insert(
-              milestones.map(m => ({
+              milestones.map((m, index) => ({
                 goal_id: goalData.id,
-                title: m.trim(),
-                is_completed: false
+                title: m.title.trim(),
+                is_completed: false,
+                order_index: index,
               }))
             )
 
           if (milestonesError) throw milestonesError
         }
+
+        await syncGoalReminder(
+          goalData.id,
+          formData.title.trim(),
+          formData.target_date || null,
+          false
+        )
 
         toastNotify.success('Goal Created', 'Your new goal has been added')
       }
@@ -325,6 +502,7 @@ export default function GoalsPage() {
 
   const toggleGoalCompletion = async (goalId: string, currentStatus: boolean) => {
     try {
+      const goal = goals.find(g => g.id === goalId)
       const { error } = await supabase
         .from('goals')
         .update({ 
@@ -334,6 +512,12 @@ export default function GoalsPage() {
         .eq('id', goalId)
 
       if (error) throw error
+      await syncGoalReminder(
+        goalId,
+        goal?.title || 'Goal',
+        goal?.target_date || null,
+        !currentStatus
+      )
       toastNotify.success(currentStatus ? 'Goal Reopened' : 'Goal Completed', currentStatus ? 'Your goal has been reopened' : 'Congratulations on completing your goal! 🎉')
       fetchGoals()
     } catch (err) {
@@ -358,6 +542,13 @@ export default function GoalsPage() {
         .eq('id', goalToDelete)
 
       if (error) throw error
+      if (user?.id) {
+        await supabase
+          .from('reminders')
+          .delete()
+          .eq('user_id', user.id)
+          .ilike('description', `%goal_id:${goalToDelete}%`)
+      }
       toastNotify.success('Goal Deleted', 'Your goal has been permanently removed')
       fetchGoals()
       setShowDeleteDialog(false)
@@ -372,15 +563,22 @@ export default function GoalsPage() {
 
   const startEdit = (goal: Goal) => {
     setEditingId(goal.id)
+    const sortedMilestones = [...goal.milestones].sort((a, b) => {
+      const aIndex = a.order_index ?? Number.MAX_SAFE_INTEGER
+      const bIndex = b.order_index ?? Number.MAX_SAFE_INTEGER
+      return aIndex - bIndex
+    })
     setFormData({
       title: goal.title,
       description: goal.description || '',
       category: goal.category,
       target_date: goal.target_date || '',
-      milestones: goal.milestones.length > 0 
-        ? goal.milestones.map(m => m.title)
-        : ['']
+      milestones: sortedMilestones.length > 0 
+        ? sortedMilestones.map(m => createMilestoneDraft(m.title, m.id))
+        : [createMilestoneDraft()]
     })
+    setDragIndex(null)
+    setDragOverIndex(null)
     setShowAddModal(true)
   }
 
@@ -390,23 +588,26 @@ export default function GoalsPage() {
       description: '',
       category: 'personal',
       target_date: '',
-      milestones: ['']
+      milestones: [createMilestoneDraft()]
     })
     setEditingId(null)
     setCustomCategory('')
     setShowAddModal(false)
+    setBulkMilestones('')
+    setDragIndex(null)
+    setDragOverIndex(null)
   }
 
   const addMilestone = () => {
     setFormData({
       ...formData,
-      milestones: [...formData.milestones, '']
+      milestones: [...formData.milestones, createMilestoneDraft()]
     })
   }
 
   const updateMilestone = (index: number, value: string) => {
     const newMilestones = [...formData.milestones]
-    newMilestones[index] = value
+    newMilestones[index] = { ...newMilestones[index], title: value }
     setFormData({ ...formData, milestones: newMilestones })
   }
 
@@ -415,6 +616,63 @@ export default function GoalsPage() {
       ...formData,
       milestones: formData.milestones.filter((_, i) => i !== index)
     })
+  }
+
+  const addBulkMilestones = () => {
+    const items = bulkMilestones
+      .split(/\r?\n|,/)
+      .map(item => item.trim())
+      .filter(Boolean)
+
+    if (items.length === 0) return
+
+    setFormData((prev) => {
+      const existing = prev.milestones.filter(m => m.title.trim())
+      const next = existing.length > 0 ? existing : []
+      const added = items.map(title => createMilestoneDraft(title))
+      return {
+        ...prev,
+        milestones: [...next, ...added],
+      }
+    })
+    setBulkMilestones('')
+  }
+
+  const reorderMilestones = (startIndex: number, endIndex: number) => {
+    const next = [...formData.milestones]
+    const [moved] = next.splice(startIndex, 1)
+    next.splice(endIndex, 0, moved)
+    setFormData({ ...formData, milestones: next })
+  }
+
+  const handleMilestoneDragStart = (index: number) => (event: React.DragEvent<HTMLDivElement>) => {
+    setDragIndex(index)
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.setData('text/plain', String(index))
+  }
+
+  const handleMilestoneDragOver = (index: number) => (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setDragOverIndex(index)
+  }
+
+  const handleMilestoneDrop = (index: number) => (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const fromIndex = dragIndex ?? Number(event.dataTransfer.getData('text/plain'))
+    if (Number.isNaN(fromIndex) || fromIndex === index) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+
+    reorderMilestones(fromIndex, index)
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }
+
+  const handleMilestoneDragEnd = () => {
+    setDragIndex(null)
+    setDragOverIndex(null)
   }
 
   const filteredGoals = goals.filter(goal => {
@@ -550,6 +808,11 @@ export default function GoalsPage() {
               const cat = categories.find(c => c.value === goal.category)
               const targetDate = goal.target_date ? new Date(goal.target_date) : null
               const isOverdue = targetDate && targetDate < new Date() && !goal.is_completed
+              const orderedMilestones = [...goal.milestones].sort((a, b) => {
+                const aIndex = a.order_index ?? Number.MAX_SAFE_INTEGER
+                const bIndex = b.order_index ?? Number.MAX_SAFE_INTEGER
+                return aIndex - bIndex
+              })
 
               return (
                 <div
@@ -623,9 +886,9 @@ export default function GoalsPage() {
                         </div>
 
                         {/* Milestones */}
-                        {goal.milestones.length > 0 && (
+                        {orderedMilestones.length > 0 && (
                           <div className="space-y-1.5">
-                            {goal.milestones.map((milestone) => (
+                            {orderedMilestones.map((milestone) => (
                               <label
                                 key={milestone.id}
                                 className="flex items-center gap-2 cursor-pointer group"
@@ -824,10 +1087,25 @@ export default function GoalsPage() {
                 </div>
                 <div className="space-y-2">
                   {formData.milestones.map((milestone, index) => (
-                    <div key={index} className="flex gap-2">
+                    <div
+                      key={milestone.clientId}
+                      className={`flex gap-2 items-center rounded-lg transition-colors ${
+                        dragOverIndex === index
+                          ? 'bg-gold/10 dark:bg-teal/10'
+                          : ''
+                      }`}
+                      draggable
+                      onDragStart={handleMilestoneDragStart(index)}
+                      onDragOver={handleMilestoneDragOver(index)}
+                      onDrop={handleMilestoneDrop(index)}
+                      onDragEnd={handleMilestoneDragEnd}
+                    >
+                      <div className="p-2 cursor-grab active:cursor-grabbing text-charcoal/40 dark:text-white/40">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
                       <input
                         type="text"
-                        value={milestone}
+                        value={milestone.title}
                         onChange={(e) => updateMilestone(index, e.target.value)}
                         className="flex-1 px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
                         placeholder={`Milestone ${index + 1}`}
@@ -843,6 +1121,29 @@ export default function GoalsPage() {
                       )}
                     </div>
                   ))}
+                </div>
+                <p className="mt-2 text-xs text-charcoal/50 dark:text-white/50">
+                  Tip: drag the grip to reorder milestones.
+                </p>
+                <div className="mt-4 space-y-2">
+                  <label className="block text-xs font-medium text-charcoal/60 dark:text-white/60">
+                    Bulk add milestones (one per line or comma-separated)
+                  </label>
+                  <textarea
+                    value={bulkMilestones}
+                    onChange={(e) => setBulkMilestones(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-2.5 bg-charcoal/5 dark:bg-white/5 border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                    placeholder="Launch MVP\nShip v2\nWrite documentation"
+                  />
+                  <button
+                    type="button"
+                    onClick={addBulkMilestones}
+                    disabled={!bulkMilestones.trim()}
+                    className="px-4 py-2 bg-charcoal/10 dark:bg-white/10 text-charcoal dark:text-white rounded-lg text-sm font-semibold hover:bg-charcoal/20 dark:hover:bg-white/20 transition-all disabled:opacity-50"
+                  >
+                    Add milestones
+                  </button>
                 </div>
               </div>
 

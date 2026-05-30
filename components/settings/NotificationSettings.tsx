@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useNotificationPreferences } from '@/lib/hooks/useNotificationPreferences'
-import { Bell, Clock, Calendar, Star, Zap, RefreshCw, Globe } from 'lucide-react'
+import { Bell, Clock, Calendar, Star, Zap, RefreshCw, Globe, Target } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const days = [
@@ -258,6 +258,78 @@ export default function NotificationSettings() {
             />
           </button>
         </div>
+      </div>
+
+      {/* Goal Deadline Reminders */}
+      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+        <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4 mb-4">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <Target className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
+            <div>
+              <h3 className="text-sm sm:text-base font-semibold text-charcoal dark:text-white mb-1">
+                Goal Deadline Reminders
+              </h3>
+              <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">
+                Get a reminder before your goal deadline
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setLocalPrefs(prev => ({ ...prev, goalDeadlineReminders: !prev.goalDeadlineReminders }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 ${
+              localPrefs.goalDeadlineReminders
+                ? 'bg-gold dark:bg-teal'
+                : 'bg-charcoal/20 dark:bg-white/20'
+            }`}
+            role="switch"
+            aria-checked={localPrefs.goalDeadlineReminders}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform flex-shrink-0 ${
+                localPrefs.goalDeadlineReminders ? 'translate-x-5' : 'translate-x-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {localPrefs.goalDeadlineReminders && (
+          <div className="ml-0 sm:ml-8 space-y-4">
+            <div>
+              <label className="text-xs sm:text-sm font-medium text-charcoal/70 dark:text-white/70 flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4 flex-shrink-0" />
+                Lead Time (days before deadline)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={30}
+                value={localPrefs.goalDeadlineLeadDays}
+                onChange={(e) => setLocalPrefs(prev => ({
+                  ...prev,
+                  goalDeadlineLeadDays: Math.max(0, Number(e.target.value) || 0),
+                }))}
+                className="block w-full px-3 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal bg-white dark:bg-midnight text-charcoal dark:text-white text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs sm:text-sm font-medium text-charcoal/70 dark:text-white/70 flex items-center gap-2 mb-2">
+                <Clock className="h-4 w-4 flex-shrink-0" />
+                Reminder Time
+              </label>
+              <input
+                type="time"
+                value={localPrefs.goalDeadlineReminderTime}
+                onChange={(e) => setLocalPrefs(prev => ({ ...prev, goalDeadlineReminderTime: e.target.value }))}
+                className="block w-full px-3 py-2 border border-charcoal/20 dark:border-white/20 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal bg-white dark:bg-midnight text-charcoal dark:text-white text-sm"
+              />
+            </div>
+            <div className="bg-gray-50 dark:bg-midnight/50 rounded-lg p-3 sm:p-4 border border-charcoal/10 dark:border-white/10">
+              <p className="text-xs sm:text-sm text-charcoal/70 dark:text-white/70">
+                Reminders are scheduled {localPrefs.goalDeadlineLeadDays} day(s) before the target date at {localPrefs.goalDeadlineReminderTime}.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Milestone Notifications */}

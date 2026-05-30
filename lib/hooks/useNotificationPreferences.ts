@@ -7,6 +7,9 @@ export interface NotificationPreferences {
   weeklyReminder: boolean
   milestoneNotifications: boolean
   streakNotifications: boolean
+  goalDeadlineReminders: boolean
+  goalDeadlineLeadDays: number
+  goalDeadlineReminderTime: string
   reminderTime: string // HH:MM format
   reminderDays: string[] // ['monday', 'tuesday', ...]
   timezone: string // IANA timezone (e.g., 'Asia/Kolkata', 'America/New_York')
@@ -26,6 +29,9 @@ const defaultPreferences: NotificationPreferences = {
   weeklyReminder: false,
   milestoneNotifications: true,
   streakNotifications: true,
+  goalDeadlineReminders: true,
+  goalDeadlineLeadDays: 3,
+  goalDeadlineReminderTime: '09:00',
   reminderTime: '20:00',
   reminderDays: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
   timezone: getBrowserTimezone(),
@@ -46,7 +52,7 @@ export function useNotificationPreferences() {
       try {
         const { data, error } = await supabase
           .from('user_settings')
-          .select('email_reminders_enabled, weekly_summary_enabled, inactivity_emails_enabled, milestone_notifications_enabled, reminder_time, reminder_days, timezone')
+          .select('email_reminders_enabled, weekly_summary_enabled, inactivity_emails_enabled, milestone_notifications_enabled, reminder_time, reminder_days, timezone, goal_deadline_reminders_enabled, goal_deadline_reminder_days, goal_deadline_reminder_time')
           .eq('user_id', user.id)
           .maybeSingle()
 
@@ -80,6 +86,9 @@ export function useNotificationPreferences() {
             weeklyReminder: data.weekly_summary_enabled ?? false,
             milestoneNotifications: data.milestone_notifications_enabled ?? true,
             streakNotifications: data.inactivity_emails_enabled ?? true,
+            goalDeadlineReminders: data.goal_deadline_reminders_enabled ?? true,
+            goalDeadlineLeadDays: data.goal_deadline_reminder_days ?? defaultPreferences.goalDeadlineLeadDays,
+            goalDeadlineReminderTime: data.goal_deadline_reminder_time ?? defaultPreferences.goalDeadlineReminderTime,
             reminderTime: data.reminder_time ?? '20:00',
             reminderDays: data.reminder_days ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
             timezone: effectiveTimezone,
@@ -125,6 +134,9 @@ export function useNotificationPreferences() {
           weekly_summary_enabled: updated.weeklyReminder,
           inactivity_emails_enabled: updated.streakNotifications,
           milestone_notifications_enabled: updated.milestoneNotifications,
+          goal_deadline_reminders_enabled: updated.goalDeadlineReminders,
+          goal_deadline_reminder_days: updated.goalDeadlineLeadDays,
+          goal_deadline_reminder_time: updated.goalDeadlineReminderTime,
           reminder_time: updated.reminderTime,
           reminder_days: updated.reminderDays,
           timezone: effectiveTimezone,
@@ -137,7 +149,7 @@ export function useNotificationPreferences() {
       // Reload from database to ensure UI stays in sync
       const { data: reloaded } = await supabase
         .from('user_settings')
-        .select('email_reminders_enabled, weekly_summary_enabled, inactivity_emails_enabled, milestone_notifications_enabled, reminder_time, reminder_days, timezone')
+        .select('email_reminders_enabled, weekly_summary_enabled, inactivity_emails_enabled, milestone_notifications_enabled, reminder_time, reminder_days, timezone, goal_deadline_reminders_enabled, goal_deadline_reminder_days, goal_deadline_reminder_time')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -147,6 +159,9 @@ export function useNotificationPreferences() {
           weeklyReminder: reloaded.weekly_summary_enabled ?? false,
           milestoneNotifications: reloaded.milestone_notifications_enabled ?? true,
           streakNotifications: reloaded.inactivity_emails_enabled ?? true,
+          goalDeadlineReminders: reloaded.goal_deadline_reminders_enabled ?? true,
+          goalDeadlineLeadDays: reloaded.goal_deadline_reminder_days ?? defaultPreferences.goalDeadlineLeadDays,
+          goalDeadlineReminderTime: reloaded.goal_deadline_reminder_time ?? defaultPreferences.goalDeadlineReminderTime,
           reminderTime: reloaded.reminder_time ?? '20:00',
           reminderDays: reloaded.reminder_days ?? ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
           timezone: reloaded.timezone || getBrowserTimezone(),
@@ -177,6 +192,9 @@ export function useNotificationPreferences() {
           weekly_summary_enabled: defaultPreferences.weeklyReminder,
           inactivity_emails_enabled: defaultPreferences.streakNotifications,
           milestone_notifications_enabled: defaultPreferences.milestoneNotifications,
+          goal_deadline_reminders_enabled: defaultPreferences.goalDeadlineReminders,
+          goal_deadline_reminder_days: defaultPreferences.goalDeadlineLeadDays,
+          goal_deadline_reminder_time: defaultPreferences.goalDeadlineReminderTime,
           reminder_time: defaultPreferences.reminderTime,
           reminder_days: defaultPreferences.reminderDays,
           timezone: getBrowserTimezone(),

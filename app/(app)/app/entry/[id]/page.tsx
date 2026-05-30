@@ -16,6 +16,7 @@ import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import MultiFolderSelector from '@/components/folders/MultiFolderSelector'
 import FolderBreadcrumbs from '@/components/folders/FolderBreadcrumbs'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import TagInput from '@/components/tags/TagInput'
 
 // Lazy load editor
 const WYSIWYGEditor = dynamic(() => import('@/components/editor/WYSIWYGEditor'), {
@@ -44,6 +45,8 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [linkedPeople, setLinkedPeople] = useState<any[]>([])
+  const [people, setPeople] = useState<any[]>([])
+  const [selectedPeople, setSelectedPeople] = useState<string[]>([])
   const [linkedStories, setLinkedStories] = useState<any[]>([])
   const [showAddStories, setShowAddStories] = useState(false)
   const [allStories, setAllStories] = useState<any[]>([])
@@ -58,6 +61,8 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isBookmarked, setIsBookmarked] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [popularTags, setPopularTags] = useState<string[]>([])
   const { user } = useAuth()
   const router = useRouter()
   const supabase = createClient()
@@ -90,6 +95,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
       setMood(data.mood || '')
       setEntryDate(data.entry_date || '')
       setIsBookmarked(data.is_bookmarked || false)
+      setTags(Array.isArray(data.tags) ? data.tags : [])
 
       // Fetch linked people
       const { data: peopleData, error: peopleError } = await supabase
@@ -102,7 +108,9 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
         .eq('entry_id', id)
 
       if (!peopleError && peopleData) {
-        setLinkedPeople(peopleData.map(ep => ep.people).filter(Boolean))
+        const people = peopleData.map(ep => ep.people).filter(Boolean)
+        setLinkedPeople(people)
+        setSelectedPeople(people.map((person: any) => person.id))
       }
 
       // Fetch linked stories
@@ -189,11 +197,64 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
     }
   }, [id, user?.id, supabase, router])
 
+  const fetchPeople = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('people')
+        .select('id, name, avatar_url')
+        .eq('user_id', user?.id)
+        .order('name')
+
+      if (error) throw error
+      setPeople(data || [])
+    } catch (err) {
+      console.error('Error fetching people:', err)
+    }
+  }, [user?.id, supabase])
+
+  const fetchPopularTags = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('entries')
+        .select('tags')
+        .eq('user_id', user?.id)
+        .not('tags', 'is', null)
+
+      if (error) throw error
+
+      const tagCount: Record<string, number> = {}
+      data?.forEach((entry: any) => {
+        entry.tags?.forEach((tag: string) => {
+          tagCount[tag] = (tagCount[tag] || 0) + 1
+        })
+      })
+
+      const popular = Object.entries(tagCount)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([tag]) => tag)
+
+      setPopularTags(popular)
+    } catch (err) {
+      console.error('Error fetching popular tags:', err)
+    }
+  }, [user?.id, supabase])
+
   useEffect(() => {
     if (user) {
       fetchEntry()
+      fetchPeople()
+      fetchPopularTags()
     }
-  }, [user, id, fetchEntry])
+  }, [user, id, fetchEntry, fetchPeople, fetchPopularTags])
+
+  const togglePerson = (personId: string) => {
+    setSelectedPeople(prev =>
+      prev.includes(personId)
+        ? prev.filter(id => id !== personId)
+        : [...prev, personId]
+    )
+  }
 
   const handleImageUpload = async (file: File): Promise<string> => {
     if (!user) throw new Error('User not authenticated')
@@ -250,10 +311,33 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
           mood: finalMood,
           entry_date: entryDate,
           word_count: wordCount,
+          tags: tags.length > 0 ? tags : null,
         })
         .eq('id', id)
 
       if (error) throw error
+
+      const { error: unlinkError } = await supabase
+        .from('entry_people')
+        .delete()
+        .eq('entry_id', id)
+
+      if (unlinkError) throw unlinkError
+
+      if (selectedPeople.length > 0) {
+        const peopleLinks = selectedPeople
+          .filter(personId => personId)
+          .map(personId => ({
+            entry_id: id,
+            person_id: personId,
+          }))
+
+        const { error: linkError } = await supabase
+          .from('entry_people')
+          .insert(peopleLinks)
+
+        if (linkError) throw linkError
+      }
 
       setEditing(false)
       fetchEntry()
@@ -507,6 +591,10 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
                     setTitle(entry.title)
                     setContent(entry.content)
                     setMood(entry.mood || '')
+                    setEntryDate(entry.entry_date || '')
+                    setTags(Array.isArray(entry.tags) ? entry.tags : [])
+                    setSelectedPeople(linkedPeople.map((person: any) => person.id))
+                    setCustomMood('')
                   }}
                   className="flex items-center gap-2 px-6 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
                 >
@@ -856,6 +944,61 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
                 month: 'long',
                 day: 'numeric',
               })}
+            </div>
+
+            {/* People Selector */}
+            {people.length > 0 && (
+              <div className="p-4 bg-charcoal/5 dark:bg-white/5 rounded-lg border border-charcoal/10 dark:border-white/10">
+                <label className="block text-sm font-medium text-charcoal dark:text-white mb-3">
+                  People mentioned
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {people.map((person) => {
+                    const isSelected = selectedPeople.includes(person.id)
+                    return (
+                      <button
+                        key={person.id}
+                        onClick={() => togglePerson(person.id)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                          isSelected
+                            ? 'bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal border border-gold/40 dark:border-teal/40'
+                            : 'bg-white dark:bg-graphite text-charcoal dark:text-white border border-charcoal/10 dark:border-white/10 hover:bg-charcoal/5 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        {person.avatar_url ? (
+                          <Image
+                            src={person.avatar_url}
+                            alt={person.name}
+                            width={20}
+                            height={20}
+                            className="w-5 h-5 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-charcoal/10 dark:bg-white/10 flex items-center justify-center text-xs">
+                            {person.name.charAt(0)}
+                          </div>
+                        )}
+                        <span>{person.name}</span>
+                        {isSelected && <X className="w-4 h-4" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Tags */}
+            <div className="p-4 bg-charcoal/5 dark:bg-white/5 rounded-lg border border-charcoal/10 dark:border-white/10">
+              <label className="block text-sm font-medium text-charcoal dark:text-white mb-3">
+                Tags
+              </label>
+              <TagInput
+                tags={tags}
+                onChange={setTags}
+                suggestions={popularTags}
+                placeholder="Add tags (e.g., work, travel, family)..."
+                maxTags={10}
+              />
             </div>
 
             {/* WYSIWYG Editor */}
