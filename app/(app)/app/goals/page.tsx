@@ -619,8 +619,15 @@ export default function GoalsPage() {
   }
 
   const addBulkMilestones = () => {
-    const items = bulkMilestones
-      .split(/\r?\n|,/)
+    // Normalize: convert literal escape sequences to actual whitespace
+    const normalized = bulkMilestones
+      .replace(/\\n/g, '\n')  // literal \n → actual newline
+      .replace(/\\r/g, '\r')  // literal \r → actual carriage return
+      .replace(/\\t/g, '\t')  // literal \t → actual tab
+
+    // Split on any combination of newlines, commas, semicolons
+    const items = normalized
+      .split(/[\r\n,;]+/)
       .map(item => item.trim())
       .filter(Boolean)
 
