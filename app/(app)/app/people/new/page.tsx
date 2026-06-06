@@ -104,9 +104,9 @@ export default function NewPersonPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -144,7 +144,7 @@ export default function NewPersonPage() {
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-6 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="vintage-card rounded-lg shadow-lg p-8 space-y-6">
           {/* Avatar Upload */}
           <div>
             <label className="block text-sm font-medium text-charcoal dark:text-white mb-3">
@@ -200,7 +200,7 @@ export default function NewPersonPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Someone's name"
               required
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
             />
           </div>
 
@@ -214,7 +214,7 @@ export default function NewPersonPage() {
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white [&>option]:bg-[#FFF5E6] [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white [&>option]:bg-paper [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
             >
               {relationships.map((rel) => (
                 <option key={rel} value={rel}>
@@ -230,7 +230,7 @@ export default function NewPersonPage() {
                 value={customRelationship}
                 onChange={(e) => setCustomRelationship(e.target.value)}
                 placeholder="Enter custom relationship"
-                className="w-full mt-3 px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+                className="w-full mt-3 px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
               />
             )}
           </div>
@@ -245,7 +245,7 @@ export default function NewPersonPage() {
               type="date"
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white"
             />
           </div>
 
@@ -260,7 +260,7 @@ export default function NewPersonPage() {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any additional information about this person..."
               rows={4}
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white resize-none"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/10 dark:border-white/10 rounded-lg focus:outline-none focus:border-gold dark:focus:border-teal transition-colors text-charcoal dark:text-white resize-none"
             />
           </div>
         </form>

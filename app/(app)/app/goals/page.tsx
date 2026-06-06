@@ -696,9 +696,9 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
@@ -740,11 +740,11 @@ export default function GoalsPage() {
           </p>
           
           <div className="flex gap-3 sm:gap-4">
-            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
+            <div className="vintage-card rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
               <div className="text-2xl sm:text-3xl font-black text-gold dark:text-teal">{activeGoals.length}</div>
               <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Active Goals</div>
             </div>
-            <div className="bg-white dark:bg-graphite rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
+            <div className="vintage-card rounded-xl shadow-lg px-4 sm:px-6 py-2.5 sm:py-3 border border-gold/20 dark:border-teal/20">
               <div className="text-2xl sm:text-3xl font-black text-green-600 dark:text-green-400">{completedGoals.length}</div>
               <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Completed</div>
             </div>
@@ -759,7 +759,7 @@ export default function GoalsPage() {
               className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-lg'
-                  : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
+                  : 'vintage-card text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
               }`}
             >
               All Categories
@@ -771,7 +771,7 @@ export default function GoalsPage() {
                 className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                   selectedCategory === cat.value
                     ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-lg'
-                    : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
+                    : 'vintage-card text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
                 }`}
               >
                 {cat.icon} {cat.label}
@@ -793,7 +793,7 @@ export default function GoalsPage() {
         </div>
 
         {filteredGoals.length === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
+          <div className="vintage-card rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
             <div className="text-8xl mb-6">🎯</div>
             <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal">
               No Goals Yet
@@ -824,7 +824,7 @@ export default function GoalsPage() {
               return (
                 <div
                   key={goal.id}
-                  className={`bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border transition-all hover:shadow-xl ${
+                  className={`vintage-card rounded-xl shadow-lg p-6 border transition-all hover:shadow-xl ${
                     goal.is_completed
                       ? 'border-green-200 dark:border-green-800'
                       : 'border-charcoal/10 dark:border-white/10'
@@ -1005,7 +1005,7 @@ export default function GoalsPage() {
       {/* Add/Edit Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-8">
+          <div className="vintage-card rounded-2xl shadow-2xl max-w-2xl w-full p-6 my-8">
             <h3 className="text-2xl font-bold text-charcoal dark:text-white mb-6">
               {editingId ? 'Edit Goal' : 'Create New Goal'}
             </h3>

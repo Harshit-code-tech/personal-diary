@@ -216,7 +216,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading story...</div>
       </div>
     )
@@ -227,9 +227,9 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
             href="/app/stories"
@@ -281,7 +281,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Story Header */}
-        <div className="bg-white dark:bg-graphite rounded-lg shadow-lg overflow-hidden mb-8">
+        <div className="vintage-card rounded-lg shadow-lg overflow-hidden mb-8">
           {/* Cover */}
           {story.cover_image_url ? (
             <div className="h-64 md:h-80 overflow-hidden">
@@ -386,7 +386,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {entries.length === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-12 text-center">
+          <div className="vintage-card rounded-lg shadow-sm p-12 text-center">
             <FileText className="w-16 h-16 mx-auto text-charcoal/20 dark:text-white/20 mb-4" />
             <h3 className="text-xl font-semibold text-charcoal dark:text-white mb-2">
               No Entries Yet
@@ -407,7 +407,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
             {entries.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-white dark:bg-graphite rounded-lg shadow-sm p-6 hover:shadow-md transition-all border border-charcoal/10 dark:border-white/10 group"
+                className="vintage-card rounded-lg shadow-sm p-6 hover:shadow-md transition-all border border-charcoal/10 dark:border-white/10 group"
               >
                 <div className="flex items-start justify-between">
                   <Link href={`/app/entry/${entry.id}`} className="flex-1">
@@ -454,7 +454,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
       {/* Add Entries Modal */}
       {showAddEntries && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+          <div className="vintage-card rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
             <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-serif font-bold text-charcoal dark:text-teal">
@@ -476,7 +476,7 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search entries..."
-                className="w-full px-4 py-2 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                className="w-full px-4 py-2 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
             </div>
 

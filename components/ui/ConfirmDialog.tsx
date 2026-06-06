@@ -74,7 +74,7 @@ export const ConfirmDialog = ({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
       <div
         ref={dialogRef}
-        className="bg-white dark:bg-graphite rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scaleIn"
+        className="vintage-card rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scaleIn"
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"

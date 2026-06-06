@@ -69,7 +69,7 @@ export default function MemoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+      <div className="min-h-screen bg-paper dark:bg-midnight">
         <AppHeader />
         <div className="max-w-4xl mx-auto px-4 py-12 text-charcoal/60 dark:text-white/60">Loading memory...</div>
       </div>
@@ -78,7 +78,7 @@ export default function MemoryDetailPage() {
 
   if (!memory) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+      <div className="min-h-screen bg-paper dark:bg-midnight">
         <AppHeader />
         <div className="max-w-4xl mx-auto px-4 py-12 text-charcoal/60 dark:text-white/60">Memory not found.</div>
       </div>
@@ -86,7 +86,7 @@ export default function MemoryDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       <AppHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-6 flex items-center gap-3">
@@ -107,7 +107,7 @@ export default function MemoryDetailPage() {
           )}
         </div>
 
-        <div className="bg-white dark:bg-graphite rounded-2xl shadow-lg border border-charcoal/10 dark:border-white/10 p-6 sm:p-8">
+        <div className="vintage-card rounded-2xl shadow-lg border border-charcoal/10 dark:border-white/10 p-6 sm:p-8">
           <div className="flex flex-col gap-4 mb-6">
             <div className="text-sm text-charcoal/60 dark:text-white/60 flex items-center gap-2">
               <Calendar className="w-4 h-4" />

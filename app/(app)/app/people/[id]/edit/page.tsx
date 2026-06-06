@@ -156,7 +156,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
@@ -167,9 +167,9 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
             href={`/app/people/${id}`}
@@ -207,7 +207,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
           </div>
         )}
 
-        <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8">
+        <div className="vintage-card rounded-lg shadow-lg p-8">
           <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal mb-8">
             Edit Person
           </h1>
@@ -266,7 +266,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter name"
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               required
             />
           </div>
@@ -279,7 +279,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
             <select
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
             >
               {relationships.map((rel) => (
                 <option key={rel} value={rel}>
@@ -298,7 +298,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
               type="date"
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
             />
           </div>
 
@@ -312,7 +312,7 @@ export default function EditPersonPage({ params }: { params: Promise<{ id: strin
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add notes about this person..."
               rows={4}
-              className="w-full px-4 py-3 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal resize-none"
+              className="w-full px-4 py-3 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal resize-none"
             />
           </div>
         </div>

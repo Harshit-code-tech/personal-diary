@@ -22,7 +22,7 @@ export function MoodBarChart({ data, height = 300 }: MoodChartProps) {
   const maxCount = Math.max(...data.map(d => d.count), 1)
 
   return (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <h3 className="text-xl font-bold text-charcoal dark:text-white mb-6">
         Mood Distribution
       </h3>
@@ -110,7 +110,7 @@ export function MoodTimeline({ entries }: { entries: Array<{ entry_date: string;
   const last30Days = timeline.slice(-30)
 
   return (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <h3 className="text-xl font-bold text-charcoal dark:text-white mb-6">
         Mood Timeline (Last 30 Days)
       </h3>
@@ -191,7 +191,7 @@ export function MoodPieChart({ data }: MoodPieChartProps) {
   })
 
   return (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <h3 className="text-xl font-bold text-charcoal dark:text-white mb-6">
         Mood Breakdown
       </h3>
@@ -215,7 +215,7 @@ export function MoodPieChart({ data }: MoodPieChartProps) {
           
           {/* Center circle for donut effect */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-24 h-24 bg-white dark:bg-graphite rounded-full shadow-inner flex items-center justify-center">
+            <div className="w-24 h-24 vintage-card rounded-full shadow-inner flex items-center justify-center">
               <div className="text-center">
                 <div className="text-2xl font-bold text-charcoal dark:text-white">
                   {data.reduce((sum, item) => sum + item.count, 0)}

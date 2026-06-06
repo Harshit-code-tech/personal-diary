@@ -275,9 +275,9 @@ export default function RemindersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-3">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <Link
@@ -350,7 +350,7 @@ export default function RemindersPage() {
 
         {/* Rate Limit Status */}
         {rateLimit && (
-          <div className="mb-6 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10 shadow-md">
+          <div className="mb-6 p-4 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10 shadow-md">
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-gold dark:text-teal mt-0.5 shrink-0" />
               <div className="flex-1 min-w-0">
@@ -397,7 +397,7 @@ export default function RemindersPage() {
         )}
 
         {reminders.length === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
+          <div className="vintage-card rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
             <div className="text-8xl mb-6">🔔</div>
             <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal">
               No Reminders Yet
@@ -496,7 +496,7 @@ export default function RemindersPage() {
         >
           <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
             <div
-              className="bg-white dark:bg-graphite rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
+              className="vintage-card rounded-t-2xl sm:rounded-2xl shadow-2xl max-w-lg w-full p-4 sm:p-6 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
             <h3 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white mb-4 sm:mb-6">
@@ -551,7 +551,7 @@ export default function RemindersPage() {
                 <select
                   value={formData.reminder_type}
                   onChange={(e) => setFormData({ ...formData, reminder_type: e.target.value as 'once' | 'daily' | 'weekly' | 'custom' })}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-graphite [&>option]:text-charcoal [&>option]:dark:text-white"
+                  className="w-full px-4 py-2.5 vintage-card border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-graphite [&>option]:text-charcoal [&>option]:dark:text-white"
                 >
                   <option value="once">Once</option>
                   <option value="daily">Daily</option>
@@ -701,7 +701,7 @@ function ReminderCard({ reminder, onToggle, onEdit, onDelete, isPast }: {
   const isActive = reminder.is_active
 
   return (
-    <div className={`group bg-white dark:bg-graphite rounded-xl shadow-md p-5 border transition-all hover:shadow-lg ${
+    <div className={`group vintage-card rounded-xl shadow-md p-5 border transition-all hover:shadow-lg ${
       !isActive
         ? 'border-gray-500/30 dark:border-gray-400/30 opacity-60'
         : isPast

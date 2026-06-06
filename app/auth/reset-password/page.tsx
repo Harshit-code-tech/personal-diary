@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4">
+    <main className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center px-4">
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
           <Book className="w-6 h-6" />
@@ -98,7 +98,7 @@ export default function ResetPasswordPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md bg-white dark:bg-graphite rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
+      <div className="w-full max-w-md vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-white mb-2">
             Set New Password

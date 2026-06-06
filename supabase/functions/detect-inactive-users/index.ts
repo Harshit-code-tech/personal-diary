@@ -49,14 +49,14 @@ function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number,
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #FFF5E6 0%, #FFE6CC 100%);">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #FFF5E6 0%, #FFE6CC 100%); padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #F4E8D1 0%, #E8D5B8 100%);">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #F4E8D1 0%, #E8D5B8 100%); padding: 40px 20px;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); overflow: hidden;">
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #D4AF37 0%, #F4C430 100%); padding: 40px; text-align: center;">
+            <td style="background: linear-gradient(135deg, #8B5E3C 0%, #A67B5B 100%); padding: 40px; text-align: center;">
               <h1 style="margin: 0; color: white; font-size: 48px;">${emoji}</h1>
               <h2 style="margin: 20px 0 0 0; color: white; font-size: 28px; font-weight: 600;">${subject}</h2>
             </td>
@@ -73,14 +73,14 @@ function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number,
                 ${message}
               </p>
 
-              <div style="background: #FFF5E6; border-left: 4px solid #D4AF37; padding: 20px; margin: 30px 0; border-radius: 8px;">
+              <div style="background: #FAF3E8; border-left: 4px solid #8B5E3C; padding: 20px; margin: 30px 0; border-radius: 8px;">
                 <p style="margin: 0; color: #2C3E50; font-size: 15px; line-height: 1.6;">
                   💡 <strong>Quick Tip:</strong> Even 5 minutes of journaling can help you process your day, reduce stress, and preserve memories that would otherwise be forgotten.
                 </p>
               </div>
 
               <div style="text-align: center; margin: 40px 0;">
-                <a href="${appUrl}/app/new" style="display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #F4C430 100%); color: white; padding: 18px 40px; text-decoration: none; border-radius: 12px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); transition: transform 0.2s;">
+                <a href="${appUrl}/app/new" style="display: inline-block; background: linear-gradient(135deg, #8B5E3C 0%, #A67B5B 100%); color: white; padding: 18px 40px; text-decoration: none; border-radius: 12px; font-size: 18px; font-weight: 600; box-shadow: 0 4px 15px rgba(139, 94, 60, 0.3); transition: transform 0.2s;">
                   ✍️ Write an Entry
                 </a>
               </div>
@@ -95,11 +95,11 @@ function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number,
           <tr>
             <td style="background: #F8F9FA; padding: 30px; text-align: center; border-top: 1px solid #E9ECEF;">
               <p style="margin: 0 0 15px 0; font-size: 14px; color: #6C757D;">
-                <a href="${appUrl}/app" style="color: #D4AF37; text-decoration: none; margin: 0 10px;">Dashboard</a> •
-                <a href="${appUrl}/app/settings" style="color: #D4AF37; text-decoration: none; margin: 0 10px;">Settings</a>
+                <a href="${appUrl}/app" style="color: #8B5E3C; text-decoration: none; margin: 0 10px;">Dashboard</a> •
+                <a href="${appUrl}/app/settings" style="color: #8B5E3C; text-decoration: none; margin: 0 10px;">Settings</a>
               </p>
               <p style="margin: 0; font-size: 12px; color: #ADB5BD;">
-                Don't want these emails? <a href="${appUrl}/app/settings" style="color: #D4AF37; text-decoration: none;">Update your preferences</a>
+                Don't want these emails? <a href="${appUrl}/app/settings" style="color: #8B5E3C; text-decoration: none;">Update your preferences</a>
               </p>
             </td>
           </tr>

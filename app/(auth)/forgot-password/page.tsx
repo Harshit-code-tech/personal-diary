@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4">
+      <main className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center px-4">
         <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
             <Book className="w-6 h-6" />
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8 text-center">
+          <div className="vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gold/10 dark:bg-teal/10 rounded-full mb-4">
               <Mail className="w-8 h-8 text-gold dark:text-teal" />
             </div>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4">
+    <main className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center px-4">
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
           <Book className="w-6 h-6" />
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md bg-white dark:bg-graphite rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
+      <div className="w-full max-w-md vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-white mb-2">
             Reset Password
@@ -104,14 +104,14 @@ export default function ForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your.email@example.com"
               required
-              className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-transparent text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal transition-all"
+              className="w-full px-4 py-3 rounded-lg text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 vintage-input transition-all"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-3.5 btn-vintage font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>

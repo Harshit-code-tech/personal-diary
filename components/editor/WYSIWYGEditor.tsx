@@ -140,7 +140,7 @@ export default function WYSIWYGEditor({ content, onChange, onImageUpload, placeh
   }
 
   return (
-    <div className="border border-charcoal/20 dark:border-white/20 rounded-lg overflow-hidden bg-white dark:bg-graphite">
+    <div className="border border-charcoal/20 dark:border-white/20 rounded-lg overflow-hidden vintage-card">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 p-2 border-b border-charcoal/10 dark:border-white/10 bg-paper/50 dark:bg-midnight/50">
         <button

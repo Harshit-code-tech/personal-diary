@@ -27,7 +27,9 @@ export default async function AppLayout({
       <ToastProvider>
         <KeyboardShortcutsProvider />
         <OnboardingTour />
-        {children}
+        <div className="book-page min-h-screen">
+          {children}
+        </div>
         <KeyboardShortcutsHelp />
         <OfflineIndicator />
       </ToastProvider>

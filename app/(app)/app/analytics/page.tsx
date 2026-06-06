@@ -349,7 +349,7 @@ export default function AnalyticsPage() {
                 className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                   timeRange === range.value
                     ? 'bg-gold dark:bg-teal text-white'
-                    : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10'
+                    : 'vintage-card text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10'
                 }`}
               >
                 {range.label}
@@ -377,7 +377,7 @@ export default function AnalyticsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Calendar Heatmap */}
-        <div className="mb-6 sm:mb-8 bg-white dark:bg-graphite rounded-2xl p-4 sm:p-6 shadow-xl border border-charcoal/10 dark:border-white/10">
+        <div className="mb-6 sm:mb-8 vintage-card rounded-2xl p-4 sm:p-6 shadow-xl border border-charcoal/10 dark:border-white/10">
           <div className="flex items-center gap-3 mb-4">
             <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal" />
             <h2 className="text-lg sm:text-2xl font-bold text-charcoal dark:text-white">
@@ -465,7 +465,7 @@ export default function AnalyticsPage() {
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           {/* Mood Distribution */}
-          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="vintage-card p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="flex items-center gap-2 mb-4">
               <Heart className="w-5 h-5 text-pink-500" />
               <h3 className="text-lg font-bold text-charcoal dark:text-white">Mood Distribution</h3>
@@ -494,7 +494,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Writing by Day of Week */}
-          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="vintage-card p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-5 h-5 text-blue-500" />
               <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing by Day</h3>
@@ -517,7 +517,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Writing Trend (Last 12 Months) */}
-        <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
+        <div className="vintage-card p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-green-500" />
             <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing Trend (Last 12 Months)</h3>
@@ -543,7 +543,7 @@ export default function AnalyticsPage() {
 
         {/* Top Tags */}
         {analytics.topTags.length > 0 && (
-          <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
+          <div className="vintage-card p-6 rounded-xl border border-charcoal/10 dark:border-white/10 mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Target className="w-5 h-5 text-indigo-500" />
               <h3 className="text-lg font-bold text-charcoal dark:text-white">Most Used Tags</h3>
@@ -628,7 +628,7 @@ function StatCard({ icon, title, value, color, size = 'md' }: StatCardProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-graphite p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
+    <div className="vintage-card p-6 rounded-xl border border-charcoal/10 dark:border-white/10">
       <div className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${colors[color]} text-white mb-3`}>
         {icon}
       </div>

@@ -281,14 +281,14 @@ export default function AppPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen">
       {/* Header */}
       <AppHeader />
 
@@ -296,7 +296,7 @@ export default function AppPage() {
         {/* Sidebar Toggle Button for Mobile - Floating */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110"
+          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 btn-vintage rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110"
           aria-label={sidebarOpen ? 'Close folders' : 'Open folders'}
         >
           {sidebarOpen ? 
@@ -318,7 +318,7 @@ export default function AppPage() {
         <aside
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] bg-gradient-to-b from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
+          } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] bg-gradient-to-b from-cream to-paper dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
           data-tour="folders"
         >
           <div className="p-6">
@@ -357,7 +357,7 @@ export default function AppPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                 <Link
                   href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
-                  className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold via-gold to-gold/80 dark:from-teal dark:via-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 justify-center"
+                  className="group flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 btn-vintage rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 justify-center"
                   data-tour="new-entry"
                 >
                   <Plus className="w-5 sm:w-6 h-5 sm:h-6 group-hover:rotate-90 transition-transform duration-300" />
@@ -368,7 +368,7 @@ export default function AppPage() {
                 <div className="flex gap-3 sm:gap-3" data-tour="quick-access">
                   <Link
                     href="/app/bookmarks"
-                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-graphite border-2 border-amber-500/20 dark:border-amber-400/20 text-amber-600 dark:text-amber-400 rounded-xl font-semibold hover:shadow-xl hover:border-amber-500/40 dark:hover:border-amber-400/40 transition-all duration-300 hover:scale-105"
+                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 vintage-card border-2 border-amber-500/20 dark:border-amber-400/20 text-amber-600 dark:text-amber-400 rounded-xl font-semibold hover:shadow-xl hover:border-amber-500/40 dark:hover:border-amber-400/40 transition-all duration-300 hover:scale-105"
                     title="View bookmarked entries"
                   >
                     <Star className="w-4 sm:w-5 h-4 sm:h-5 group-hover:fill-current transition-all" />
@@ -377,7 +377,7 @@ export default function AppPage() {
                   
                   <Link
                     href="/app/trash"
-                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 bg-white dark:bg-graphite border-2 border-red-500/20 dark:border-red-400/20 text-red-600 dark:text-red-400 rounded-xl font-semibold hover:shadow-xl hover:border-red-500/40 dark:hover:border-red-400/40 transition-all duration-300 hover:scale-105"
+                    className="group flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 vintage-card border-2 border-red-500/20 dark:border-red-400/20 text-red-600 dark:text-red-400 rounded-xl font-semibold hover:shadow-xl hover:border-red-500/40 dark:hover:border-red-400/40 transition-all duration-300 hover:scale-105"
                     title="View deleted entries"
                   >
                     <Trash2 className="w-4 sm:w-5 h-4 sm:h-5 group-hover:shake transition-all" />
@@ -391,7 +391,7 @@ export default function AppPage() {
             {!selectedFolderId && (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 {/* Total Entries */}
-                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-card rounded-lg sm:rounded-xl hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-gold/10 dark:bg-teal/10 rounded-lg sm:rounded-xl group-hover:bg-gold/20 dark:group-hover:bg-teal/20 transition-colors">
                       <FileText className="w-4 sm:w-6 h-4 sm:h-6 text-gold dark:text-teal" />
@@ -407,7 +407,7 @@ export default function AppPage() {
                 </div>
 
                 {/* Total Words */}
-                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg sm:rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/20 transition-colors">
                       <Type className="w-4 sm:w-6 h-4 sm:h-6 text-purple-500 dark:text-purple-400" />
@@ -423,7 +423,7 @@ export default function AppPage() {
                 </div>
 
                 {/* People Mentioned */}
-                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg sm:rounded-xl group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/20 transition-colors">
                       <Users className="w-4 sm:w-6 h-4 sm:h-6 text-blue-500 dark:text-blue-400" />
@@ -439,7 +439,7 @@ export default function AppPage() {
                 </div>
 
                 {/* Stories Created */}
-                <div className="group bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-orange-500/10 dark:bg-orange-400/10 rounded-lg sm:rounded-xl group-hover:bg-orange-500/20 dark:group-hover:bg-orange-400/20 transition-colors">
                       <BookMarked className="w-4 sm:w-6 h-4 sm:h-6 text-orange-500 dark:text-orange-400" />
@@ -479,7 +479,7 @@ export default function AppPage() {
 
             {/* Tag Filter */}
             {allTags.length > 0 && (
-              <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
+              <div className="mb-6 sm:mb-8 p-4 sm:p-6 vintage-card rounded-lg sm:rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-xl sm:text-2xl">🏷️</span>
@@ -522,7 +522,7 @@ export default function AppPage() {
               <div className="space-y-4 sm:space-y-6">
                 {/* Loading skeleton */}
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white dark:bg-graphite rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 animate-pulse">
+                  <div key={i} className="vintage-card rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 animate-pulse">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 space-y-3">
                         <div className="h-6 sm:h-7 bg-gradient-to-r from-charcoal/10 to-charcoal/5 dark:from-white/10 dark:to-white/5 rounded w-3/4"></div>
@@ -538,17 +538,20 @@ export default function AppPage() {
                 ))}
               </div>
             ) : entries.length === 0 ? (
-              <div className="bg-gradient-to-br from-white to-[#FFF9F0] dark:from-graphite dark:to-midnight rounded-xl sm:rounded-2xl shadow-xl p-8 sm:p-12 lg:p-16 text-center border border-gold/20 dark:border-teal/20">
-                <div className="text-6xl sm:text-7xl lg:text-8xl mb-4 sm:mb-6">📝</div>
-                <h3 className="font-serif text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-charcoal dark:text-teal bg-gradient-to-r from-gold to-gold/60 dark:from-teal dark:to-teal/60 bg-clip-text text-transparent">
+              <div className="vintage-card vintage-frame rounded-xl sm:rounded-2xl p-8 sm:p-12 lg:p-16 text-center">
+                <div className="wax-seal w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6">
+                  <span className="text-2xl sm:text-3xl">✍️</span>
+                </div>
+                <h3 className="font-display text-2xl sm:text-3xl font-bold mb-2 sm:mb-3 text-charcoal dark:text-teal">
                   Your Journal Awaits
                 </h3>
-                <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 mb-6 sm:mb-8 max-w-md mx-auto">
+                <div className="vintage-divider max-w-[160px] mx-auto mb-4"><span className="text-xs">❦</span></div>
+                <p className="text-base sm:text-lg text-charcoal/70 dark:text-white/70 mb-6 sm:mb-8 max-w-md mx-auto font-body italic">
                   Start writing your first entry to begin your journey of self-discovery
                 </p>
                 <Link
                   href={selectedFolderId ? `/app/new?folder=${selectedFolderId}` : "/app/new"}
-                  className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-sm sm:text-base"
+                  className="btn-vintage inline-flex items-center gap-2 text-sm sm:text-base"
                 >
                   <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                   Create First Entry
@@ -560,7 +563,7 @@ export default function AppPage() {
                   <Link
                     key={entry.id}
                     href={`/app/entry/${entry.id}`}
-                    className="group block bg-white dark:bg-graphite rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.01] sm:hover:scale-[1.02] hover:-translate-y-1"
+                    className="group block vintage-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.01] sm:hover:scale-[1.02] hover:-translate-y-1"
                   >
                     <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
                       <div className="flex-1 min-w-0">

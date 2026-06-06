@@ -528,7 +528,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading entry...</div>
       </div>
     )
@@ -539,9 +539,9 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
             href="/app"
@@ -618,7 +618,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-8">
         {!editing ? (
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 space-y-6">
+          <div className="vintage-card rounded-lg shadow-lg p-8 space-y-6">
             {/* Breadcrumbs */}
             {entry.folder_id && (
               <FolderBreadcrumbs 
@@ -858,7 +858,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 space-y-6">
+          <div className="vintage-card rounded-lg shadow-lg p-8 space-y-6">
             {/* Title */}
             <input
               type="text"
@@ -932,7 +932,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
                 type="date"
                 value={entryDate}
                 onChange={(e) => setEntryDate(e.target.value)}
-                className="px-4 py-2 bg-[#FFF5E6] dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                className="px-4 py-2 bg-paper dark:bg-midnight border border-charcoal/20 dark:border-white/20 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
             </div>
 
@@ -962,7 +962,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                           isSelected
                             ? 'bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal border border-gold/40 dark:border-teal/40'
-                            : 'bg-white dark:bg-graphite text-charcoal dark:text-white border border-charcoal/10 dark:border-white/10 hover:bg-charcoal/5 dark:hover:bg-white/5'
+                            : 'vintage-card text-charcoal dark:text-white border border-charcoal/10 dark:border-white/10 hover:bg-charcoal/5 dark:hover:bg-white/5'
                         }`}
                       >
                         {person.avatar_url ? (
@@ -1035,7 +1035,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
       {/* Add to Stories Modal */}
       {showAddStories && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full">
+          <div className="vintage-card rounded-lg shadow-2xl max-w-md w-full">
             <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal">
@@ -1128,7 +1128,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
       {/* Add Goals Modal */}
       {showAddGoals && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full">
+          <div className="vintage-card rounded-lg shadow-2xl max-w-md w-full">
             <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal">
@@ -1220,7 +1220,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
       {/* Add Life Events Modal */}
       {showAddEvents && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full">
+          <div className="vintage-card rounded-lg shadow-2xl max-w-md w-full">
             <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal">

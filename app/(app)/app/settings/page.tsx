@@ -330,16 +330,16 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
             <Link
@@ -360,7 +360,7 @@ export default function SettingsPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="space-y-6">
           {/* Profile Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="vintage-card rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <User className="w-6 h-6 text-gold dark:text-teal" />
               <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
@@ -383,7 +383,7 @@ export default function SettingsPage() {
                       setUsernameError('')
                     }}
                     placeholder="your-username"
-                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal text-sm"
+                    className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-charcoal/20 dark:border-white/20 rounded-lg vintage-card text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal text-sm"
                   />
                   <button
                     onClick={handleUpdateUsername}
@@ -449,7 +449,7 @@ export default function SettingsPage() {
                           value={newEmail}
                           onChange={(e) => setNewEmail(e.target.value)}
                           placeholder="new.email@example.com"
-                          className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                          className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg vintage-card text-charcoal dark:text-white"
                         />
                       </div>
                       <button
@@ -519,7 +519,7 @@ export default function SettingsPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Enter new password"
                       minLength={8}
-                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg vintage-card text-charcoal dark:text-white"
                     />
                   </div>
 
@@ -533,7 +533,7 @@ export default function SettingsPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm new password"
                       minLength={8}
-                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg bg-white dark:bg-graphite text-charcoal dark:text-white"
+                      className="w-full px-4 py-3 border border-charcoal/20 dark:border-white/20 rounded-lg vintage-card text-charcoal dark:text-white"
                     />
                   </div>
 
@@ -554,7 +554,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Appearance Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="vintage-card rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               {theme === 'dark' ? (
                 <Moon className="w-6 h-6 text-gold dark:text-teal" />
@@ -583,7 +583,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Data & Privacy Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="vintage-card rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <Shield className="w-6 h-6 text-gold dark:text-teal" />
               <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">
@@ -655,12 +655,12 @@ export default function SettingsPage() {
           </div>
 
           {/* Notification Settings Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="vintage-card rounded-lg shadow-lg p-4 sm:p-6">
             <NotificationSettings />
           </div>
 
           {/* Account Actions Section */}
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="vintage-card rounded-lg shadow-lg p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-6">
               <LogOut className="w-6 h-6 text-gold dark:text-teal" />
               <h2 className="text-lg sm:text-xl font-semibold text-charcoal dark:text-white">

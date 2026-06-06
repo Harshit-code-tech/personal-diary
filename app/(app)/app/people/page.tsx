@@ -114,16 +114,16 @@ export default function PeoplePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading people...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link
@@ -166,7 +166,7 @@ export default function PeoplePage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search people..."
-              className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm sm:text-base text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal shadow-sm"
+              className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg text-sm sm:text-base text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal shadow-sm"
             />
             {searchQuery && (
               <button
@@ -186,7 +186,7 @@ export default function PeoplePage() {
               <select
                 value={selectedRelationship}
                 onChange={(e) => setSelectedRelationship(e.target.value)}
-                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
+                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
               >
                 {relationships.map(rel => (
                   <option key={rel} value={rel}>
@@ -202,7 +202,7 @@ export default function PeoplePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'recent' | 'entries')}
-                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
+                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg text-sm text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal [&>option]:bg-white [&>option]:dark:bg-midnight [&>option]:text-charcoal [&>option]:dark:text-white"
               >
                 <option value="name">Sort by Name</option>
                 <option value="recent">Recently Added</option>
@@ -261,7 +261,7 @@ export default function PeoplePage() {
               <Link
                 key={person.id}
                 href={`/app/people/${person.id}`}
-                className="bg-white dark:bg-graphite rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105 border border-charcoal/10 dark:border-white/10 overflow-hidden group"
+                className="vintage-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105 border border-charcoal/10 dark:border-white/10 overflow-hidden group"
               >
                 <div className="p-6">
                   {/* Avatar */}

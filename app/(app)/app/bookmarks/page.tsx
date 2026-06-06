@@ -80,14 +80,14 @@ export default function BookmarksPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading bookmarks...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight transition-colors duration-500">
+    <div className="min-h-screen bg-paper dark:bg-midnight transition-colors duration-500">
       <AppHeader />
       
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -118,7 +118,7 @@ export default function BookmarksPage() {
 
         {/* Bookmarked Entries */}
         {entries.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-graphite rounded-2xl border-2 border-charcoal/10 dark:border-white/10">
+          <div className="text-center py-16 vintage-card rounded-2xl border-2 border-charcoal/10 dark:border-white/10">
             <Star className="w-16 h-16 mx-auto text-charcoal/20 dark:text-white/20 mb-4" />
             <h3 className="text-xl font-semibold text-charcoal dark:text-white mb-2">
               No bookmarked entries yet
@@ -128,7 +128,7 @@ export default function BookmarksPage() {
             </p>
             <Link
               href="/app"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-semibold hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 btn-vintage rounded-xl font-semibold hover:shadow-lg transition-all"
             >
               Browse Entries
             </Link>
@@ -139,7 +139,7 @@ export default function BookmarksPage() {
               <Link
                 key={entry.id}
                 href={`/app/entry/${entry.id}`}
-                className="group relative bg-white dark:bg-graphite rounded-xl p-6 border-2 border-charcoal/10 dark:border-white/10 hover:border-gold dark:hover:border-teal hover:shadow-lg transition-all"
+                className="group relative vintage-card rounded-xl p-6 border-2 border-charcoal/10 dark:border-white/10 hover:border-gold dark:hover:border-teal hover:shadow-lg transition-all"
               >
                 {/* Bookmark Badge */}
                 <button

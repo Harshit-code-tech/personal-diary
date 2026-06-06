@@ -333,9 +333,9 @@ export default function NewEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
           <Link
             href="/app"
@@ -372,7 +372,7 @@ export default function NewEntryPage() {
             <button
               onClick={handleSave}
               disabled={saving || !title.trim() || !content.trim()}
-              className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100"
+              className="flex items-center gap-2 px-8 py-3 btn-vintage rounded-xl font-bold hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 disabled:hover:scale-100"
             >
               {saving ? (
                 <>
@@ -403,7 +403,7 @@ export default function NewEntryPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-graphite rounded-2xl shadow-2xl p-8 md:p-12 border border-gold/10 dark:border-teal/20">
+        <div className="vintage-card rounded-2xl shadow-2xl p-8 md:p-12 border border-gold/10 dark:border-teal/20">
           {/* Title Input */}
           <div className="group mb-8">
             <input
@@ -533,7 +533,7 @@ export default function NewEntryPage() {
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="px-3 md:px-4 py-2 md:py-2.5 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/10 dark:border-white/10 rounded-lg md:rounded-xl text-sm md:text-base text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
+              className="px-3 md:px-4 py-2 md:py-2.5 bg-paper dark:bg-midnight border-2 border-charcoal/10 dark:border-white/10 rounded-lg md:rounded-xl text-sm md:text-base text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
             />
           </div>
 
@@ -640,7 +640,7 @@ export default function NewEntryPage() {
         </div>
 
         {/* Tips */}
-        <div className="mt-8 p-8 bg-gradient-to-br from-gold/10 via-gold/5 to-transparent dark:from-teal/10 dark:via-teal/5 dark:to-transparent rounded-2xl border-2 border-gold/20 dark:border-teal/20 shadow-lg">
+        <div className="mt-8 p-8 vintage-card vintage-frame rounded-2xl">
           <h3 className="font-serif text-xl font-bold text-charcoal dark:text-teal mb-4 flex items-center gap-2">
             <span className="text-2xl">💡</span>
             Writing Tips
@@ -669,7 +669,7 @@ export default function NewEntryPage() {
       {/* Folder Selector Modal */}
       {showFolderSelector && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-graphite rounded-lg shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col">
+          <div className="vintage-card rounded-lg shadow-2xl max-w-md w-full max-h-[80vh] flex flex-col">
             <div className="p-6 border-b border-charcoal/10 dark:border-white/10">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-serif font-bold text-charcoal dark:text-teal flex items-center gap-2">
@@ -705,7 +705,7 @@ export default function NewEntryPage() {
             <div className="p-6 border-t border-charcoal/10 dark:border-white/10">
               <button
                 onClick={() => setShowFolderSelector(false)}
-                className="w-full px-6 py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all"
+                className="w-full px-6 py-3 btn-vintage rounded-lg font-semibold"
               >
                 Done ({selectedFolders.length} selected)
               </button>

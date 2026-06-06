@@ -61,7 +61,7 @@ export default function ReauthModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-md bg-white dark:bg-graphite rounded-2xl shadow-2xl border border-charcoal/10 dark:border-white/10 p-8 animate-in zoom-in-95">
+      <div className="w-full max-w-md vintage-card rounded-2xl shadow-2xl border border-charcoal/10 dark:border-white/10 p-8 animate-in zoom-in-95">
         <h2 className="font-serif text-2xl font-bold text-charcoal dark:text-white mb-2">
           {title}
         </h2>

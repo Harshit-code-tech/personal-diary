@@ -187,9 +187,9 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-graphite rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gold/20 dark:border-teal/20">
+      <div className="vintage-card rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gold/20 dark:border-teal/20">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-graphite border-b border-charcoal/10 dark:border-white/10 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 vintage-card border-b border-charcoal/10 dark:border-white/10 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gold/10 dark:bg-teal/10 rounded-lg">
               <Upload className="w-6 h-6 text-gold dark:text-teal" />
@@ -359,7 +359,7 @@ export default function ImportModal({ isOpen, onClose, onSuccess }: ImportModalP
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white dark:bg-graphite border-t border-charcoal/10 dark:border-white/10 px-6 py-4 flex gap-3">
+        <div className="sticky bottom-0 vintage-card border-t border-charcoal/10 dark:border-white/10 px-6 py-4 flex gap-3">
           <button
             onClick={handleClose}
             disabled={importing}

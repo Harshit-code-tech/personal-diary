@@ -8,15 +8,15 @@ type Theme = 'light' | 'dark'
 
 const themes = {
   light: {
-    name: 'Sunlight on Paper',
+    name: 'Morning Pages',
     icon: Sun,
-    description: 'Bright and cheerful',
+    description: 'Warm parchment & ink',
     classes: 'bg-paper text-charcoal'
   },
   dark: {
-    name: 'Midnight Study',
+    name: 'By Candlelight',
     icon: Moon,
-    description: 'Easy on the eyes',
+    description: 'Leather & amber glow',
     classes: 'bg-midnight text-white'
   }
 }
@@ -73,7 +73,7 @@ export default function ThemeSwitcher() {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-52 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg shadow-xl z-50 overflow-hidden">
             {Object.entries(themes).map(([key, theme]) => {
               const Icon = theme.icon
               const isActive = currentTheme === key

@@ -229,9 +229,9 @@ export default function SearchPage() {
   const hasActiveFilters = Object.values(filters).some(v => v !== '')
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4 mb-4">
             <Link
@@ -259,12 +259,12 @@ export default function SearchPage() {
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 placeholder="Search titles, content, moods... (Ctrl+K)"
                 aria-label="Search your diary entries - Press Ctrl+K from anywhere"
-                className="w-full pl-12 pr-4 py-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
+                className="w-full pl-12 pr-4 py-3 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
               
               {/* Search Suggestions Dropdown */}
               {showSuggestions && (suggestions.length > 0 || searchHistory.length > 0) && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl shadow-xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-2 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl shadow-xl z-50 overflow-hidden">
                   <div className="p-2">
                     <div className="text-xs font-bold text-charcoal/60 dark:text-white/60 px-3 py-2">
                       {query ? 'Suggestions' : 'Recent Searches'}
@@ -338,7 +338,7 @@ export default function SearchPage() {
           
           {/* Save Search Modal */}
           {showSavedSearches && query && (
-            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+            <div className="mt-4 p-4 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
               <h3 className="font-semibold text-charcoal dark:text-white mb-3">Save This Search</h3>
               <div className="flex gap-2">
                 <input
@@ -369,7 +369,7 @@ export default function SearchPage() {
           
           {/* Saved Searches List */}
           {showSavedSearches && !query && savedSearches.length > 0 && (
-            <div className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+            <div className="mt-4 p-4 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
               <h3 className="font-semibold text-charcoal dark:text-white mb-3 flex items-center gap-2">
                 <Star className="w-5 h-5 fill-gold dark:fill-teal text-gold dark:text-teal" />
                 Saved Searches
@@ -415,7 +415,7 @@ export default function SearchPage() {
           {showFilters && (
             <div 
               id="search-filters"
-              className="mt-4 p-4 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10"
+              className="mt-4 p-4 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10"
               role="region"
               aria-label="Search filters"
             >
@@ -561,7 +561,7 @@ export default function SearchPage() {
                 <Link
                   key={result.id}
                   href={`/app/entry/${result.id}`}
-                  className="block bg-white dark:bg-graphite p-6 rounded-xl shadow-sm border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-shadow"
+                  className="block vintage-card p-6 rounded-xl shadow-sm border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
 <h3 className="text-xl font-bold text-charcoal dark:text-white flex-1">

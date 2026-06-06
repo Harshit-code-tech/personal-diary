@@ -22,7 +22,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-gold/20 to-gold/5 dark:from-teal/20 dark:to-teal/5 rounded-full animate-pulse" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <FileText className="w-16 h-16 text-gold dark:text-teal" strokeWidth={1.5} />
         </div>
         <div className="absolute -top-2 -right-2 w-8 h-8 bg-gold dark:bg-teal rounded-full flex items-center justify-center shadow-lg">
@@ -40,7 +40,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-200/50 to-blue-100/20 dark:from-blue-900/30 dark:to-blue-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <Search className="w-16 h-16 text-blue-500 dark:text-blue-400" strokeWidth={1.5} />
         </div>
       </div>
@@ -55,7 +55,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-200/50 to-amber-100/20 dark:from-amber-900/30 dark:to-amber-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <div className="text-6xl">📁</div>
         </div>
       </div>
@@ -70,7 +70,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-pink-200/50 to-pink-100/20 dark:from-pink-900/30 dark:to-pink-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <div className="text-6xl">👥</div>
         </div>
       </div>
@@ -85,7 +85,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-200/50 to-purple-100/20 dark:from-purple-900/30 dark:to-purple-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <div className="text-6xl">📚</div>
         </div>
       </div>
@@ -100,7 +100,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-green-200/50 to-green-100/20 dark:from-green-900/30 dark:to-green-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <div className="text-6xl">🏷️</div>
         </div>
       </div>
@@ -115,7 +115,7 @@ const illustrations = {
     illustration: (
       <div className="relative w-48 h-48 mx-auto mb-6">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-200/50 to-indigo-100/20 dark:from-indigo-900/30 dark:to-indigo-800/10 rounded-full" />
-        <div className="absolute inset-8 bg-white dark:bg-graphite rounded-2xl shadow-xl flex items-center justify-center">
+        <div className="absolute inset-8 vintage-card rounded-2xl shadow-xl flex items-center justify-center">
           <Calendar className="w-16 h-16 text-indigo-500 dark:text-indigo-400" strokeWidth={1.5} />
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function EmptyStateIllustration({
           {actionHref ? (
             <Link
               href={actionHref}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 py-3 btn-vintage rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
               <config.icon className="w-5 h-5" />
               {actionLabel || config.defaultActionLabel}
@@ -162,7 +162,7 @@ export default function EmptyStateIllustration({
           ) : onAction ? (
             <button
               onClick={onAction}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 py-3 btn-vintage rounded-xl font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
               <config.icon className="w-5 h-5" />
               {actionLabel || config.defaultActionLabel}
@@ -175,7 +175,7 @@ export default function EmptyStateIllustration({
       {type === 'entries' && (
         <div className="mt-8 p-4 bg-gold/10 dark:bg-teal/10 rounded-lg border border-gold/20 dark:border-teal/20 max-w-md">
           <p className="text-sm text-charcoal/70 dark:text-white/70">
-            💡 <strong>Tip:</strong> Press <kbd className="px-2 py-1 bg-white dark:bg-graphite rounded border border-charcoal/20 dark:border-white/20 text-xs font-mono">Ctrl+E</kbd> to quickly create a new entry
+            💡 <strong>Tip:</strong> Press <kbd className="px-2 py-1 vintage-card rounded border border-charcoal/20 dark:border-white/20 text-xs font-mono">Ctrl+E</kbd> to quickly create a new entry
           </p>
         </div>
       )}

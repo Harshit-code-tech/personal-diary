@@ -180,7 +180,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
@@ -193,9 +193,9 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
   const birthdayInfo = formatBirthday(person.birthday)
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-[#FFF5E6]/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">
           <Link
             href="/app/people"
@@ -228,7 +228,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-6 py-8">
         {/* Profile Section */}
-        <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 mb-8">
+        <div className="vintage-card rounded-lg shadow-lg p-8 mb-8">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             {/* Avatar */}
             <div className="flex-shrink-0">
@@ -305,7 +305,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </h2>
           
           {entries.length === 0 ? (
-            <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8 text-center">
+            <div className="vintage-card rounded-lg shadow-sm p-8 text-center">
               <p className="text-charcoal/60 dark:text-white/60">
                 No diary entries about {person.name} yet.
               </p>
@@ -316,7 +316,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                 <Link
                   key={entry.id}
                   href={`/app/entry/${entry.id}`}
-                  className="block bg-white dark:bg-graphite rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-charcoal/10 dark:border-white/10 group"
+                  className="block vintage-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 p-6 border border-charcoal/10 dark:border-white/10 group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="text-xl font-serif font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal transition-colors">
@@ -357,7 +357,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
           </h2>
           
           {memories.length === 0 ? (
-            <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8 text-center">
+            <div className="vintage-card rounded-lg shadow-sm p-8 text-center">
               <p className="text-charcoal/60 dark:text-white/60 mb-4">
                 No memories about {person.name} yet.
               </p>
@@ -366,7 +366,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
               </p>
               <Link
                 href={`/app/memories/new?person=${id}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-bold hover:shadow-xl transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 btn-vintage rounded-xl font-bold hover:shadow-xl transition-all"
               >
                 <Heart className="w-5 h-5" />
                 Create Memory

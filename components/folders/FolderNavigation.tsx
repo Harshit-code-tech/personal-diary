@@ -363,9 +363,9 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
           setShowNewFolder(false)
           setParentFolderId(null)
         }}>
-          <div className="bg-white dark:bg-graphite rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="vintage-card rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-graphite p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
+            <div className="sticky top-0 vintage-card p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="p-4 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-2xl">
@@ -398,7 +398,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
                   placeholder="e.g., Work, Travel, Dreams"
-                  className="w-full px-6 py-4 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
+                  className="w-full px-6 py-4 bg-paper dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
                   autoFocus
                 />
               </div>
@@ -466,7 +466,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-graphite p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
+            <div className="sticky bottom-0 vintage-card p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
               <button
                 onClick={() => {
                   setShowNewFolder(false)
@@ -497,7 +497,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             onClick={() => setContextMenu(null)}
           />
           <div
-            className="fixed z-50 bg-white dark:bg-graphite rounded-xl shadow-2xl border-2 border-gold/20 dark:border-teal/20 py-2 min-w-[180px] animate-in fade-in zoom-in-95 duration-200"
+            className="fixed z-50 vintage-card rounded-xl shadow-2xl border-2 border-gold/20 dark:border-teal/20 py-2 min-w-[180px] animate-in fade-in zoom-in-95 duration-200"
             style={{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }}
           >
             <button
@@ -533,9 +533,9 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
       {/* Edit Folder Modal */}
       {showEditFolder && editingFolder && typeof window !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowEditFolder(false)}>
-          <div className="bg-white dark:bg-graphite rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="vintage-card rounded-3xl shadow-2xl w-[90vw] max-w-3xl max-h-[85vh] overflow-y-auto border-2 border-gold/20 dark:border-teal/20 animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-graphite p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
+            <div className="sticky top-0 vintage-card p-8 pb-6 border-b border-charcoal/10 dark:border-white/10 z-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="p-4 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-2xl">
@@ -564,7 +564,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
                   type="text"
                   value={folderName}
                   onChange={(e) => setFolderName(e.target.value)}
-                  className="w-full px-6 py-4 bg-[#FFF5E6] dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
+                  className="w-full px-6 py-4 bg-paper dark:bg-midnight border-2 border-charcoal/20 dark:border-white/20 rounded-xl text-lg text-charcoal dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal focus:border-transparent transition-all"
                   autoFocus
                 />
               </div>
@@ -611,7 +611,7 @@ export default function FolderNavigation({ onFolderSelect, selectedFolderId }: F
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-white dark:bg-graphite p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
+            <div className="sticky bottom-0 vintage-card p-8 pt-6 border-t border-charcoal/10 dark:border-white/10 flex gap-4 z-10">
               <button
                 onClick={() => setShowEditFolder(false)}
                 className="flex-1 px-6 py-4 border-2 border-charcoal/20 dark:border-white/20 rounded-xl hover:bg-charcoal/5 dark:hover:bg-white/5 transition-all font-bold text-lg hover:scale-105"

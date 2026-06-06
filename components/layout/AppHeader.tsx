@@ -11,6 +11,7 @@ import StreakBadge from '@/components/analytics/StreakBadge'
 import Tooltip from '@/components/ui/Tooltip'
 import {
   BookOpen,
+  PenTool,
   Menu,
   X,
   Settings,
@@ -133,7 +134,7 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-lg">
+    <header className="sticky top-0 z-50 vintage-header">
       <div className="max-w-full px-3 sm:px-6 lg:px-8 py-2.5 sm:py-4">
         <div className="flex items-center justify-between gap-2">
           {/* Logo — compact on mobile */}
@@ -142,8 +143,8 @@ export default function AppHeader() {
             className="group flex items-center gap-2 sm:gap-3 flex-shrink-0"
             aria-label="Go to home page"
           >
-            <div className="p-1.5 sm:p-2 bg-gradient-to-br from-gold/20 to-gold/10 dark:from-teal/20 dark:to-teal/10 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg">
-              <BookOpen className="w-5 h-5 sm:w-7 sm:h-7 text-gold dark:text-teal" />
+            <div className="wax-seal w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-110 transition-transform duration-300">
+              <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-white/90" />
             </div>
             <span className="font-script text-2xl sm:text-3xl lg:text-4xl tracking-wide text-gold dark:text-teal">
               Noted<span className="text-xl sm:text-2xl lg:text-3xl">.</span>

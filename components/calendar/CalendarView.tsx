@@ -138,7 +138,7 @@ export default function CalendarView() {
       </div>
 
       {/* Calendar Heatmap */}
-      <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-8">
+      <div className="vintage-card rounded-lg shadow-sm p-8">
         <CalendarHeatmap
           startDate={startDate}
           endDate={endDate}
@@ -188,7 +188,7 @@ export default function CalendarView() {
 
 function StatCard({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="bg-white dark:bg-graphite rounded-lg shadow-sm p-6 text-center">
+    <div className="vintage-card rounded-lg shadow-sm p-6 text-center">
       <div className="text-4xl mb-3">{icon}</div>
       <div className="text-2xl font-bold text-charcoal dark:text-teal mb-1">{value}</div>
       <div className="text-sm text-charcoal/70 dark:text-white/70">{label}</div>

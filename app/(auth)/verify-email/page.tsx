@@ -83,7 +83,7 @@ export default function VerifyEmailPage() {
         </div>
 
         {/* Instructions */}
-        <div className="bg-white dark:bg-graphite rounded-lg shadow-lg p-8 space-y-6">
+        <div className="vintage-card rounded-lg shadow-lg p-8 space-y-6">
           <div className="space-y-4 text-sm text-charcoal/70 dark:text-white/70">
             <div className="flex gap-3">
               <span className="flex-shrink-0 w-6 h-6 bg-gold/20 dark:bg-teal/20 text-gold dark:text-teal rounded-full flex items-center justify-center text-xs font-bold">1</span>

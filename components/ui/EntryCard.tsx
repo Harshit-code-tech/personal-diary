@@ -41,7 +41,7 @@ const EntryCard = React.memo(({ entry, onToggleBookmark }: EntryCardProps) => {
   }
 
   return (
-    <div className="bg-white dark:bg-charcoal/50 rounded-lg border border-charcoal/10 dark:border-white/10 hover:border-gold dark:hover:border-teal transition-all hover:shadow-lg group">
+    <div className="vintage-card rounded-lg hover:border-gold dark:hover:border-teal transition-all hover:shadow-lg group">
       <Link href={`/app/entry/${entry.id}`} className="block p-6">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">

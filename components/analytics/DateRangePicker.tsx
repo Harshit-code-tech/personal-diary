@@ -58,7 +58,7 @@ export default function DateRangePicker({
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl shadow-2xl z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-80 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl shadow-2xl z-50 overflow-hidden">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-charcoal dark:text-white">Select Date Range</h3>

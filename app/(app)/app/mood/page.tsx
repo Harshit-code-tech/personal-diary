@@ -11,7 +11,7 @@ import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 // Lazy load chart components
 const MoodBarChart = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodBarChart })), {
   loading: () => (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading chart...</div>
     </div>
   )
@@ -19,7 +19,7 @@ const MoodBarChart = dynamic(() => import('@/components/charts/MoodCharts').then
 
 const MoodTimeline = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodTimeline })), {
   loading: () => (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading timeline...</div>
     </div>
   )
@@ -27,7 +27,7 @@ const MoodTimeline = dynamic(() => import('@/components/charts/MoodCharts').then
 
 const MoodPieChart = dynamic(() => import('@/components/charts/MoodCharts').then(mod => ({ default: mod.MoodPieChart })), {
   loading: () => (
-    <div className="bg-white dark:bg-graphite rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
+    <div className="vintage-card rounded-xl p-6 border border-gold/20 dark:border-teal/20 shadow-lg">
       <div className="text-center text-charcoal/60 dark:text-white/60 py-12">Loading chart...</div>
     </div>
   )
@@ -157,9 +157,9 @@ export default function MoodAnalysisPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
@@ -198,7 +198,7 @@ export default function MoodAnalysisPage() {
               className={`px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 ${
                 timeRange === range
                   ? 'bg-gold dark:bg-teal text-white dark:text-midnight shadow-lg scale-105'
-                  : 'bg-white dark:bg-graphite text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
+                  : 'vintage-card text-charcoal dark:text-white hover:bg-gold/10 dark:hover:bg-teal/10 border border-charcoal/10 dark:border-white/10'
               }`}
             >
               {range === 'week' && 'Past Week'}
@@ -210,7 +210,7 @@ export default function MoodAnalysisPage() {
         </div>
 
         {moodStats.length === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
+          <div className="vintage-card rounded-2xl shadow-xl p-16 text-center border border-gold/20 dark:border-teal/20">
             <div className="text-8xl mb-6">😊</div>
             <h3 className="font-serif text-3xl font-bold mb-3 text-charcoal dark:text-teal">
               No Mood Data Yet
@@ -248,7 +248,7 @@ export default function MoodAnalysisPage() {
                   <button
                     key={stat.mood}
                     onClick={() => setSelectedMood(selectedMood === stat.mood ? null : stat.mood)}
-                    className={`group relative bg-white dark:bg-graphite rounded-xl shadow-lg hover:shadow-2xl p-6 border transition-all duration-300 hover:scale-105 text-left ${
+                    className={`group relative vintage-card rounded-xl shadow-lg hover:shadow-2xl p-6 border transition-all duration-300 hover:scale-105 text-left ${
                       selectedMood === stat.mood
                         ? 'border-gold dark:border-teal ring-4 ring-gold/20 dark:ring-teal/20'
                         : isTop
@@ -321,7 +321,7 @@ export default function MoodAnalysisPage() {
 
             {/* Entry List */}
             {selectedMood && (
-              <div className="bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
+              <div className="vintage-card rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-charcoal dark:text-white flex items-center gap-3">
                     <span className="text-4xl">{selectedMood.split(' ')[0]}</span>

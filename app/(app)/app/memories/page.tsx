@@ -137,7 +137,7 @@ export default function MemoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+      <div className="min-h-screen bg-paper dark:bg-midnight">
         <AppHeader />
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center text-charcoal/60 dark:text-white/60">
@@ -149,7 +149,7 @@ export default function MemoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       <AppHeader />
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -170,25 +170,25 @@ export default function MemoriesPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
-          <div className="p-4 sm:p-6 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="p-4 sm:p-6 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-teal mb-1">
               {stats.totalEntries}
             </div>
             <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Total Entries</div>
           </div>
-          <div className="p-4 sm:p-6 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="p-4 sm:p-6 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-teal mb-1">
               {stats.totalWords.toLocaleString()}
             </div>
             <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Words Written</div>
           </div>
-          <div className="p-4 sm:p-6 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="p-4 sm:p-6 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-teal mb-1">
               {stats.journalingDays}
             </div>
             <div className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60">Days Journaling</div>
           </div>
-          <div className="p-4 sm:p-6 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10">
+          <div className="p-4 sm:p-6 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10">
             <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-teal mb-1">
               {stats.longestEntry}
             </div>
@@ -210,7 +210,7 @@ export default function MemoriesPage() {
                 <Link
                   key={entry.id}
                   href={`/app/entry/${entry.id}`}
-                  className="block p-4 sm:p-6 bg-white dark:bg-graphite rounded-xl border border-charcoal/10 dark:border-white/10 hover:border-gold dark:hover:border-teal transition-all hover:shadow-lg group"
+                  className="block p-4 sm:p-6 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10 hover:border-gold dark:hover:border-teal transition-all hover:shadow-lg group"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2 sm:gap-3">

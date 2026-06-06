@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { Book, Eye, EyeOff } from 'lucide-react'
+import { Book, Eye, EyeOff, PenTool } from 'lucide-react'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
 import { authLimiter } from '@/lib/rate-limit'
@@ -97,20 +97,23 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center px-4 pt-20 sm:pt-0">
+    <main className="min-h-screen flex items-center justify-center px-4 pt-20 sm:pt-0">
       {/* Logo/Brand with Theme Switcher */}
       <div className="absolute top-4 sm:top-8 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-10">
-        <Link href="/" className="flex items-center gap-2 font-serif text-xl sm:text-2xl font-bold text-charcoal dark:text-teal hover:opacity-80 transition-opacity">
-          <Book className="w-5 h-5 sm:w-6 sm:h-6" />
-          <span>Noted.</span>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <img src="/textures/wax-seal.png" alt="" className="w-8 h-8 object-contain" />
+          <span className="font-script text-2xl font-bold text-charcoal dark:text-teal">Noted.</span>
         </Link>
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md bg-white dark:bg-graphite rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
+      <div className="w-full max-w-md vintage-card rounded-2xl p-8">
         {/* Welcome Header */}
         <div className="text-center mb-8">
-          <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-white mb-2">
+          <div className="flex justify-center mb-4">
+            <img src="/textures/wax-seal.png" alt="Noted. seal" className="w-16 h-16 object-contain drop-shadow-md" />
+          </div>
+          <h1 className="font-display text-4xl font-bold text-charcoal dark:text-white mb-2">
             Welcome Back
           </h1>
           <p className="text-charcoal/60 dark:text-white/60">
@@ -119,6 +122,7 @@ export default function LoginPage() {
               create a new account
             </Link>
           </p>
+          <div className="vintage-divider mb-6"><span className="text-xs">✦</span></div>
         </div>
 
         {/* Tab Switcher */}
@@ -156,7 +160,7 @@ export default function LoginPage() {
               }}
               onBlur={(e) => handleBlur('email', e.target.value)}
               required
-              className={`w-full px-4 py-3 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
+              className={`w-full px-4 py-3 rounded-lg transition-all text-charcoal dark:text-white font-body vintage-input ${
                 touched.email && errors.email
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
                   : touched.email && !errors.email && email
@@ -195,7 +199,7 @@ export default function LoginPage() {
                 }}
                 onBlur={(e) => handleBlur('password', e.target.value)}
                 required
-                className={`w-full px-4 py-3 pr-12 bg-white dark:bg-graphite border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white ${
+                className={`w-full px-4 py-3 pr-12 rounded-lg transition-all text-charcoal dark:text-white font-body vintage-input ${
                   touched.password && errors.password
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
                     : 'border-charcoal/10 dark:border-white/10 focus:border-gold dark:focus:border-teal focus:ring-gold/20 dark:focus:ring-teal/20'
@@ -228,7 +232,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-98"
+            className="w-full py-3.5 btn-vintage font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>

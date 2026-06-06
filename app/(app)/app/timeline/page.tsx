@@ -511,7 +511,7 @@ export default function LifeTimelinePage() {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite"
+      className="min-h-screen bg-paper dark:bg-midnight"
       onClick={() => {
         // Close any open goal picker when clicking outside
         if (showGoalPicker) {
@@ -612,7 +612,7 @@ export default function LifeTimelinePage() {
                   setExpandedYears(prev => new Set(prev).add(yearNum))
                 }
               }}
-              className="px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold/50 dark:focus:ring-teal/50"
+              className="px-3 py-1.5 sm:py-2 text-xs sm:text-sm vintage-card border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold/50 dark:focus:ring-teal/50"
             >
               <option value="all">All Years</option>
               {availableYears.map(y => (
@@ -623,7 +623,7 @@ export default function LifeTimelinePage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-1.5 sm:py-2 text-xs sm:text-sm bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold/50 dark:focus:ring-teal/50"
+              className="px-3 py-1.5 sm:py-2 text-xs sm:text-sm vintage-card border border-charcoal/10 dark:border-white/10 rounded-lg text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-gold/50 dark:focus:ring-teal/50"
             >
               <option value="all">All Categories</option>
               {allCategoryValues.map(cat => {
@@ -682,7 +682,7 @@ export default function LifeTimelinePage() {
 
         {/* ── Empty State ─────────────────────────────────────────────────── */}
         {filteredEvents.length === 0 ? (
-          <div className="bg-white dark:bg-graphite rounded-2xl shadow-lg p-8 sm:p-12 text-center border border-charcoal/10 dark:border-white/10">
+          <div className="vintage-card rounded-2xl shadow-lg p-8 sm:p-12 text-center border border-charcoal/10 dark:border-white/10">
             <div className="text-5xl sm:text-6xl mb-4">⭐</div>
             <h3 className="font-serif text-xl sm:text-2xl font-bold mb-2 text-charcoal dark:text-teal">
               {events.length === 0 ? 'No Events Yet' : 'No Matching Events'}
@@ -810,7 +810,7 @@ export default function LifeTimelinePage() {
           onClick={resetForm}
         >
           <div
-            className="bg-white dark:bg-graphite rounded-2xl shadow-2xl w-full max-w-lg p-5 sm:p-6 my-8"
+            className="vintage-card rounded-2xl shadow-2xl w-full max-w-lg p-5 sm:p-6 my-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
@@ -989,7 +989,7 @@ function EventCard({
 
   return (
     <div
-      className={`group bg-white dark:bg-graphite rounded-xl border transition-all ${
+      className={`group vintage-card rounded-xl border transition-all ${
         event.is_major
           ? 'border-gold/30 dark:border-teal/30 shadow-md ring-1 ring-gold/10 dark:ring-teal/10'
           : 'border-charcoal/10 dark:border-white/10 shadow-sm'
@@ -1107,7 +1107,7 @@ function EventCard({
                     {/* ── Goal picker dropdown ─────────────────────── */}
                     {showGoalPicker && (
                       <div
-                        className="absolute left-0 top-full mt-1 z-20 w-56 sm:w-64 bg-white dark:bg-graphite rounded-lg shadow-xl border border-charcoal/10 dark:border-white/10 overflow-hidden"
+                        className="absolute left-0 top-full mt-1 z-20 w-56 sm:w-64 vintage-card rounded-lg shadow-xl border border-charcoal/10 dark:border-white/10 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="px-3 py-2 border-b border-charcoal/5 dark:border-white/5">

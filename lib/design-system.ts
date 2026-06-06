@@ -1,5 +1,5 @@
-// Premium Typography System for Personal Diary
-// Thoughtfully curated fonts for a warm, personal, premium experience
+// Premium Typography System for Personal Diary — Vintage Journal Edition
+// Warm, nostalgic fonts for an authentic journal experience
 
 export const typography = {
   // Main Display Font - Elegant serif for headers and titles
@@ -14,9 +14,9 @@ export const typography = {
     usage: 'Page titles, hero sections, important headings'
   },
 
-  // Heading Font - Modern serif with personality
+  // Heading Font - Warm, readable serif with journal character
   heading: {
-    family: '"Cormorant Garamond", "Baskerville", serif',
+    family: '"Lora", "Crimson Pro", "Georgia", serif',
     weights: {
       normal: 400,
       medium: 500,
@@ -26,8 +26,20 @@ export const typography = {
     usage: 'Section headings, card titles, entry titles'
   },
 
-  // Body Font - Clean, highly readable sans-serif
+  // Body Font - Readable serif for a real diary feel
   body: {
+    family: '"Source Serif 4", "Georgia", serif',
+    weights: {
+      normal: 400,
+      medium: 500,
+      semibold: 600,
+      bold: 700,
+    },
+    usage: 'All body text, diary entries, descriptions'
+  },
+
+  // UI Font - Clean sans-serif for buttons, labels, metadata
+  ui: {
     family: '"Inter", "SF Pro Display", -apple-system, system-ui, sans-serif',
     weights: {
       normal: 400,
@@ -35,12 +47,12 @@ export const typography = {
       semibold: 600,
       bold: 700,
     },
-    usage: 'All body text, descriptions, content'
+    usage: 'Buttons, labels, metadata, small UI text'
   },
 
-  // Script Font - Elegant handwriting for special touches
+  // Script Font - Natural handwriting for special touches
   script: {
-    family: '"Dancing Script", "Brush Script MT", cursive',
+    family: '"Caveat", "Brush Script MT", cursive',
     weights: {
       normal: 400,
       medium: 500,
@@ -119,7 +131,7 @@ export const typographyUsage = {
     size: fontSizes.display.md,
     weight: 600,
     letterSpacing: letterSpacing.wide,
-    example: '"Noted." - The app name in elegant script'
+    example: '"Noted." - The app name in natural handwriting'
   },
 
   pageTitle: {
@@ -169,7 +181,7 @@ export const typographyUsage = {
   },
 
   metadata: {
-    font: typography.body.family,
+    font: typography.ui.family,
     size: fontSizes.body.sm,
     weight: 500,
     letterSpacing: letterSpacing.wide,
@@ -178,7 +190,7 @@ export const typographyUsage = {
   },
 
   button: {
-    font: typography.body.family,
+    font: typography.ui.family,
     size: fontSizes.button,
     weight: 600,
     letterSpacing: letterSpacing.wide,
@@ -186,21 +198,21 @@ export const typographyUsage = {
   }
 }
 
-// Premium Color Psychology
+// Premium Color Psychology — Vintage Journal
 export const premiumColors = {
-  // Warm, inviting primary colors
+  // Warm, aged parchment & leather palette
   primary: {
-    cream: '#FFF5E6',      // Soft, paper-like background
-    warmGold: '#D4AF37',   // Elegant gold accent
-    richBrown: '#6B4423',  // Warm, sophisticated brown
+    parchment: '#F4E8D1',     // Aged paper background
+    sepia: '#8B5E3C',         // Warm leather-brown accent
+    ink: '#2C1810',           // Deep ink for text
   },
 
   // Accent colors for different contexts
   accents: {
-    sage: '#87A96B',       // Calming green for positive actions
-    coral: '#FF7F7F',      // Soft coral for highlights
-    lavender: '#9B88B3',   // Gentle purple for memories
-    amber: '#FFB84D',      // Warm amber for bookmarks
+    wax: '#A0522D',          // Wax seal sienna
+    burgundy: '#722F37',     // Deep burgundy for emphasis
+    sage: '#87A96B',         // Calming green for positive actions
+    lavender: '#9B88B3',     // Gentle purple for memories
   },
 
   // Semantic colors (user-friendly)
@@ -211,32 +223,33 @@ export const premiumColors = {
     info: '#3B82F6',       // Informative blue
   },
 
-  // Dark mode palette
+  // Dark mode — Leather & Candlelight
   dark: {
-    midnight: '#0F1419',   // Deep blue-black
-    charcoal: '#1F2937',   // Warm charcoal
-    slate: '#374151',      // Lighter slate
-    teal: '#14B8A6',       // Elegant teal accent
+    leather: '#1A110A',      // Deep dark leather
+    leatherCard: '#2A1F15',  // Card surface
+    leatherHover: '#3D2E20', // Hover states
+    amber: '#D4A44F',        // Warm candlelight amber
   }
 }
 
 // Export CSS custom properties for use in Tailwind
 export function generateFontCSS() {
   return `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,500&family=Caveat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
     :root {
       /* Font Families */
       --font-display: ${typography.display.family};
       --font-heading: ${typography.heading.family};
       --font-body: ${typography.body.family};
+      --font-ui: ${typography.ui.family};
       --font-script: ${typography.script.family};
       --font-mono: ${typography.mono.family};
 
-      /* Premium Colors */
-      --color-cream: ${premiumColors.primary.cream};
-      --color-gold: ${premiumColors.primary.warmGold};
-      --color-brown: ${premiumColors.primary.richBrown};
+      /* Premium Colors — Vintage Journal */
+      --color-parchment: ${premiumColors.primary.parchment};
+      --color-sepia: ${premiumColors.primary.sepia};
+      --color-ink: ${premiumColors.primary.ink};
       
       /* Design tokens */
       --letter-spacing-tight: ${letterSpacing.tight};

@@ -250,7 +250,7 @@ export default function CategoryComboBox({
 
       {/* Dropdown list */}
       {isOpen && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-graphite border border-charcoal/10 dark:border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 vintage-card border border-charcoal/10 dark:border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {loading && (
             <div className="px-3 py-2 text-xs text-charcoal/50 dark:text-white/50">
               Loading...

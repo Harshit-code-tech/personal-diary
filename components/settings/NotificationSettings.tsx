@@ -105,7 +105,7 @@ export default function NotificationSettings() {
       </div>
 
       {/* Daily Reminder */}
-      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+      <div className="vintage-card rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
         <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4 mb-4">
           <div className="flex items-start gap-2 sm:gap-3">
             <Clock className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
@@ -228,7 +228,7 @@ export default function NotificationSettings() {
       </div>
 
       {/* Weekly Summary */}
-      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+      <div className="vintage-card rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
         <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4">
           <div className="flex items-start gap-2 sm:gap-3">
             <Calendar className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
@@ -261,7 +261,7 @@ export default function NotificationSettings() {
       </div>
 
       {/* Goal Deadline Reminders */}
-      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+      <div className="vintage-card rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
         <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4 mb-4">
           <div className="flex items-start gap-2 sm:gap-3">
             <Target className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
@@ -333,7 +333,7 @@ export default function NotificationSettings() {
       </div>
 
       {/* Milestone Notifications */}
-      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+      <div className="vintage-card rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
         <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4">
           <div className="flex items-start gap-2 sm:gap-3">
             <Star className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
@@ -366,7 +366,7 @@ export default function NotificationSettings() {
       </div>
 
       {/* Streak Notifications */}
-      <div className="bg-white dark:bg-graphite rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
+      <div className="vintage-card rounded-xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10">
         <div className="flex flex-col xs:flex-row xs:items-start xs:justify-between gap-3 xs:gap-4">
           <div className="flex items-start gap-2 sm:gap-3">
             <Zap className="w-5 h-5 text-gold dark:text-teal mt-1 flex-shrink-0" />
@@ -411,7 +411,7 @@ export default function NotificationSettings() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-gold to-gold/80 dark:from-teal dark:to-teal/80 text-white dark:text-midnight rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
+          className="flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-8 py-2 sm:py-3 btn-vintage rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 text-sm sm:text-base order-1 sm:order-2"
         >
           {saving ? 'Saving...' : 'Save Preferences'}
         </button>

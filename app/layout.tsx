@@ -1,6 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter, Crimson_Pro, Playfair_Display, Dancing_Script } from 'next/font/google'
+import { Inter, Lora, Playfair_Display, Caveat, Source_Serif_4 } from 'next/font/google'
 import QueryProvider from '@/components/providers/QueryProvider'
 import ServiceWorkerRegistration from '@/components/providers/ServiceWorkerRegistration'
 
@@ -10,9 +10,9 @@ const inter = Inter({
   display: 'swap',
 })
 
-const crimsonPro = Crimson_Pro({ 
+const lora = Lora({ 
   subsets: ['latin'],
-  variable: '--font-crimson',
+  variable: '--font-lora',
   display: 'swap',
 })
 
@@ -23,10 +23,16 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-const dancingScript = Dancing_Script({
+const caveat = Caveat({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-dancing',
+  variable: '--font-caveat',
+  display: 'swap',
+})
+
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-source-serif',
   display: 'swap',
 })
 
@@ -78,8 +84,8 @@ export const viewport = {
   maximumScale: 5,
   userScalable: true,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#D4A44F' },
-    { media: '(prefers-color-scheme: dark)', color: '#5EEAD4' }
+    { media: '(prefers-color-scheme: light)', color: '#8B5E3C' },
+    { media: '(prefers-color-scheme: dark)', color: '#D4A44F' }
   ],
 }
 
@@ -90,7 +96,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${crimsonPro.variable} ${playfair.variable} ${dancingScript.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${lora.variable} ${playfair.variable} ${caveat.variable} ${sourceSerif.variable} font-sans antialiased`} suppressHydrationWarning>
         <QueryProvider>
           {children}
         </QueryProvider>

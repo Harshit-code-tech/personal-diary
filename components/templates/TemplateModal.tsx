@@ -39,7 +39,7 @@ export default function TemplateModal({ onClose, onSelect }: TemplateModalProps)
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white dark:bg-graphite rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="vintage-card rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="border-b border-charcoal/10 dark:border-white/10 p-6 flex items-center justify-between">
           <div>

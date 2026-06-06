@@ -40,9 +40,9 @@ export default function KeyboardShortcutsHelp() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-graphite rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div className="vintage-card rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-graphite border-b border-charcoal/10 dark:border-white/10 p-6 flex items-center justify-between">
+        <div className="sticky top-0 vintage-card border-b border-charcoal/10 dark:border-white/10 p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gold/10 dark:bg-teal/10 rounded-lg">
               <Keyboard className="w-5 h-5 text-gold dark:text-teal" />

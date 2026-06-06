@@ -59,7 +59,7 @@ export default function ReminderAppPromo() {
     <div className="fixed bottom-4 left-4 z-40 sm:bottom-6 sm:left-6 max-w-[calc(100vw-5rem)]">
       {/* Expanded card */}
       {expanded && (
-        <div className="mb-2 w-60 sm:w-72 bg-white dark:bg-graphite rounded-xl shadow-2xl border border-gold/20 dark:border-teal/20 overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
+        <div className="mb-2 w-60 sm:w-72 vintage-card rounded-xl shadow-2xl border border-gold/20 dark:border-teal/20 overflow-hidden animate-in slide-in-from-bottom-2 duration-300">
           {/* Header */}
           <div className="bg-gradient-to-r from-gold/10 to-amber-100/50 dark:from-teal/10 dark:to-teal/5 px-3 py-2 sm:px-4 sm:py-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -119,7 +119,7 @@ export default function ReminderAppPromo() {
         className={`group flex items-center justify-center gap-2 rounded-full shadow-lg transition-all duration-300 ${
           expanded
             ? 'px-3 py-2 bg-gold/10 dark:bg-teal/10 border border-gold/30 dark:border-teal/30'
-            : 'w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-2 bg-white dark:bg-graphite border border-gold/20 dark:border-teal/20 hover:shadow-xl hover:scale-105'
+            : 'w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-2 vintage-card border border-gold/20 dark:border-teal/20 hover:shadow-xl hover:scale-105'
         }`}
         title="Check out our Reminder App!"
       >

@@ -131,9 +131,9 @@ export default function ExportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FFF5E6] via-[#FFF9F0] to-[#FFE6CC] dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen bg-paper dark:bg-midnight">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-midnight/80 border-b border-gold/20 dark:border-teal/20 shadow-xl">
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
           <Link
             href="/app"
@@ -165,7 +165,7 @@ export default function ExportPage() {
         </div>
 
         {/* Date Range Filter */}
-        <div className="mb-6 bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
+        <div className="mb-6 vintage-card rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
           <div className="flex items-center gap-3 mb-4">
             <Filter className="w-5 h-5 text-gold dark:text-teal" />
             <h3 className="text-lg font-bold text-charcoal dark:text-white">Filter by Date</h3>
@@ -219,7 +219,7 @@ export default function ExportPage() {
         </div>
 
         {/* Entry Selection */}
-        <div className="mb-6 bg-white dark:bg-graphite rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
+        <div className="mb-6 vintage-card rounded-xl shadow-lg p-6 border border-gold/20 dark:border-teal/20">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-bold text-charcoal dark:text-white">

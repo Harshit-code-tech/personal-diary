@@ -14,18 +14,32 @@ const config: Config = {
         '3xl': '1920px',
       },
       colors: {
-        // Light mode - warm, elegant
-        paper: '#F7F2E8',
-        cream: '#FFF5E6',
-        charcoal: '#1C1C1C',
-        gold: '#D4A44F',
+        // Light mode — Vintage Journal: warm parchment & ink
+        parchment: {
+          DEFAULT: '#F4E8D1',
+          light: '#FAF3E8',
+          dark: '#E8D5B8',
+        },
+        ink: '#2C1810',
+        sepia: {
+          DEFAULT: '#8B5E3C',
+          light: '#A67B5B',
+          dark: '#6B4423',
+        },
+        wax: '#A0522D',
+        burgundy: '#722F37',
         
-        // Dark mode - rich, deep slate palette
-        midnight: '#0F172A',    // slate-900
-        graphite: '#1E293B',    // slate-800
-        navy: '#334155',        // slate-700
-        teal: '#5EEAD4',       // teal-300
-        cyan: '#06B6D4',       // cyan-500
+        // Dark mode — Leather & Candlelight
+        leather: {
+          DEFAULT: '#1A110A',
+          card: '#2A1F15',
+          hover: '#3D2E20',
+        },
+        amber: {
+          DEFAULT: '#D4A44F',
+          glow: '#E8B84D',
+          dim: '#B8892E',
+        },
         
         // Grey mode ("I'm Tired...")
         tired: {
@@ -33,15 +47,27 @@ const config: Config = {
           card: '#4B5563',
           text: '#F3F4F6',
           accent: '#9CA3AF',
-        }
+        },
+
+        // Legacy aliases for gradual migration
+        paper: '#F4E8D1',
+        cream: '#FAF3E8',
+        charcoal: '#2C1810',
+        gold: '#8B5E3C',
+        midnight: '#1A110A',
+        graphite: '#2A1F15',
+        navy: '#3D2E20',
+        teal: '#D4A44F',
+        cyan: '#E8B84D',
       },
       fontFamily: {
-        // Premium Typography System
+        // Premium Vintage Typography System
         display: ['"Playfair Display"', 'Georgia', 'serif'],
-        heading: ['"Cormorant Garamond"', 'Baskerville', 'serif'],
-        sans: ['Inter', '"SF Pro Display"', '-apple-system', 'system-ui', 'sans-serif'],
-        body: ['Inter', '"SF Pro Display"', 'sans-serif'],
-        script: ['var(--font-dancing)', '"Dancing Script"', '"Brush Script MT"', 'cursive'],
+        heading: ['"Lora"', '"Crimson Pro"', 'Georgia', 'serif'],
+        sans: ['"Source Serif 4"', 'Georgia', 'serif'],
+        body: ['"Source Serif 4"', 'Georgia', 'serif'],
+        ui: ['Inter', '"SF Pro Display"', '-apple-system', 'system-ui', 'sans-serif'],
+        script: ['var(--font-caveat)', '"Caveat"', '"Brush Script MT"', 'cursive'],
         mono: ['"JetBrains Mono"', '"Fira Code"', '"Courier New"', 'monospace'],
       },
       fontSize: {

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
-import { Book, Eye, EyeOff } from 'lucide-react'
+import { Book, Eye, EyeOff, PenTool } from 'lucide-react'
 import PasswordStrengthIndicator from '@/components/ui/PasswordStrengthIndicator'
 import { useFormValidation, commonRules } from '@/lib/hooks/useFormValidation'
 import { useCSRFToken } from '@/lib/hooks/useCSRFToken'
@@ -136,12 +136,12 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FFF5E6] dark:bg-midnight flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       {/* Logo/Brand with Theme Switcher */}
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
-          <Book className="w-6 h-6" />
-          <span>Noted.</span>
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/textures/wax-seal.png" alt="" className="w-8 h-8 object-contain" />
+          <span className="font-script text-2xl font-bold text-charcoal dark:text-teal">Noted.</span>
         </Link>
         <ThemeSwitcher />
       </div>
@@ -149,16 +149,17 @@ export default function SignupPage() {
       <div className="w-full max-w-md mt-8">
 
         {/* Card */}
-        <div className="bg-white dark:bg-graphite rounded-2xl shadow-xl p-8 border border-charcoal/10 dark:border-white/10">
+        <div className="vintage-card rounded-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <Book className="w-16 h-16 text-gold dark:text-teal mx-auto mb-3" />
-            <h1 className="font-serif text-3xl font-bold text-charcoal dark:text-teal mb-2">
+            <img src="/textures/wax-seal.png" alt="" className="w-16 h-16 object-contain drop-shadow-md mx-auto mb-3" />
+            <h1 className="font-display text-3xl font-bold text-charcoal dark:text-teal mb-2">
               Create Account
             </h1>
-            <p className="text-charcoal/60 dark:text-white/60">
+            <p className="text-charcoal/60 dark:text-white/60 font-body italic">
               Start your journaling journey
             </p>
+            <div className="vintage-divider mt-4"><span className="text-xs">✦</span></div>
           </div>
 
           {/* Error Message */}
@@ -185,7 +186,7 @@ export default function SignupPage() {
                 }}
                 onBlur={(e) => handleBlur('username', e.target.value)}
                 placeholder="Your username"
-                className={`w-full px-4 py-3 bg-gray-50 dark:bg-midnight border-2 rounded-lg focus:outline-none focus:ring-2 transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 ${
+                className={`w-full px-4 py-3 rounded-lg transition-all text-charcoal dark:text-white placeholder-charcoal/40 dark:placeholder-white/40 vintage-input ${
                   touched.username && errors.username
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-900'
                     : touched.username && !errors.username && username
@@ -350,7 +351,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-98"
+              className="w-full py-3.5 btn-vintage font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Sign Up'}
             </button>

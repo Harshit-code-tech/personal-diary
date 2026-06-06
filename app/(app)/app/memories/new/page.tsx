@@ -213,7 +213,7 @@ export default function CreateMemoryPage() {
             placeholder="e.g., First time climbing together, Birthday celebration"
             value={formData.title}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
+            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
             required
           />
         </div>
@@ -230,7 +230,7 @@ export default function CreateMemoryPage() {
             value={formData.description}
             onChange={handleChange}
             rows={6}
-            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold resize-none"
+            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold resize-none"
           />
         </div>
 
@@ -246,7 +246,7 @@ export default function CreateMemoryPage() {
               type="date"
               value={formData.memory_date}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
+              className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
               required
             />
           </div>
@@ -263,7 +263,7 @@ export default function CreateMemoryPage() {
               placeholder="e.g., Rocky Mountain Trail, Coffee shop on 5th"
               value={formData.location}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
+              className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
             />
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function CreateMemoryPage() {
             name="mood"
             value={formData.mood}
             onChange={handleChange}
-            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
+            className="w-full px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
           >
             {moods.map((mood) => (
               <option key={mood} value={mood} className="capitalize">
@@ -306,7 +306,7 @@ export default function CreateMemoryPage() {
                   handleAddTag();
                 }
               }}
-              className="flex-1 px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 bg-white dark:bg-graphite text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
+              className="flex-1 px-4 py-3 rounded-lg border border-charcoal/20 dark:border-white/10 vintage-card text-charcoal dark:text-white placeholder-charcoal/50 dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal dark:focus:ring-gold"
             />
             <button
               type="button"

@@ -49,7 +49,7 @@ export default function TagInput({
 
   return (
     <div className="relative">
-      <div className="flex flex-wrap gap-2 p-3 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-xl focus-within:ring-2 focus-within:ring-gold dark:focus-within:ring-teal min-h-[48px]">
+      <div className="flex flex-wrap gap-2 p-3 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl focus-within:ring-2 focus-within:ring-gold dark:focus-within:ring-teal min-h-[48px]">
         {tags.map((tag, index) => (
           <span
             key={index}
@@ -93,7 +93,7 @@ export default function TagInput({
 
       {/* Suggestions Dropdown */}
       {showSuggestions && filteredSuggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-graphite border border-charcoal/20 dark:border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg shadow-lg max-h-48 overflow-y-auto">
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={index}
