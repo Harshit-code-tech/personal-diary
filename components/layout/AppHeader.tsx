@@ -143,8 +143,8 @@ export default function AppHeader() {
             className="group flex items-center gap-2 sm:gap-3 flex-shrink-0"
             aria-label="Go to home page"
           >
-            <div className="wax-seal w-8 h-8 sm:w-10 sm:h-10 group-hover:scale-110 transition-transform duration-300">
-              <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-white/90" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden group-hover:scale-110 transition-transform duration-300 shadow-md flex-shrink-0" style={{backgroundColor: '#6B2D3E'}}>
+              <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
             </div>
             <span className="font-script text-2xl sm:text-3xl lg:text-4xl tracking-wide text-gold dark:text-teal">
               Noted<span className="text-xl sm:text-2xl lg:text-3xl">.</span>

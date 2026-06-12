@@ -73,7 +73,7 @@ export default function ThemeSwitcher() {
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-52 vintage-card border border-charcoal/20 dark:border-white/20 rounded-lg shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-52 bg-[#F5E6CF] dark:bg-[#251B12] border border-charcoal/20 dark:border-white/20 rounded-lg shadow-xl z-50 overflow-hidden">
             {Object.entries(themes).map(([key, theme]) => {
               const Icon = theme.icon
               const isActive = currentTheme === key

@@ -21,26 +21,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen transition-colors duration-300 relative overflow-hidden book-page">
-      {/* Ornate corner flourishes — CSS-based, always visible */}
-      <div className="fixed top-4 left-4 text-[#8B5E3C]/20 dark:text-[#D4A44F]/15 text-5xl pointer-events-none select-none hidden lg:block font-serif" aria-hidden="true" style={{textShadow: '1px 1px 2px rgba(139,94,60,0.15)'}}>❦</div>
-      <div className="fixed top-4 right-4 text-[#8B5E3C]/20 dark:text-[#D4A44F]/15 text-5xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleX(-1)', textShadow: '1px 1px 2px rgba(139,94,60,0.15)'}} aria-hidden="true">❦</div>
-      <div className="fixed bottom-4 left-4 text-[#8B5E3C]/20 dark:text-[#D4A44F]/15 text-5xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleY(-1)', textShadow: '1px 1px 2px rgba(139,94,60,0.15)'}} aria-hidden="true">❦</div>
-      <div className="fixed bottom-4 right-4 text-[#8B5E3C]/20 dark:text-[#D4A44F]/15 text-5xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scale(-1)', textShadow: '1px 1px 2px rgba(139,94,60,0.15)'}} aria-hidden="true">❦</div>
+      {/* Ornate corner flourishes — blend naturally into parchment */}
+      <div className="fixed top-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" aria-hidden="true">❧</div>
+      <div className="fixed top-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleX(-1)'}} aria-hidden="true">❧</div>
+      <div className="fixed bottom-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleY(-1)'}} aria-hidden="true">❧</div>
+      <div className="fixed bottom-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scale(-1)'}} aria-hidden="true">❧</div>
 
-      {/* Decorative quill pens in corners — optional image overlay */}
-      <img src="/textures/quill-pen.png" alt="" aria-hidden="true" className="fixed top-6 left-6 w-24 h-24 sm:w-32 sm:h-32 opacity-20 dark:opacity-10 pointer-events-none select-none hidden lg:block object-contain" style={{transform: 'rotate(-30deg)'}} />
-      <img src="/textures/quill-pen.png" alt="" aria-hidden="true" className="fixed top-6 right-6 w-24 h-24 sm:w-32 sm:h-32 opacity-20 dark:opacity-10 pointer-events-none select-none hidden lg:block object-contain" style={{transform: 'rotate(30deg) scaleX(-1)'}} />
-      <img src="/textures/quill-pen.png" alt="" aria-hidden="true" className="fixed bottom-6 left-6 w-24 h-24 sm:w-32 sm:h-32 opacity-20 dark:opacity-10 pointer-events-none select-none hidden lg:block object-contain" style={{transform: 'rotate(30deg) scaleY(-1)'}} />
-      <img src="/textures/quill-pen.png" alt="" aria-hidden="true" className="fixed bottom-6 right-6 w-24 h-24 sm:w-32 sm:h-32 opacity-20 dark:opacity-10 pointer-events-none select-none hidden lg:block object-contain" style={{transform: 'rotate(-30deg) scale(-1)'}} />
-
-      {/* CSS ink splatters — always visible */}
-      <div className="ink-splatter ink-splatter-1 hidden sm:block" aria-hidden="true" />
-      <div className="ink-splatter ink-splatter-2 hidden sm:block" aria-hidden="true" />
-      <div className="ink-splatter ink-splatter-3 hidden lg:block" aria-hidden="true" />
-
-      {/* Real ink splatter overlay — optional enhancement */}
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed top-[10%] left-[5%] w-28 h-28 opacity-15 dark:opacity-8 pointer-events-none select-none hidden sm:block object-contain" />
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed bottom-[15%] right-[8%] w-24 h-24 opacity-12 dark:opacity-6 pointer-events-none select-none hidden sm:block object-contain" style={{transform: 'rotate(120deg)'}} />
+      {/* Ink splatters — blended into page with multiply mode, NOT a pasted rectangle */}
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed top-[8%] left-[3%] w-36 h-36 opacity-[0.07] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed bottom-[12%] right-[5%] w-32 h-32 opacity-[0.06] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(135deg)'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed top-[55%] left-[10%] w-24 h-24 opacity-[0.04] pointer-events-none select-none hidden lg:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(-45deg) scaleX(-1)'}} />
 
       {/* Sticky Header */}
       <nav className="sticky top-0 z-50 vintage-header">
@@ -106,7 +96,9 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Section */}
           <div className="flex justify-center mb-8 sm:mb-10">
-            <img src="/textures/wax-seal.png" alt="Noted. wax seal" className="w-20 h-20 sm:w-28 sm:h-28 object-contain drop-shadow-lg" />
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl ring-2 ring-[#6B2D3E]/20" style={{backgroundColor: '#6B2D3E'}}>
+              <img src="/textures/wax-seal.png" alt="Noted. wax seal" className="w-full h-full object-cover scale-[1.5]" />
+            </div>
           </div>
           
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight ink-accent">
@@ -139,7 +131,7 @@ export default function Home() {
 
           {/* Features Grid — Vintage frame cards */}
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-5xl mx-auto">
-            <div className="vintage-card rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative" style={{backgroundImage: 'url(/textures/card-texture.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+            <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
               <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
                 <Lock className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
@@ -154,7 +146,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="vintage-card rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative" style={{backgroundImage: 'url(/textures/card-texture.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+            <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
               <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
                 <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
@@ -169,7 +161,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="vintage-card rounded-xl p-6 sm:p-8 text-center sm:col-span-2 md:col-span-1 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative" style={{backgroundImage: 'url(/textures/card-texture.png)', backgroundSize: 'cover', backgroundPosition: 'center'}}>
+            <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center sm:col-span-2 md:col-span-1 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
               <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
                 <Download className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />

@@ -136,11 +136,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 book-page">
       {/* Logo/Brand with Theme Switcher */}
       <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <img src="/textures/wax-seal.png" alt="" className="w-8 h-8 object-contain" />
+          <div className="w-8 h-8 rounded-full overflow-hidden shadow-md flex-shrink-0" style={{backgroundColor: '#6B2D3E'}}>
+            <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
+          </div>
           <span className="font-script text-2xl font-bold text-charcoal dark:text-teal">Noted.</span>
         </Link>
         <ThemeSwitcher />
@@ -152,7 +154,9 @@ export default function SignupPage() {
         <div className="vintage-card rounded-2xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <img src="/textures/wax-seal.png" alt="" className="w-16 h-16 object-contain drop-shadow-md mx-auto mb-3" />
+            <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg mx-auto mb-3" style={{backgroundColor: '#6B2D3E'}}>
+              <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
+            </div>
             <h1 className="font-display text-3xl font-bold text-charcoal dark:text-teal mb-2">
               Create Account
             </h1>

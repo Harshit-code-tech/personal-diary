@@ -62,8 +62,11 @@ export default function LoginPage() {
         // Provide better error messages based on error type
         let errorMessage = 'Invalid email or password'
         
-        if (signInError.message?.includes('rate limit') || signInError.message?.includes('too many')) {
-          errorMessage = 'Too many login attempts. Please wait a moment and try again.'
+        if (signInError.status === 429 || signInError.message?.includes('rate limit') || signInError.message?.includes('too many') || signInError.message?.includes('Request rate limit')) {
+          setError('Too many attempts. Supabase rate limit reached — please wait 30 seconds before trying again.')
+          setLoading(false)
+          setTimeout(() => setError(null), 30000)
+          return
         } else if (signInError.message?.includes('timeout') || signInError.message?.includes('network')) {
           errorMessage = 'Network connection issue. Please check your internet and try again.'
         } else if (signInError.message?.includes('Invalid URL')) {
@@ -97,11 +100,13 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 pt-20 sm:pt-0">
+    <main className="min-h-screen flex items-center justify-center px-4 pt-20 sm:pt-0 book-page">
       {/* Logo/Brand with Theme Switcher */}
       <div className="absolute top-4 sm:top-8 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-10">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src="/textures/wax-seal.png" alt="" className="w-8 h-8 object-contain" />
+          <div className="w-8 h-8 rounded-full overflow-hidden shadow-md flex-shrink-0" style={{backgroundColor: '#6B2D3E'}}>
+            <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
+          </div>
           <span className="font-script text-2xl font-bold text-charcoal dark:text-teal">Noted.</span>
         </Link>
         <ThemeSwitcher />
@@ -111,7 +116,9 @@ export default function LoginPage() {
         {/* Welcome Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src="/textures/wax-seal.png" alt="Noted. seal" className="w-16 h-16 object-contain drop-shadow-md" />
+            <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg" style={{backgroundColor: '#6B2D3E'}}>
+              <img src="/textures/wax-seal.png" alt="Noted. seal" className="w-full h-full object-cover scale-[1.5]" />
+            </div>
           </div>
           <h1 className="font-display text-4xl font-bold text-charcoal dark:text-white mb-2">
             Welcome Back
