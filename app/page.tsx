@@ -22,15 +22,15 @@ export default function Home() {
   return (
     <main className="min-h-screen transition-colors duration-300 relative overflow-hidden book-page">
       {/* Ornate corner flourishes — blend naturally into parchment */}
-      <div className="fixed top-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" aria-hidden="true">❧</div>
-      <div className="fixed top-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleX(-1)'}} aria-hidden="true">❧</div>
-      <div className="fixed bottom-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleY(-1)'}} aria-hidden="true">❧</div>
-      <div className="fixed bottom-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scale(-1)'}} aria-hidden="true">❧</div>
+      <div className="absolute top-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" aria-hidden="true">❧</div>
+      <div className="absolute top-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleX(-1)'}} aria-hidden="true">❧</div>
+      <div className="absolute bottom-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleY(-1)'}} aria-hidden="true">❧</div>
+      <div className="absolute bottom-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scale(-1)'}} aria-hidden="true">❧</div>
 
       {/* Ink splatters — blended into page with multiply mode, NOT a pasted rectangle */}
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed top-[8%] left-[3%] w-36 h-36 opacity-[0.07] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply'}} />
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed bottom-[12%] right-[5%] w-32 h-32 opacity-[0.06] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(135deg)'}} />
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="fixed top-[55%] left-[10%] w-24 h-24 opacity-[0.04] pointer-events-none select-none hidden lg:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(-45deg) scaleX(-1)'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[8%] left-[3%] w-36 h-36 opacity-[0.07] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute bottom-[12%] right-[5%] w-32 h-32 opacity-[0.06] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(135deg)'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[55%] left-[10%] w-24 h-24 opacity-[0.04] pointer-events-none select-none hidden lg:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(-45deg) scaleX(-1)'}} />
 
       {/* Sticky Header */}
       <nav className="sticky top-0 z-50 vintage-header">

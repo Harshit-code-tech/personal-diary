@@ -77,12 +77,36 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute = pathname === '/login' || pathname === '/signup'
   const hasSupabaseCookies = req.cookies.getAll().some((cookie) => cookie.name.startsWith('sb-'))
 
+  // No cookies + protected route → redirect to login (no API call needed)
   if (isProtectedRoute && !hasSupabaseCookies) {
     return withCsrfCookie(NextResponse.redirect(new URL('/login', req.url)))
   }
 
-  if (!isProtectedRoute && !(isAuthRoute && hasSupabaseCookies)) {
+  // No cookies + public route → pass through (no API call needed)
+  if (!hasSupabaseCookies) {
     return withCsrfCookie(res)
+  }
+
+  // Auth routes with cookies: quick session check to redirect logged-in users.
+  // If the token is stale, just clear cookies and let them stay on login — NO retry.
+  if (isAuthRoute) {
+    try {
+      const supabase = createMiddlewareClient({ req, res })
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (session && !error) {
+        return withCsrfCookie(NextResponse.redirect(new URL('/app', req.url)))
+      }
+    } catch (_) {
+      // Ignore — stale token, network issue, etc.
+    }
+    // Clear stale cookies so the client SDK doesn't retry endlessly
+    const authRes = NextResponse.next()
+    req.cookies.getAll().forEach((cookie) => {
+      if (cookie.name.startsWith('sb-')) {
+        authRes.cookies.delete(cookie.name)
+      }
+    })
+    return withCsrfCookie(authRes)
   }
 
   const clearSupabaseCookies = (response: NextResponse) => {

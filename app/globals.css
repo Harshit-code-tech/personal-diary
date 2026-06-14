@@ -67,7 +67,7 @@ body:not(.dark) {
     /* Optional real texture (loads if file exists, graceful fallback) */
     url('/textures/paper-bg.png');
   background-size: 300px 300px, 200px 200px, auto, auto, auto, auto, auto, auto, auto, cover;
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 /* ── Dark leather texture (dark mode) ────────────────────────── */
@@ -90,7 +90,7 @@ body.dark {
     /* Optional real texture */
     url('/textures/leather-bg.png');
   background-size: 250px 250px, 150px 150px, auto, auto, auto, auto, auto, cover;
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -455,25 +455,19 @@ body.dark {
    ═══════════════════════════════════════════════════════════════ */
 
 .vintage-header {
-  background-color: rgba(244, 232, 209, 0.6);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='hg'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.4 0 0 0 0 0.25 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23hg)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border-bottom: 1px solid rgba(139, 94, 60, 0.12);
-  box-shadow: 0 1px 4px rgba(44, 24, 16, 0.05);
+  background-color: rgba(244, 232, 209, 0.35);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid rgba(139, 94, 60, 0.08);
+  box-shadow: none;
 }
 
 .dark .vintage-header {
-  background-color: rgba(26, 17, 10, 0.65);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='hl'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.0' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.07 0 0 0 0 0.04 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23hl)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border-bottom-color: rgba(212, 164, 79, 0.08);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  background-color: rgba(26, 17, 10, 0.35);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom-color: rgba(212, 164, 79, 0.06);
+  box-shadow: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════

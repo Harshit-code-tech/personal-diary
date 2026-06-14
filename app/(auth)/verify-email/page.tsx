@@ -62,7 +62,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <main className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center px-4 book-page">
+    <main className="min-h-screen flex items-center justify-center px-4 book-page">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
