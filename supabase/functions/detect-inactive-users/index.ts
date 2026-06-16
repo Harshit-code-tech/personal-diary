@@ -4,8 +4,11 @@ import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-const GMAIL_USER = Deno.env.get('GMAIL_USER') ?? ''
-const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') ?? ''
+const SMTP_HOST = Deno.env.get('SMTP_HOST') ?? 'smtp-relay.brevo.com'
+const SMTP_PORT = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
+const SMTP_USER = Deno.env.get('SMTP_USER') ?? ''
+const SMTP_PASSWORD = Deno.env.get('SMTP_PASSWORD') ?? ''
+const SMTP_FROM = Deno.env.get('SMTP_FROM') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://personal-diary-three.vercel.app'
 
 // Days of inactivity thresholds
@@ -134,12 +137,12 @@ serve(async (req) => {
     // Create SMTP client per-request (avoids module-level boot failures)
     const smtpClient = new SMTPClient({
       connection: {
-        hostname: 'smtp.gmail.com',
-        port: 465,
-        tls: true,
+        hostname: SMTP_HOST,
+        port: SMTP_PORT,
+        tls: false,
         auth: {
-          username: GMAIL_USER,
-          password: GMAIL_APP_PASSWORD,
+          username: SMTP_USER,
+          password: SMTP_PASSWORD,
         },
       },
     })
@@ -262,7 +265,7 @@ serve(async (req) => {
 
         // Send email
         await smtpClient.send({
-          from: `Noted <${GMAIL_USER}>`, // Display name "Noted"
+          from: `Noted <${SMTP_FROM}>`, // Display name "Noted"
           to: recipientEmail,
           subject: subject,
           html: html,

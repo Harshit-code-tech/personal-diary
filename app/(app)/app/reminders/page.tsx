@@ -275,7 +275,7 @@ export default function RemindersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight">
+    <div className="min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header">
         <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-3">

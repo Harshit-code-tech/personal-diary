@@ -4,8 +4,11 @@ import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-const GMAIL_USER = Deno.env.get('GMAIL_USER') ?? ''
-const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') ?? ''
+const SMTP_HOST = Deno.env.get('SMTP_HOST') ?? 'smtp-relay.brevo.com'
+const SMTP_PORT = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
+const SMTP_USER = Deno.env.get('SMTP_USER') ?? ''
+const SMTP_PASSWORD = Deno.env.get('SMTP_PASSWORD') ?? ''
+const SMTP_FROM = Deno.env.get('SMTP_FROM') ?? ''
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://personal-diary-three.vercel.app'
 
 // Batch size - process fewer emails per invocation to avoid timeouts
@@ -469,18 +472,18 @@ async function sendEmailWithTimeout(
     throw new Error('Email HTML body is empty or null')
   }
 
-  if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-    throw new Error('SMTP credentials not configured (GMAIL_USER or GMAIL_APP_PASSWORD missing)')
+  if (!SMTP_USER || !SMTP_PASSWORD) {
+    throw new Error('SMTP credentials not configured (SMTP_USER or SMTP_PASSWORD missing)')
   }
 
   const smtpClient = new SMTPClient({
     connection: {
-      hostname: 'smtp.gmail.com',
-      port: 465,
-      tls: true,
+      hostname: SMTP_HOST,
+      port: SMTP_PORT,
+      tls: false,
       auth: {
-        username: GMAIL_USER,
-        password: GMAIL_APP_PASSWORD,
+        username: SMTP_USER,
+        password: SMTP_PASSWORD,
       },
     },
   })
@@ -490,7 +493,7 @@ async function sendEmailWithTimeout(
     const cleanedHtml = htmlBody.replace(/ +$/gm, '').replace(/\t+$/gm, '')
     
     const sendPromise = smtpClient.send({
-      from: `Noted <${GMAIL_USER}>`,
+      from: `Noted <${SMTP_FROM}>`,
       to: recipient,
       subject: subject,
       content: `${subject}\n\nPlease view this email in an HTML-capable email client.`,

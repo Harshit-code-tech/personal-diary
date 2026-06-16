@@ -11,7 +11,7 @@
   --cream: #FAF3E8;
   --charcoal: #2C1810;
   --gold: #8B5E3C;
-  
+
   /* Dark theme — Leather & Candlelight */
   --midnight: #1A110A;
   --graphite: #2A1F15;
@@ -20,7 +20,7 @@
   --cyan: #E8B84D;
   --purple-dark: #7C3AED;
   --pink-dark: #EC4899;
-  
+
   /* Semantic colors */
   --text-primary: #2C1810;
   --text-primary-dark: #F0E6D6;
@@ -66,7 +66,7 @@ body:not(.dark) {
     radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(120, 80, 40, 0.08) 100%),
     /* Optional real texture (loads if file exists, graceful fallback) */
     url('/textures/paper-bg.png');
-  background-size: 300px 300px, 200px 200px, auto, auto, auto, auto, auto, auto, auto, cover;
+  background-size: 300px 300px, 200px 200px, auto, auto, auto, auto, auto, auto, auto, 100vw auto;
   background-attachment: scroll;
 }
 
@@ -89,7 +89,7 @@ body.dark {
     radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.12) 100%),
     /* Optional real texture */
     url('/textures/leather-bg.png');
-  background-size: 250px 250px, 150px 150px, auto, auto, auto, auto, auto, cover;
+  background-size: 250px 250px, 150px 150px, auto, auto, auto, auto, auto, 100vw auto;
   background-attachment: scroll;
 }
 
@@ -354,11 +354,34 @@ body.dark {
 }
 
 /* Variant positions */
-.ink-splatter-1 { top: 12%; left: 8%; }
-.ink-splatter-2 { top: 45%; right: 5%; transform: rotate(30deg); }
-.ink-splatter-3 { bottom: 20%; left: 15%; transform: rotate(-15deg); }
-.ink-splatter-4 { top: 70%; right: 12%; transform: rotate(45deg); }
-.ink-splatter-5 { bottom: 8%; right: 25%; transform: rotate(-30deg); }
+.ink-splatter-1 {
+  top: 12%;
+  left: 8%;
+}
+
+.ink-splatter-2 {
+  top: 45%;
+  right: 5%;
+  transform: rotate(30deg);
+}
+
+.ink-splatter-3 {
+  bottom: 20%;
+  left: 15%;
+  transform: rotate(-15deg);
+}
+
+.ink-splatter-4 {
+  top: 70%;
+  right: 12%;
+  transform: rotate(45deg);
+}
+
+.ink-splatter-5 {
+  bottom: 8%;
+  right: 25%;
+  transform: rotate(-30deg);
+}
 
 /* Dark mode ink splatters — amber tinted */
 .dark .ink-splatter::before {
@@ -455,19 +478,15 @@ body.dark {
    ═══════════════════════════════════════════════════════════════ */
 
 .vintage-header {
-  background-color: rgba(244, 232, 209, 0.35);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border-bottom: 1px solid rgba(139, 94, 60, 0.08);
-  box-shadow: none;
+  background-color: rgba(244, 232, 209, 0.55);
+  border-bottom: 1px solid rgba(139, 94, 60, 0.1);
+  box-shadow: 0 1px 3px rgba(100, 60, 30, 0.04);
 }
 
 .dark .vintage-header {
-  background-color: rgba(26, 17, 10, 0.35);
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  border-bottom-color: rgba(212, 164, 79, 0.06);
-  box-shadow: none;
+  background-color: rgba(26, 17, 10, 0.6);
+  border-bottom-color: rgba(212, 164, 79, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -594,13 +613,18 @@ h4 {
   -webkit-tap-highlight-color: transparent;
 }
 
-img, picture, video, canvas, svg {
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-button, a {
+button,
+a {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -656,12 +680,15 @@ button, a {
 .react-calendar-heatmap .color-scale-1 {
   fill: rgba(139, 94, 60, 0.3);
 }
+
 .react-calendar-heatmap .color-scale-2 {
   fill: rgba(139, 94, 60, 0.5);
 }
+
 .react-calendar-heatmap .color-scale-3 {
   fill: rgba(139, 94, 60, 0.7);
 }
+
 .react-calendar-heatmap .color-scale-4 {
   fill: rgba(139, 94, 60, 1);
 }
@@ -674,28 +701,44 @@ button, a {
 .dark .react-calendar-heatmap .color-scale-1 {
   fill: rgba(212, 164, 79, 0.3);
 }
+
 .dark .react-calendar-heatmap .color-scale-2 {
   fill: rgba(212, 164, 79, 0.5);
 }
+
 .dark .react-calendar-heatmap .color-scale-3 {
   fill: rgba(212, 164, 79, 0.7);
 }
+
 .dark .react-calendar-heatmap .color-scale-4 {
   fill: rgba(212, 164, 79, 1);
 }
 
-.theme-grey .react-calendar-heatmap .color-scale-1 { fill: rgba(107, 107, 107, 0.4); }
-.theme-grey .react-calendar-heatmap .color-scale-2 { fill: rgba(107, 107, 107, 0.6); }
-.theme-grey .react-calendar-heatmap .color-scale-3 { fill: rgba(107, 107, 107, 0.8); }
-.theme-grey .react-calendar-heatmap .color-scale-4 { fill: rgba(107, 107, 107, 1); }
+.theme-grey .react-calendar-heatmap .color-scale-1 {
+  fill: rgba(107, 107, 107, 0.4);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-2 {
+  fill: rgba(107, 107, 107, 0.6);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-3 {
+  fill: rgba(107, 107, 107, 0.8);
+}
+
+.theme-grey .react-calendar-heatmap .color-scale-4 {
+  fill: rgba(107, 107, 107, 1);
+}
 
 .react-calendar-heatmap text {
   fill: var(--charcoal);
   font-size: 10px;
 }
+
 .dark .react-calendar-heatmap text {
   fill: rgba(255, 255, 255, 0.7);
 }
+
 .theme-grey .react-calendar-heatmap text {
   fill: #2E2E2E;
 }
@@ -704,17 +747,50 @@ button, a {
    MARKDOWN / PROSE STYLING
    ═══════════════════════════════════════════════════════════════ */
 
-.prose { @apply max-w-none; }
-.prose h1 { @apply font-serif text-4xl font-bold mb-4 text-charcoal dark:text-teal; }
-.prose h2 { @apply font-serif text-3xl font-semibold mb-3 text-charcoal dark:text-teal; }
-.prose h3 { @apply font-serif text-2xl font-semibold mb-2 text-charcoal dark:text-teal; }
-.prose p { @apply font-body text-lg leading-relaxed mb-4 text-charcoal/90 dark:text-white/90; }
-.prose ul, .prose ol { @apply ml-6 mb-4; }
-.prose li { @apply mb-2; }
-.prose code { @apply bg-charcoal/10 dark:bg-white/10 px-2 py-1 rounded text-sm; }
-.prose pre { @apply bg-charcoal/10 dark:bg-white/10 p-4 rounded-lg overflow-x-auto mb-4; }
-.prose blockquote { @apply border-l-4 border-gold dark:border-teal pl-4 italic my-4; }
-.prose img { @apply rounded-lg shadow-md my-4; }
+.prose {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply font-serif text-4xl font-bold mb-4 text-charcoal dark:text-teal;
+}
+
+.prose h2 {
+  @apply font-serif text-3xl font-semibold mb-3 text-charcoal dark:text-teal;
+}
+
+.prose h3 {
+  @apply font-serif text-2xl font-semibold mb-2 text-charcoal dark:text-teal;
+}
+
+.prose p {
+  @apply font-body text-lg leading-relaxed mb-4 text-charcoal/90 dark:text-white/90;
+}
+
+.prose ul,
+.prose ol {
+  @apply ml-6 mb-4;
+}
+
+.prose li {
+  @apply mb-2;
+}
+
+.prose code {
+  @apply bg-charcoal/10 dark:bg-white/10 px-2 py-1 rounded text-sm;
+}
+
+.prose pre {
+  @apply bg-charcoal/10 dark:bg-white/10 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-gold dark:border-teal pl-4 italic my-4;
+}
+
+.prose img {
+  @apply rounded-lg shadow-md my-4;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    ANIMATIONS
@@ -722,70 +798,185 @@ button, a {
 
 /* Toast Animations */
 @keyframes slideIn {
-  from { transform: translateX(400px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
+
 @keyframes slideOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(400px); opacity: 0; }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
 }
-.animate-slideIn { animation: slideIn 0.3s ease-out forwards; }
-.animate-slideOut { animation: slideOut 0.3s ease-in forwards; }
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-slideOut {
+  animation: slideOut 0.3s ease-in forwards;
+}
 
 /* Dialog/Modal Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes scaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-.animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
-.animate-scaleIn { animation: scaleIn 0.3s ease-out forwards; }
+  from {
+    opacity: 0;
+  }
 
-.fade-in { animation: fadeIn 0.5s ease-in-out; }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
 
 @keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-.slide-up { animation: slideUp 0.3s ease-out; }
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-slideDown { animation: slideDown 0.3s ease-out; }
-.animate-slideUp { animation: slideUp 0.3s ease-out; }
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
 
 /* Error shake */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-  20%, 40%, 60%, 80% { transform: translateX(8px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-8px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(8px);
+  }
 }
-.animate-shake { animation: shake 0.5s ease-in-out; }
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
 
 /* Subtle bounce */
 @keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
 }
-.animate-bounce-subtle { animation: bounce-subtle 0.4s ease-in-out; }
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 0.4s ease-in-out;
+}
 
 /* Skeleton pulse */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
-.animate-pulse-slow { animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
 
 /* Candlelight flicker */
 @keyframes flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.92; }
-  75% { opacity: 0.97; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.92;
+  }
+
+  75% {
+    opacity: 0.97;
+  }
 }
 
 .dark .candlelight-flicker {
@@ -794,8 +985,13 @@ button, a {
 
 /* Quill writing animation */
 @keyframes quill-write {
-  0% { width: 0; }
-  100% { width: 100%; }
+  0% {
+    width: 0;
+  }
+
+  100% {
+    width: 100%;
+  }
 }
 
 .quill-underline {
@@ -822,7 +1018,11 @@ button, a {
    FOCUS & ACCESSIBILITY
    ═══════════════════════════════════════════════════════════════ */
 
-input:focus, textarea:focus, button:focus, select:focus, a:focus {
+input:focus,
+textarea:focus,
+button:focus,
+select:focus,
+a:focus {
   @apply outline-none ring-2 ring-gold dark:ring-teal ring-offset-2 ring-offset-paper dark:ring-offset-midnight;
 }
 
@@ -839,11 +1039,189 @@ button:active:not(:disabled) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   VINTAGE SIDEBAR — Aged paper panel with grain
+   ═══════════════════════════════════════════════════════════════ */
+
+.vintage-sidebar {
+  background-color: rgba(244, 232, 209, 0.65);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='sb'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.42 0 0 0 0 0.28 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23sb)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  border-right: 1px solid rgba(139, 94, 60, 0.12);
+}
+
+.dark .vintage-sidebar {
+  background-color: rgba(26, 17, 10, 0.7);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='sbd'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.07 0 0 0 0 0.04 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23sbd)'/%3E%3C/svg%3E");
+  border-right-color: rgba(212, 164, 79, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VINTAGE STAT CARD — Parchment number display
+   ═══════════════════════════════════════════════════════════════ */
+
+.vintage-stat-card {
+  position: relative;
+  background-color: rgba(244, 232, 209, 0.7);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='sc'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.42 0 0 0 0 0.3 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23sc)'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+  border: 1px solid rgba(139, 94, 60, 0.12);
+  box-shadow:
+    0 2px 8px rgba(100, 60, 30, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
+}
+
+.vintage-stat-card:hover {
+  box-shadow:
+    0 4px 16px rgba(100, 60, 30, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.dark .vintage-stat-card {
+  background-color: rgba(35, 22, 12, 0.7);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='scd'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.08 0 0 0 0 0.04 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23scd)'/%3E%3C/svg%3E");
+  border-color: rgba(212, 164, 79, 0.1);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(212, 164, 79, 0.05);
+}
+
+.dark .vintage-stat-card:hover {
+  box-shadow:
+    0 4px 16px rgba(212, 164, 79, 0.12),
+    inset 0 1px 0 rgba(212, 164, 79, 0.08);
+  border-color: rgba(212, 164, 79, 0.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VINTAGE ENTRY CARD — Journal page with ruled lines
+   ═══════════════════════════════════════════════════════════════ */
+
+.vintage-entry-card {
+  position: relative;
+  background-color: rgba(248, 240, 225, 0.85);
+  background-image:
+    /* Ruled lines effect */
+    repeating-linear-gradient(transparent,
+      transparent 27px,
+      rgba(139, 94, 60, 0.06) 27px,
+      rgba(139, 94, 60, 0.06) 28px),
+    /* Paper grain */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='ec'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.45 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23ec)'/%3E%3C/svg%3E");
+  background-size: auto, 200px 200px;
+  border: 1px solid rgba(139, 94, 60, 0.1);
+  /* Page-turn shadow on the right edge */
+  box-shadow:
+    2px 2px 6px rgba(100, 60, 30, 0.08),
+    4px 0 8px -2px rgba(100, 60, 30, 0.04);
+  transition: all 0.3s ease;
+}
+
+.vintage-entry-card:hover {
+  border-color: rgba(139, 94, 60, 0.2);
+  box-shadow:
+    2px 4px 12px rgba(100, 60, 30, 0.12),
+    4px 0 12px -2px rgba(100, 60, 30, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Red margin line for journal feel */
+.vintage-entry-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 40px;
+  bottom: 0;
+  width: 1px;
+  background: rgba(180, 60, 60, 0.12);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark .vintage-entry-card {
+  background-color: rgba(35, 22, 12, 0.8);
+  background-image:
+    repeating-linear-gradient(transparent,
+      transparent 27px,
+      rgba(212, 164, 79, 0.04) 27px,
+      rgba(212, 164, 79, 0.04) 28px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='ecd'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.07 0 0 0 0 0.04 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23ecd)'/%3E%3C/svg%3E");
+  border-color: rgba(212, 164, 79, 0.08);
+  box-shadow:
+    2px 2px 6px rgba(0, 0, 0, 0.15),
+    4px 0 8px -2px rgba(0, 0, 0, 0.08);
+}
+
+.dark .vintage-entry-card:hover {
+  border-color: rgba(212, 164, 79, 0.15);
+  box-shadow:
+    2px 4px 12px rgba(0, 0, 0, 0.25),
+    4px 0 12px -2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .vintage-entry-card::before {
+  background: rgba(180, 100, 60, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VINTAGE TAG — Ink-stamped label
+   ═══════════════════════════════════════════════════════════════ */
+
+.vintage-tag {
+  background-color: rgba(139, 94, 60, 0.08);
+  border: 1px solid rgba(139, 94, 60, 0.15);
+  color: rgba(100, 60, 30, 0.85);
+  font-family: var(--font-source-serif), Georgia, serif;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.vintage-tag:hover {
+  background-color: rgba(139, 94, 60, 0.15);
+  border-color: rgba(139, 94, 60, 0.25);
+  transform: scale(1.05);
+}
+
+.vintage-tag.active {
+  background-color: rgba(139, 94, 60, 0.25);
+  border-color: rgba(139, 94, 60, 0.4);
+  color: rgba(80, 40, 15, 1);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(100, 60, 30, 0.15);
+}
+
+.dark .vintage-tag {
+  background-color: rgba(212, 164, 79, 0.08);
+  border-color: rgba(212, 164, 79, 0.15);
+  color: rgba(212, 164, 79, 0.8);
+}
+
+.dark .vintage-tag:hover {
+  background-color: rgba(212, 164, 79, 0.15);
+  border-color: rgba(212, 164, 79, 0.25);
+}
+
+.dark .vintage-tag.active {
+  background-color: rgba(212, 164, 79, 0.2);
+  border-color: rgba(212, 164, 79, 0.35);
+  color: rgba(212, 164, 79, 1);
+  box-shadow: 0 1px 4px rgba(212, 164, 79, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
    REDUCED MOTION & PRINT
    ═══════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -852,8 +1230,24 @@ button:active:not(:disabled) {
 }
 
 @media print {
-  body { @apply bg-white text-black; }
-  .no-print, header, nav, button, .sidebar { display: none !important; }
-  a { text-decoration: underline; }
-  img { max-width: 100%; page-break-inside: avoid; }
+  body {
+    @apply bg-white text-black;
+  }
+
+  .no-print,
+  header,
+  nav,
+  button,
+  .sidebar {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
 }

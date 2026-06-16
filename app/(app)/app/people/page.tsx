@@ -114,16 +114,16 @@ export default function PeoplePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading people...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+      <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <Link

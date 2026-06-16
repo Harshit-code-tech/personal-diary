@@ -281,7 +281,7 @@ export default function AppPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading...</div>
       </div>
     )
@@ -318,7 +318,7 @@ export default function AppPage() {
         <aside
           className={`${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] bg-gradient-to-b from-cream to-paper dark:from-graphite dark:to-midnight border-r border-gold/10 dark:border-teal/10 overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
+          } fixed lg:sticky top-[73px] left-0 z-40 w-80 h-[calc(100vh-73px)] vintage-sidebar overflow-y-auto transition-all duration-500 lg:translate-x-0 shadow-2xl lg:shadow-none`}
           data-tour="folders"
         >
           <div className="p-6">
@@ -391,7 +391,7 @@ export default function AppPage() {
             {!selectedFolderId && (
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
                 {/* Total Entries */}
-                <div className="group vintage-card rounded-lg sm:rounded-xl hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-stat-card rounded-lg sm:rounded-xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-gold/10 dark:bg-teal/10 rounded-lg sm:rounded-xl group-hover:bg-gold/20 dark:group-hover:bg-teal/20 transition-colors">
                       <FileText className="w-4 sm:w-6 h-4 sm:h-6 text-gold dark:text-teal" />
@@ -407,7 +407,7 @@ export default function AppPage() {
                 </div>
 
                 {/* Total Words */}
-                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-stat-card rounded-lg sm:rounded-xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-purple-500/10 dark:bg-purple-400/10 rounded-lg sm:rounded-xl group-hover:bg-purple-500/20 dark:group-hover:bg-purple-400/20 transition-colors">
                       <Type className="w-4 sm:w-6 h-4 sm:h-6 text-purple-500 dark:text-purple-400" />
@@ -423,7 +423,7 @@ export default function AppPage() {
                 </div>
 
                 {/* People Mentioned */}
-                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-stat-card rounded-lg sm:rounded-xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg sm:rounded-xl group-hover:bg-blue-500/20 dark:group-hover:bg-blue-400/20 transition-colors">
                       <Users className="w-4 sm:w-6 h-4 sm:h-6 text-blue-500 dark:text-blue-400" />
@@ -439,7 +439,7 @@ export default function AppPage() {
                 </div>
 
                 {/* Stories Created */}
-                <div className="group vintage-card rounded-lg sm:rounded-xl shadow-lg hover:shadow-2xl p-4 sm:p-6 border border-gold/10 dark:border-teal/20 transition-all duration-300 hover:scale-105">
+                <div className="group vintage-stat-card rounded-lg sm:rounded-xl p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-2 sm:mb-3">
                     <div className="p-2 sm:p-3 bg-orange-500/10 dark:bg-orange-400/10 rounded-lg sm:rounded-xl group-hover:bg-orange-500/20 dark:group-hover:bg-orange-400/20 transition-colors">
                       <BookMarked className="w-4 sm:w-6 h-4 sm:h-6 text-orange-500 dark:text-orange-400" />
@@ -479,7 +479,7 @@ export default function AppPage() {
 
             {/* Tag Filter */}
             {allTags.length > 0 && (
-              <div className="mb-6 sm:mb-8 p-4 sm:p-6 vintage-card rounded-lg sm:rounded-xl shadow-lg border border-orange-500/10 dark:border-orange-400/10">
+              <div className="mb-6 sm:mb-8 p-4 sm:p-6 vintage-stat-card rounded-lg sm:rounded-xl">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <span className="text-xl sm:text-2xl">🏷️</span>
@@ -499,10 +499,10 @@ export default function AppPage() {
                     <button
                       key={tag}
                       onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium vintage-tag ${
                         selectedTag === tag
-                          ? 'bg-orange-500 dark:bg-orange-400 text-white shadow-lg scale-105'
-                          : 'bg-orange-500/10 dark:bg-orange-400/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 dark:hover:bg-orange-400/20 hover:scale-105'
+                          ? 'active'
+                          : ''
                       }`}
                     >
                       {tag}
@@ -522,7 +522,7 @@ export default function AppPage() {
               <div className="space-y-4 sm:space-y-6">
                 {/* Loading skeleton */}
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="vintage-card rounded-lg sm:rounded-xl shadow-md p-4 sm:p-6 animate-pulse">
+                  <div key={i} className="vintage-entry-card rounded-lg sm:rounded-xl p-4 sm:p-6 animate-pulse">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1 space-y-3">
                         <div className="h-6 sm:h-7 bg-gradient-to-r from-charcoal/10 to-charcoal/5 dark:from-white/10 dark:to-white/5 rounded w-3/4"></div>
@@ -563,7 +563,7 @@ export default function AppPage() {
                   <Link
                     key={entry.id}
                     href={`/app/entry/${entry.id}`}
-                    className="group block vintage-card rounded-xl sm:rounded-2xl shadow-lg hover:shadow-2xl p-4 sm:p-6 transition-all duration-300 border border-charcoal/5 dark:border-white/5 hover:border-gold/40 dark:hover:border-teal/40 hover:scale-[1.01] sm:hover:scale-[1.02] hover:-translate-y-1"
+                    className="group block vintage-entry-card rounded-xl sm:rounded-2xl p-4 sm:p-6 pl-12 sm:pl-14"
                   >
                     <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
                       <div className="flex-1 min-w-0">

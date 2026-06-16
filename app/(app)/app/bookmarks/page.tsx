@@ -80,14 +80,14 @@ export default function BookmarksPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-charcoal dark:text-white">Loading bookmarks...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight transition-colors duration-500">
+    <div className="min-h-screen transition-colors duration-500">
       <AppHeader />
       
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

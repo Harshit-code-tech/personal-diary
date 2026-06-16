@@ -5,16 +5,20 @@ import { generateDailyReminderEmail, generateWeeklySummaryEmail, generateStreakM
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') 
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-const GMAIL_USER = Deno.env.get('GMAIL_USER') 
-const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD') 
+const SMTP_HOST = Deno.env.get('SMTP_HOST') ?? 'smtp-relay.brevo.com'
+const SMTP_PORT = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
+const SMTP_USER = Deno.env.get('SMTP_USER') ?? ''
+const SMTP_PASSWORD = Deno.env.get('SMTP_PASSWORD') ?? ''
+const SMTP_FROM = Deno.env.get('SMTP_FROM') ?? ''
 const APP_URL = Deno.env.get('APP_URL') 
 
 // Log environment check on startup
 console.log('🔍 Environment check:', {
   hasSupabaseUrl: !!SUPABASE_URL,
   hasServiceKey: !!SUPABASE_SERVICE_ROLE_KEY,
-  hasGmailUser: !!GMAIL_USER,
-  hasGmailPassword: !!GMAIL_APP_PASSWORD,
+  hasSmtpUser: !!SMTP_USER,
+  hasSmtpPassword: !!SMTP_PASSWORD,
+  hasSmtpFrom: !!SMTP_FROM,
   hasAppUrl: !!APP_URL,
 })
 
@@ -48,9 +52,9 @@ serve(async (req) => {
       throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
     }
 
-    if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
-      console.error('❌ Missing Gmail credentials')
-      throw new Error('Missing GMAIL_USER or GMAIL_APP_PASSWORD - please set these secrets in Supabase dashboard')
+    if (!SMTP_USER || !SMTP_PASSWORD) {
+      console.error('❌ Missing SMTP credentials')
+      throw new Error('Missing SMTP_USER or SMTP_PASSWORD - please set these secrets in Supabase dashboard')
     }
 
     console.log('✅ All environment variables present')
@@ -102,12 +106,12 @@ serve(async (req) => {
     console.log('📮 Creating SMTP client...')
     const smtpClient = new SMTPClient({
       connection: {
-        hostname: 'smtp.gmail.com',
-        port: 465,
-        tls: true,
+        hostname: SMTP_HOST,
+        port: SMTP_PORT,
+        tls: false,
         auth: {
-          username: GMAIL_USER,
-          password: GMAIL_APP_PASSWORD,
+          username: SMTP_USER,
+          password: SMTP_PASSWORD,
         },
       },
     })
@@ -204,7 +208,7 @@ serve(async (req) => {
 
           // Send email via Gmail SMTP
           await smtpClient.send({
-            from: `Noted <${GMAIL_USER}>`, // Display name with valid email
+            from: `Noted <${SMTP_FROM}>`, // Display name with valid email
             to: profile.email,
             subject: emailSubject,
             html: emailHtml,

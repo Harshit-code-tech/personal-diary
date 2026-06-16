@@ -511,7 +511,7 @@ export default function LifeTimelinePage() {
 
   return (
     <div
-      className="min-h-screen bg-paper dark:bg-midnight"
+      className="min-h-screen"
       onClick={() => {
         // Close any open goal picker when clicking outside
         if (showGoalPicker) {
