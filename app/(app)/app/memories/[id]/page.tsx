@@ -69,7 +69,7 @@ export default function MemoryDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight">
+      <div className="min-h-screen book-page">
         <AppHeader />
         <div className="max-w-4xl mx-auto px-4 py-12 text-charcoal/60 dark:text-white/60">Loading memory...</div>
       </div>
@@ -78,7 +78,7 @@ export default function MemoryDetailPage() {
 
   if (!memory) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight">
+      <div className="min-h-screen book-page">
         <AppHeader />
         <div className="max-w-4xl mx-auto px-4 py-12 text-charcoal/60 dark:text-white/60">Memory not found.</div>
       </div>
@@ -86,7 +86,7 @@ export default function MemoryDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight">
+    <div className="min-h-screen book-page">
       <AppHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="mb-6 flex items-center gap-3">

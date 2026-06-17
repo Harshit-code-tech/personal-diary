@@ -152,7 +152,7 @@ export default function StoriesPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">

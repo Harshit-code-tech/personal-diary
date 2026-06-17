@@ -294,7 +294,7 @@ export default function AnalyticsPage() {
 
   if (!analytics) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream dark:bg-charcoal">
+      <div className="min-h-screen flex items-center justify-center book-page">
         <p className="text-charcoal dark:text-white">No data available</p>
       </div>
     )
@@ -305,8 +305,8 @@ export default function AnalyticsPage() {
   const maxDayCount = Math.max(...analytics.writingByDayOfWeek.map((d) => d.count), 1)
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-charcoal pb-16">{/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/80 dark:bg-charcoal/80 border-b border-charcoal/10 dark:border-white/10">
+    <div className="min-h-screen book-page pb-16">{/* Header */}
+      <header className="sticky top-0 z-50 vintage-header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">

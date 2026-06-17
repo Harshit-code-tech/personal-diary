@@ -288,7 +288,7 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen book-page">
       {/* Header */}
       <AppHeader />
 

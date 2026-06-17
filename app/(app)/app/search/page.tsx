@@ -229,7 +229,7 @@ export default function SearchPage() {
   const hasActiveFilters = Object.values(filters).some(v => v !== '')
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-4">

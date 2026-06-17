@@ -528,7 +528,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center book-page">
         <div className="text-charcoal dark:text-white">Loading entry...</div>
       </div>
     )
@@ -539,7 +539,7 @@ export default function EntryPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight">
+    <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-paper/80 dark:bg-midnight/80 border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="px-6 py-4 flex items-center justify-between">

@@ -87,7 +87,7 @@ export default function BookmarksPage() {
   }
 
   return (
-    <div className="min-h-screen transition-colors duration-500">
+    <div className="min-h-screen transition-colors duration-500 book-page">
       <AppHeader />
       
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

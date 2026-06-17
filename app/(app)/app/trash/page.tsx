@@ -125,7 +125,7 @@ export default function TrashPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cream via-paper to-gold/10 dark:from-midnight dark:via-charcoal dark:to-graphite">
+      <div className="min-h-screen book-page">
         <AppHeader />
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center text-charcoal/60 dark:text-white/60">
@@ -137,7 +137,7 @@ export default function TrashPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream via-paper to-gold/10 dark:from-midnight dark:via-charcoal dark:to-graphite">
+    <div className="min-h-screen book-page">
       <AppHeader />
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

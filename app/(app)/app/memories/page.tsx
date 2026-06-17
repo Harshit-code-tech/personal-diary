@@ -137,7 +137,7 @@ export default function MemoriesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen flex items-center justify-center book-page">
         <AppHeader />
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="text-center text-charcoal/60 dark:text-white/60">
@@ -149,7 +149,7 @@ export default function MemoriesPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen book-page">
       <AppHeader />
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">

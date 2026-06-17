@@ -131,7 +131,7 @@ export default function ExportPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header">
         <div className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">

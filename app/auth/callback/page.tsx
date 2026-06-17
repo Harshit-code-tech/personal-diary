@@ -49,7 +49,7 @@ export default function AuthCallbackPage() {
   }, [searchParams, router, supabase])
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-midnight flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center book-page">
       <div className="text-center">
         <div className="animate-spin w-12 h-12 border-4 border-gold border-t-transparent rounded-full mx-auto mb-4"></div>
         <p className="text-charcoal/70 dark:text-white/70">Verifying your email...</p>
