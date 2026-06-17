@@ -194,7 +194,7 @@ export default function TrashPage() {
               return (
                 <div
                   key={entry.id}
-                  className="vintage-card rounded-2xl p-4 sm:p-6 border-2 border-red-200 dark:border-red-900/30 hover:shadow-lg transition-shadow"
+                  className="vintage-card rounded-2xl p-4 sm:p-6 border border-charcoal/10 dark:border-white/10 hover:border-red-400 dark:hover:border-red-500 transition-all"
                 >
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex-1 min-w-0">

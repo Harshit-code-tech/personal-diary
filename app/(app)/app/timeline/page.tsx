@@ -714,7 +714,7 @@ export default function LifeTimelinePage() {
                   {/* Year header bar */}
                   <button
                     onClick={() => toggleYear(yearGroup.year)}
-                    className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/60 dark:bg-graphite/60 rounded-xl border border-charcoal/10 dark:border-white/10 hover:bg-white dark:hover:bg-graphite transition-colors"
+                    className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 vintage-card rounded-xl border border-charcoal/10 dark:border-white/10 hover:shadow-md transition-all"
                   >
                     {isExpanded
                       ? <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-charcoal/50 dark:text-white/50" />

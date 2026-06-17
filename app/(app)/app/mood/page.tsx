@@ -375,7 +375,7 @@ export default function MoodAnalysisPage() {
             )}
 
             {/* Overall Summary */}
-            <div className="mt-8 bg-gradient-to-br from-gold/10 to-transparent dark:from-teal/10 dark:to-transparent rounded-xl p-8 border border-gold/20 dark:border-teal/20">
+            <div className="mt-8 vintage-card rounded-xl p-8 border border-gold/20 dark:border-teal/20 overflow-hidden">
               <h2 className="text-2xl font-bold text-charcoal dark:text-white mb-4 flex items-center gap-3">
                 <BarChart3 className="w-7 h-7 text-gold dark:text-teal" />
                 Summary

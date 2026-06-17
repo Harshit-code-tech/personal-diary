@@ -291,9 +291,10 @@ export default function StoriesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => (
-              <div
+              <Link
+                href={`/app/stories/${story.id}`}
                 key={story.id}
-                className="vintage-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 border border-charcoal/10 dark:border-white/10 overflow-hidden group"
+                className="vintage-card rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 border border-charcoal/10 dark:border-white/10 overflow-hidden group block"
               >
                 {/* Cover Image or Color */}
                 {story.cover_image_url ? (
@@ -319,14 +320,11 @@ export default function StoriesPage() {
                 <div className="p-6">
                   {/* Header with Favorite */}
                   <div className="flex items-start justify-between mb-3">
-                    <Link
-                      href={`/app/stories/${story.id}`}
-                      className="flex-1"
-                    >
+                    <div className="flex-1">
                       <h3 className="text-xl font-serif font-bold text-charcoal dark:text-white group-hover:text-gold dark:group-hover:text-teal transition-colors line-clamp-2">
                         {story.title}
                       </h3>
-                    </Link>
+                    </div>
                     <button
                       onClick={(e) => {
                         e.preventDefault()
@@ -380,7 +378,7 @@ export default function StoriesPage() {
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

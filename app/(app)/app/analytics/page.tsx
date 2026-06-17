@@ -442,7 +442,7 @@ export default function AnalyticsPage() {
 
         {/* Journey Info */}
         {analytics.firstEntryDate && (
-          <div className="bg-gradient-to-r from-gold/10 to-teal/10 dark:from-gold/5 dark:to-teal/5 p-6 rounded-xl mb-8 border border-gold/20 dark:border-teal/20">
+          <div className="vintage-card p-6 rounded-xl mb-8 border border-gold/20 dark:border-teal/20 overflow-x-auto">
             <div className="flex items-center gap-3 mb-2">
               <Calendar className="w-5 h-5 text-gold dark:text-teal" />
               <h3 className="font-semibold text-charcoal dark:text-white">Your Writing Journey</h3>
@@ -499,7 +499,7 @@ export default function AnalyticsPage() {
               <Calendar className="w-5 h-5 text-blue-500" />
               <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing by Day</h3>
             </div>
-            <div className="flex justify-between items-end h-40">
+            <div className="flex justify-between items-end h-40 overflow-x-auto min-w-full pb-2">
               {analytics.writingByDayOfWeek.map((day) => (
                 <div key={day.day} className="flex flex-col items-center gap-2 flex-1">
                   <div className="w-full flex items-end justify-center" style={{ height: '120px' }}>
@@ -522,7 +522,7 @@ export default function AnalyticsPage() {
             <TrendingUp className="w-5 h-5 text-green-500" />
             <h3 className="text-lg font-bold text-charcoal dark:text-white">Writing Trend (Last 12 Months)</h3>
           </div>
-          <div className="flex justify-between items-end h-48 gap-1">
+          <div className="flex justify-between items-end h-48 gap-1 overflow-x-auto min-w-full pb-2">
             {analytics.writingByMonth.map((month) => (
               <div key={month.month} className="flex flex-col items-center gap-2 flex-1 min-w-0">
                 <div className="w-full flex items-end justify-center h-32">
@@ -565,7 +565,7 @@ export default function AnalyticsPage() {
         {/* Insights */}
         <div className="grid md:grid-cols-2 gap-6">
           {/* Most Productive Time */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-700">
+          <div className="vintage-card p-6 rounded-xl border border-blue-200/50 dark:border-blue-700/50 overflow-x-auto">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <h3 className="font-bold text-charcoal dark:text-white">Most Productive Hour</h3>
@@ -588,7 +588,7 @@ export default function AnalyticsPage() {
           {analytics.longestEntry && (
             <Link
               href={`/app/entry/${analytics.longestEntry.id}`}
-              className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-700 hover:scale-105 transition-transform"
+              className="vintage-card p-6 rounded-xl border border-amber-200/50 dark:border-amber-700/50 hover:scale-105 transition-transform"
             >
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />

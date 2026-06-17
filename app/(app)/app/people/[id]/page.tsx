@@ -386,7 +386,7 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                 <Link
                   href={`/app/memories/${memory.id}`}
                   key={memory.id}
-                  className="block rounded-xl border border-charcoal/10 dark:border-white/10 bg-gradient-to-r from-white via-white to-gold/10 dark:from-graphite dark:via-midnight dark:to-teal/10 p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5"
+                  className="block vintage-card rounded-xl border border-charcoal/10 dark:border-white/10 p-6 shadow-sm hover:shadow-lg transition-all hover:-translate-y-0.5 group relative"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-sm text-charcoal/60 dark:text-white/60">
@@ -397,11 +397,16 @@ export default function PersonDetailPage({ params }: { params: Promise<{ id: str
                         year: 'numeric',
                       })}
                     </div>
-                    {memory.mood && (
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-charcoal/5 dark:bg-white/10 text-charcoal dark:text-white">
-                        {memory.mood}
+                    <div className="flex items-center gap-2">
+                      {memory.mood && (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-charcoal/5 dark:bg-white/10 text-charcoal dark:text-white">
+                          {memory.mood}
+                        </span>
+                      )}
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold text-gold dark:text-teal bg-gold/10 dark:bg-teal/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                        <Edit className="w-3 h-3" /> View/Edit
                       </span>
-                    )}
+                    </div>
                   </div>
 
                   <h3 className="text-xl font-serif font-bold text-charcoal dark:text-white mb-2">
