@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
-import { Trash2, RefreshCw, X, Calendar, FileText, AlertCircle } from 'lucide-react'
+import { Trash2, RefreshCw, X, Calendar, FileText, AlertCircle, ArrowLeft } from 'lucide-react'
 import { stripHtmlTags } from '@/lib/sanitize'
-import AppHeader from '@/components/layout/AppHeader'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import toast from 'react-hot-toast'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import AppHeader from '@/components/layout/AppHeader'
 
 interface Entry {
   id: string
@@ -138,7 +139,25 @@ export default function TrashPage() {
 
   return (
     <div className="min-h-screen book-page">
-      <AppHeader />
+      <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between max-w-7xl mx-auto relative">
+          <div className="flex-1 flex justify-start">
+            <Link
+              href="/app"
+              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </div>
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Trash</h1>
+          </div>
+          <div className="flex-1 flex justify-end items-center gap-2 shrink-0">
+            <ThemeSwitcher />
+          </div>
+        </div>
+      </header>
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

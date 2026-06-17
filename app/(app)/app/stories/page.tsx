@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, ArrowLeft, BookOpen, Calendar, FileText, Star, Archive, Search, Filter, X } from 'lucide-react'
+import { Plus, ArrowLeft, BookOpen, Calendar, FileText, Star, Archive, Search, Filter, SortAsc, X } from 'lucide-react'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
+import DiscoverCard from '@/components/promo/DiscoverCard'
 
 interface Story {
   id: string
@@ -155,30 +157,34 @@ export default function StoriesPage() {
     <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between max-w-7xl mx-auto relative">
+          <div className="flex-1 flex justify-start">
             <Link
               href="/app"
-              className="flex items-center gap-1.5 sm:gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors shrink-0"
+              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-medium text-sm hidden sm:inline">Back</span>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div className="h-5 w-px bg-charcoal/20 dark:bg-white/20 hidden sm:block" />
-            <h1 className="text-lg sm:text-2xl font-display font-bold text-charcoal dark:text-teal flex items-center gap-1.5 sm:gap-2 truncate">
-              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
-              <span>My Stories</span>
+          </div>
+
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+            <h1 className="font-serif text-lg sm:text-2xl font-bold text-charcoal dark:text-teal truncate">
+              My Stories
             </h1>
           </div>
 
-          <Link
-            href="/app/stories/new"
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 transition-all shadow-lg shrink-0"
-          >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden xs:inline">New Story</span>
-            <span className="xs:hidden">New</span>
-          </Link>
+          <div className="flex-1 flex justify-end items-center gap-2 shrink-0">
+            <ThemeSwitcher />
+            <Link
+              href="/app/stories/new"
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 transition-all shadow-lg shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New Story</span>
+              <span className="sm:hidden">New</span>
+            </Link>
+          </div>
         </div>
       </header>
 

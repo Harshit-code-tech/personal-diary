@@ -8,6 +8,7 @@ import { ArrowLeft, Target, Plus, CheckCircle2, Trash2, Calendar, TrendingUp, Fi
 import { PageLoadingSkeleton } from '@/components/ui/LoadingSkeleton'
 import { useToast } from '@/components/ui/ToastContainer'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 
 type Milestone = {
   id: string
@@ -698,32 +699,38 @@ export default function GoalsPage() {
   return (
     <div className="min-h-screen book-page">
       {/* Header */}
-      <header className="sticky top-0 z-50 vintage-header">
-        <div className="px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between max-w-7xl mx-auto gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between max-w-7xl mx-auto relative">
+          <div className="flex-1 flex justify-start">
             <Link
               href="/app"
-              className="group flex items-center gap-1.5 sm:gap-2 text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-all duration-300 shrink-0"
+              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
             >
-              <div className="p-1.5 sm:p-2 rounded-lg bg-charcoal/5 dark:bg-white/5 group-hover:bg-gold/10 dark:group-hover:bg-teal/10 transition-colors">
-                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </div>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
-            <Target className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
-            <span className="font-bold text-base sm:text-lg text-charcoal dark:text-white truncate">Goals</span>
           </div>
 
-          <button
-            onClick={() => {
-              resetForm()
-              setShowAddModal(true)
-            }}
-            className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 bg-gold dark:bg-teal text-white dark:text-midnight rounded-xl text-xs sm:text-sm font-bold hover:shadow-xl transition-all shrink-0"
-          >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden xs:inline">New Goal</span>
-            <span className="xs:hidden">New</span>
-          </button>
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <Target className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+            <h1 className="font-serif text-lg sm:text-2xl font-bold text-charcoal dark:text-teal truncate">
+              Goals
+            </h1>
+          </div>
+
+          <div className="flex-1 flex justify-end items-center gap-2 shrink-0">
+            <ThemeSwitcher />
+            <button
+              onClick={() => {
+                resetForm()
+                setShowAddModal(true)
+              }}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gold dark:bg-teal text-white dark:text-midnight rounded-lg text-xs sm:text-sm font-semibold hover:opacity-90 transition-all shadow-lg shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New Goal</span>
+              <span className="sm:hidden">New</span>
+            </button>
+          </div>
         </div>
       </header>
 

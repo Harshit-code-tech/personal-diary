@@ -265,25 +265,22 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen book-page pb-16">{/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-cream/80 dark:bg-charcoal/80 border-b border-charcoal/10 dark:border-white/10">
+      <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+          <div className="flex items-center justify-between relative">
+            <div className="flex-1 flex justify-start">
               <Link
                 href="/app"
                 className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <TrendingUp className="w-6 h-6 text-gold dark:text-teal shrink-0" />
-              <div className="min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Your Writing Insights</h1>
-                <p className="text-xs sm:text-sm text-charcoal/60 dark:text-white/60 hidden xs:block">
-                  Discover patterns and celebrate your journey
-                </p>
-              </div>
             </div>
-            <div className="shrink-0">
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+              <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Insights</h1>
+            </div>
+            <div className="flex-1 flex justify-end items-center gap-2 shrink-0">
               <ThemeSwitcher />
             </div>
           </div>

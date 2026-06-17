@@ -27,7 +27,8 @@ export function MoodBarChart({ data, height = 300 }: MoodChartProps) {
         Mood Distribution
       </h3>
       
-      <div className="flex items-end justify-between gap-4" style={{ height }}>
+      <div className="overflow-x-auto pb-4">
+        <div className="flex items-end justify-between gap-4 min-w-[600px]" style={{ height }}>
         {data.map((item, index) => {
           const barHeight = (item.count / maxCount) * 100
           const moodEmoji = item.mood.split(' ')[0]
@@ -73,6 +74,7 @@ export function MoodBarChart({ data, height = 300 }: MoodChartProps) {
             </div>
           )
         })}
+        </div>
       </div>
     </div>
   )
