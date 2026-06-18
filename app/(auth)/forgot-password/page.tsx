@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
               <ArrowLeft className="w-4 h-4" />
               Back to login
             </Link>
-            </Link>
+            </div>
           </div>
         </div>
       </main>
