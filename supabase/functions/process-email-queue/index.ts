@@ -126,25 +126,25 @@ async function generateHTMLContent(
   recipientEmail: string
 ): Promise<string> {
   const userName = await getUserDisplayName(supabase, userId, recipientEmail)
-  
+
   if (emailType === 'weekly_summary') {
     // Query actual user data
     const currentStreak = await getCurrentStreak(supabase, userId)
-    
+
     // Get actual count of entries this week
     const weekAgo = new Date()
     weekAgo.setDate(weekAgo.getDate() - 7)
-    
+
     const { data: entriesData } = await supabase
       .from('entries')
       .select('id')
       .eq('user_id', userId)
       .gte('created_at', weekAgo.toISOString())
       .is('deleted_at', null)
-    
+
     const entriesThisWeek = entriesData?.length || 0
-    
-    const streakMessage = currentStreak >= 7 
+
+    const streakMessage = currentStreak >= 7
       ? `<tr>
           <td style="padding: 0 40px 20px 40px;">
             <div style="background: #FFF3E0; border-left: 4px solid #FF9800; padding: 20px; border-radius: 8px;">
@@ -155,7 +155,7 @@ async function generateHTMLContent(
           </td>
         </tr>`
       : ''
-    
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -222,16 +222,16 @@ async function generateHTMLContent(
 </body>
 </html>`
   }
-  
+
   if (emailType === 'streak_milestone') {
     // Get streak data
     const currentStreak = await getCurrentStreak(supabase, userId)
-    
+
     let emoji = '🔥'
     let title = 'Streak Milestone!'
     let message = 'Keep the fire burning!'
     let color = '#FF6B35'
-    
+
     if (currentStreak >= 365) {
       emoji = '🎉'
       title = 'ONE YEAR STREAK!'
@@ -258,7 +258,7 @@ async function generateHTMLContent(
       message = 'One week of consistent journaling!'
       color = '#2ecc71'
     }
-    
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,7 +312,7 @@ async function generateHTMLContent(
 </body>
 </html>`
   }
-  
+
   if (emailType === 'daily_reminder') {
     // Random writing prompt
     const prompts = [
@@ -331,7 +331,7 @@ async function generateHTMLContent(
 
     // Get streak data
     const currentStreak = await getCurrentStreak(supabase, userId)
-    
+
     const streakHtml = currentStreak > 0
       ? `
           <tr>
@@ -419,7 +419,7 @@ async function generateHTMLContent(
 </body>
 </html>`
   }
-  
+
   // Simple fallback for other email types
   return `<!DOCTYPE html>
 <html lang="en">
@@ -463,11 +463,11 @@ async function sendEmailWithTimeout(
   if (!recipient || !recipient.includes('@')) {
     throw new Error(`Invalid recipient email: ${recipient}`)
   }
-  
+
   if (!subject || subject.trim() === '') {
     throw new Error('Email subject is empty')
   }
-  
+
   if (!htmlBody || htmlBody.trim() === '') {
     throw new Error('Email HTML body is empty or null')
   }
@@ -480,7 +480,7 @@ async function sendEmailWithTimeout(
     connection: {
       hostname: SMTP_HOST,
       port: SMTP_PORT,
-      tls: false,
+      tls: true,
       auth: {
         username: SMTP_USER,
         password: SMTP_PASSWORD,
@@ -488,10 +488,16 @@ async function sendEmailWithTimeout(
     },
   })
 
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('SMTP timeout after 8s')), timeoutMs)
+  })
+
   try {
-    // Strip trailing whitespace from all lines to prevent =20 in quoted-printable encoding
+    // Strip trailing whitespace...
     const cleanedHtml = htmlBody.replace(/ +$/gm, '').replace(/\t+$/gm, '')
-    
+
     const sendPromise = smtpClient.send({
       from: `Noted <${SMTP_FROM}>`,
       to: recipient,
@@ -500,19 +506,18 @@ async function sendEmailWithTimeout(
       html: cleanedHtml,
     })
 
-    // Race between send and timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('SMTP timeout after 8s')), timeoutMs)
-    )
-
     await Promise.race([sendPromise, timeoutPromise])
   } finally {
+    // CLEAR THE TIMEOUT to prevent background crashes
+    if (timeoutId) clearTimeout(timeoutId)
+
     try {
       await smtpClient.close()
     } catch {
       // Ignore close errors
     }
   }
+
 }
 
 serve(async (req) => {
@@ -527,7 +532,7 @@ serve(async (req) => {
     // 1. Vercel cron job (with service role key)
     // 2. Supabase pg_cron (internal)
     const authHeader = req.headers.get('authorization')
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.error('❌ Unauthorized: Missing Authorization header')
       console.error('Headers received:', {
@@ -537,9 +542,9 @@ serve(async (req) => {
       })
       return new Response(
         JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-          status: 401 
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
         }
       )
     }
@@ -564,10 +569,10 @@ serve(async (req) => {
 
     if (!pendingEmails || pendingEmails.length === 0) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: 'No pending emails to process',
-          processed: 0 
+          processed: 0
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -599,7 +604,7 @@ serve(async (req) => {
 
           if (emailItem.email_type === 'weekly_summary' || !htmlToSend || htmlToSend.trim() === '') {
             console.warn(`⚠️ Email ID ${emailItem.id} has NULL html_body. Generating HTML from database. Email type: ${emailItem.email_type}`)
-            
+
             // Query database and generate real HTML content
             htmlToSend = await generateHTMLContent(
               supabase,
@@ -608,7 +613,7 @@ serve(async (req) => {
               emailItem.recipient_email
             )
             usedFallback = true
-            
+
             // Update the email_queue with the generated HTML
             await supabase
               .from('email_queue')
@@ -696,12 +701,12 @@ serve(async (req) => {
             console.warn('⚠️ Could not log email failure:', logErr)
           }
 
-          return { 
-            success: false, 
-            email: emailItem.recipient_email, 
+          return {
+            success: false,
+            email: emailItem.recipient_email,
             id: emailItem.id,
             error: errorMessage,
-            retryCount: newRetryCount 
+            retryCount: newRetryCount
           }
         }
       })
@@ -728,7 +733,7 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error processing email queue:', error)
-    
+
     return new Response(
       JSON.stringify({
         success: false,

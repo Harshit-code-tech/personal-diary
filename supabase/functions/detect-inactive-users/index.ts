@@ -119,7 +119,7 @@ function generateInactiveUserEmail(userName: string, daysSinceLastEntry: number,
 
 serve(async (req) => {
   console.log('🔍 Detect inactive users function called')
-  
+
   // Validate authorization
   const authHeader = req.headers.get('authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -129,7 +129,7 @@ serve(async (req) => {
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     )
   }
-  
+
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     const now = new Date()
@@ -139,14 +139,14 @@ serve(async (req) => {
       connection: {
         hostname: SMTP_HOST,
         port: SMTP_PORT,
-        tls: false,
+        tls: true,
         auth: {
           username: SMTP_USER,
           password: SMTP_PASSWORD,
         },
       },
     })
-    
+
     // Calculate dates for different thresholds
     const dates = {
       gentle: new Date(now.getTime() - INACTIVITY_THRESHOLDS.GENTLE_REMINDER * 24 * 60 * 60 * 1000),
@@ -225,7 +225,7 @@ serve(async (req) => {
 
         // Calculate days since last entry
         const lastEntryDate = user.last_entry_date ? new Date(user.last_entry_date) : null
-        const daysSinceLastEntry = lastEntryDate 
+        const daysSinceLastEntry = lastEntryDate
           ? Math.floor((now.getTime() - lastEntryDate.getTime()) / (1000 * 60 * 60 * 24))
           : Math.floor((now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
@@ -317,9 +317,9 @@ serve(async (req) => {
     console.error('Error message:', error?.message)
     console.error('Error stack:', error?.stack)
     console.error('Full error:', JSON.stringify(error, null, 2))
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message || 'Unknown error',
         type: error?.constructor?.name,
         details: error?.toString()

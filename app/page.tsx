@@ -23,14 +23,14 @@ export default function Home() {
     <main className="min-h-screen transition-colors duration-300 relative overflow-hidden book-page">
       {/* Ornate corner flourishes — blend naturally into parchment */}
       <div className="absolute top-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" aria-hidden="true">❧</div>
-      <div className="absolute top-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleX(-1)'}} aria-hidden="true">❧</div>
-      <div className="absolute bottom-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scaleY(-1)'}} aria-hidden="true">❧</div>
-      <div className="absolute bottom-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{transform: 'scale(-1)'}} aria-hidden="true">❧</div>
+      <div className="absolute top-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{ transform: 'scaleX(-1)' }} aria-hidden="true">❧</div>
+      <div className="absolute bottom-6 left-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{ transform: 'scaleY(-1)' }} aria-hidden="true">❧</div>
+      <div className="absolute bottom-6 right-6 text-[#8B5E3C]/15 dark:text-[#D4A44F]/10 text-6xl pointer-events-none select-none hidden lg:block font-serif" style={{ transform: 'scale(-1)' }} aria-hidden="true">❧</div>
 
       {/* Ink splatters — blended into page with multiply mode, NOT a pasted rectangle */}
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[8%] left-[3%] w-36 h-36 opacity-[0.07] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply'}} />
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute bottom-[12%] right-[5%] w-32 h-32 opacity-[0.06] pointer-events-none select-none hidden sm:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(135deg)'}} />
-      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[55%] left-[10%] w-24 h-24 opacity-[0.04] pointer-events-none select-none hidden lg:block object-contain" style={{mixBlendMode: 'multiply', transform: 'rotate(-45deg) scaleX(-1)'}} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[8%] left-[3%] w-36 h-36 opacity-[0.07] pointer-events-none select-none hidden sm:block object-contain" style={{ mixBlendMode: 'multiply' }} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute bottom-[12%] right-[5%] w-32 h-32 opacity-[0.06] pointer-events-none select-none hidden sm:block object-contain" style={{ mixBlendMode: 'multiply', transform: 'rotate(135deg)' }} />
+      <img src="/textures/ink-splatters.png" alt="" aria-hidden="true" className="absolute top-[55%] left-[10%] w-24 h-24 opacity-[0.04] pointer-events-none select-none hidden lg:block object-contain" style={{ mixBlendMode: 'multiply', transform: 'rotate(-45deg) scaleX(-1)' }} />
 
       {/* Sticky Header */}
       <nav className="sticky top-0 z-50 vintage-header">
@@ -43,11 +43,11 @@ export default function Home() {
               Noted.
             </h1>
           </div>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden sm:flex items-center gap-4">
             <ThemeSwitcher />
-            <Link 
+            <Link
               href="/login"
               className="text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors font-ui"
             >
@@ -80,7 +80,7 @@ export default function Home() {
               <div className="flex justify-center">
                 <ThemeSwitcher />
               </div>
-              <Link 
+              <Link
                 href="/login"
                 className="block w-full text-center py-2 text-sm font-medium text-charcoal dark:text-white hover:text-gold dark:hover:text-teal transition-colors"
                 onClick={() => setMenuOpen(false)}
@@ -96,17 +96,17 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           {/* Hero Section */}
           <div className="flex justify-center mb-8 sm:mb-10">
-            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl ring-2 ring-[#6B2D3E]/20" style={{backgroundColor: '#6B2D3E'}}>
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden shadow-xl ring-2 ring-[#6B2D3E]/20" style={{ backgroundColor: '#6B2D3E' }}>
               <img src="/textures/wax-seal.png" alt="Noted. wax seal" className="w-full h-full object-cover scale-[1.5]" />
             </div>
           </div>
-          
+
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 leading-tight ink-accent">
             <span className="text-charcoal dark:text-white">Your Space.</span>
             <br />
             <span className="text-gold dark:text-teal quill-underline">Your Thoughts.</span>
           </h1>
-          
+
           {/* Vintage divider */}
           <div className="vintage-divider max-w-xs mx-auto mb-6 sm:mb-8">
             <span className="text-sm">✦</span>
@@ -118,8 +118,8 @@ export default function Home() {
 
           {/* CTA Button */}
           <div className="flex justify-center mb-16 sm:mb-24 lg:mb-32">
-            <Link 
-              href="/signup" 
+            <Link
+              href="/signup"
               className="btn-vintage text-base sm:text-lg w-full sm:w-auto max-w-xs text-center"
             >
               ✍️ Start Writing Today
@@ -133,46 +133,46 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 max-w-5xl mx-auto">
             <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
-              <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
-                <Lock className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
-                Private & Secure
-              </h3>
-              <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
-              <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
-                Your entries are encrypted and protected. Only you can access your thoughts.
-              </p>
+                <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
+                  <Lock className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
+                  Private & Secure
+                </h3>
+                <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
+                <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
+                  Your entries are encrypted and protected. Only you can access your thoughts.
+                </p>
               </div>
             </div>
 
             <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
-              <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
-                <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
-                Rich Writing
-              </h3>
-              <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
-              <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
-                Beautiful WYSIWYG editor with image support. Express yourself fully.
-              </p>
+                <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
+                  <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
+                  Rich Writing
+                </h3>
+                <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
+                <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
+                  Beautiful WYSIWYG editor with image support. Express yourself fully.
+                </p>
               </div>
             </div>
 
             <div className="vintage-card vintage-card-ornate rounded-xl p-6 sm:p-8 text-center sm:col-span-2 md:col-span-1 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
               <div className="relative z-10">
-              <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
-                <Download className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
-              </div>
-              <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
-                Export Anytime
-              </h3>
-              <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
-              <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
-                Your data, your control. Export your diary entries whenever you want.
-              </p>
+                <div className="wax-seal w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 sm:mb-6">
+                  <Download className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-charcoal dark:text-white">
+                  Export Anytime
+                </h3>
+                <div className="vintage-divider mb-3"><span className="text-xs">✦</span></div>
+                <p className="text-sm sm:text-base text-charcoal/60 dark:text-white/60 leading-relaxed">
+                  Your data, your control. Export your diary entries whenever you want.
+                </p>
               </div>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function Home() {
               <p className="text-charcoal/70 dark:text-white/70 mb-6 sm:mb-8 text-base sm:text-lg font-body italic">
                 Join others who&apos;ve made journaling a daily habit.
               </p>
-              <Link 
+              <Link
                 href="/signup"
                 className="btn-vintage inline-block text-base sm:text-lg"
               >
@@ -212,7 +212,7 @@ export default function Home() {
               <span className="text-xs">✦</span>
             </div>
             <p className="text-xs sm:text-sm text-charcoal/50 dark:text-white/50 font-ui">
-              © 2025 Noted. Your thoughts, forever private.
+              © 2026 Noted. Your thoughts, forever private.
             </p>
           </div>
         </div>

@@ -3,14 +3,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { SMTPClient } from 'https://deno.land/x/denomailer@1.6.0/mod.ts'
 import { generateDailyReminderEmail, generateWeeklySummaryEmail, generateStreakMilestoneEmail } from './templates.ts'
 
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') 
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 const SMTP_HOST = Deno.env.get('SMTP_HOST') ?? 'smtp-relay.brevo.com'
 const SMTP_PORT = parseInt(Deno.env.get('SMTP_PORT') ?? '587', 10)
 const SMTP_USER = Deno.env.get('SMTP_USER') ?? ''
 const SMTP_PASSWORD = Deno.env.get('SMTP_PASSWORD') ?? ''
 const SMTP_FROM = Deno.env.get('SMTP_FROM') ?? ''
-const APP_URL = Deno.env.get('APP_URL') 
+const APP_URL = Deno.env.get('APP_URL')
 
 // Log environment check on startup
 console.log('🔍 Environment check:', {
@@ -34,7 +34,7 @@ interface EmailJob {
 
 serve(async (req) => {
   console.log('📧 Email reminders function called')
-  
+
   // Validate authorization
   const authHeader = req.headers.get('authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -44,7 +44,7 @@ serve(async (req) => {
       { status: 401, headers: { 'Content-Type': 'application/json' } }
     )
   }
-  
+
   try {
     // Validate environment variables first
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -108,7 +108,7 @@ serve(async (req) => {
       connection: {
         hostname: SMTP_HOST,
         port: SMTP_PORT,
-        tls: false,
+        tls: true,
         auth: {
           username: SMTP_USER,
           password: SMTP_PASSWORD,
@@ -187,14 +187,14 @@ serve(async (req) => {
           // Generate beautiful HTML email content
           let emailHtml = ''
           let emailSubject = ''
-          
+
           const templateProps = {
             userName: userSettings?.username || profile?.name || profile?.email?.split('@')[0],
             currentStreak: streak?.current_streak || 0,
             totalEntries: totalEntriesCount || 0,
             appUrl: APP_URL,
           }
-          
+
           if (emailJob.email_type === 'daily_reminder') {
             emailHtml = generateDailyReminderEmail(templateProps)
             emailSubject = '📝 Daily Journaling Reminder'
@@ -213,7 +213,7 @@ serve(async (req) => {
             subject: emailSubject,
             html: emailHtml,
           })
-          
+
           // Mark as sent
           await supabase
             .from('email_queue')
@@ -225,9 +225,9 @@ serve(async (req) => {
           // Mark as failed
           await supabase
             .from('email_queue')
-            .update({ 
-              status: 'failed', 
-              error_message: error.message 
+            .update({
+              status: 'failed',
+              error_message: error.message
             })
             .eq('id', emailJob.id)
 
@@ -255,9 +255,9 @@ serve(async (req) => {
     console.error('Error message:', error?.message)
     console.error('Error stack:', error?.stack)
     console.error('Full error object:', JSON.stringify(error, null, 2))
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message || 'Unknown error',
         type: error?.constructor?.name,
         details: error?.toString()
