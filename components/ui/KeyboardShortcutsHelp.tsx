@@ -29,7 +29,7 @@ export default function KeyboardShortcutsHelp() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="hidden sm:block fixed bottom-14 right-6 p-3 bg-gold dark:bg-teal text-white rounded-full shadow-lg hover:opacity-90 transition-opacity z-40"
+        className="hidden md:block [@media(pointer:coarse)]:!hidden fixed bottom-14 right-6 p-3 bg-gold dark:bg-teal text-white rounded-full shadow-lg hover:opacity-90 transition-opacity z-40"
         aria-label="Keyboard Shortcuts"
         title="Press Ctrl+/ for keyboard shortcuts"
       >
