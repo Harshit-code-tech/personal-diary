@@ -76,7 +76,7 @@ export default function Home() {
               className="sm:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-40 top-[56px]"
               onClick={() => setMenuOpen(false)}
             />
-            <div className="sm:hidden bg-paper dark:bg-midnight border-b border-charcoal/10 dark:border-white/10 py-4 px-4 space-y-3">
+            <div className="sm:hidden relative z-50 bg-paper dark:bg-midnight border-b border-charcoal/10 dark:border-white/10 py-4 px-4 space-y-3">
               <div className="flex justify-center">
                 <ThemeSwitcher />
               </div>

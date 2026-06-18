@@ -537,8 +537,6 @@ body.dark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #A0522D 0%, #722F37 60%, #5C1F2A 100%);
   box-shadow:

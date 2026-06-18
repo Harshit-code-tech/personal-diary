@@ -37,9 +37,17 @@ export default function AppPage() {
   const [fetchingEntries, setFetchingEntries] = useState(true)
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null)
   const [folderName, setFolderName] = useState<string>('All Entries')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+
+  // Open sidebar on large screens by default
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setSidebarOpen(true)
+    }
+  }, [])
+
   const [totalCount, setTotalCount] = useState(0)
   const ITEMS_PER_PAGE = 20
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
@@ -296,12 +304,12 @@ export default function AppPage() {
         {/* Sidebar Toggle Button for Mobile - Floating */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 btn-vintage rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110"
+          className="lg:hidden fixed bottom-6 right-6 z-40 p-3.5 bg-white dark:bg-midnight border border-charcoal/10 dark:border-white/10 text-charcoal dark:text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
           aria-label={sidebarOpen ? 'Close folders' : 'Open folders'}
         >
           {sidebarOpen ? 
-            <X className="w-6 h-6" /> : 
-            <Menu className="w-6 h-6" />
+            <X className="w-5 h-5" /> : 
+            <Menu className="w-5 h-5" />
           }
         </button>
 
