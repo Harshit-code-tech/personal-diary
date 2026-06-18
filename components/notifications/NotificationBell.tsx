@@ -177,10 +177,10 @@ export default function NotificationBell() {
             onClick={() => setShowPanel(false)}
           />
 
-          {/* Panel — full width on mobile, capped on desktop */}
-          <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[60px] sm:top-full sm:mt-2 w-auto sm:w-96 max-h-[70vh] sm:max-h-[600px] vintage-card rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 z-50 overflow-hidden">
+          {/* Panel — sized correctly for mobile and desktop */}
+          <div className="absolute right-[-10px] sm:right-0 top-[calc(100%+10px)] w-[320px] max-w-[calc(100vw-2rem)] sm:w-96 max-h-[70vh] sm:max-h-[600px] vintage-card rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 z-50 overflow-hidden transform origin-top-right">
             {/* Header */}
-            <div className="p-4 border-b border-charcoal/10 dark:border-white/10 flex items-center justify-between">
+            <div className="p-4 border-b border-charcoal/10 dark:border-white/10 flex items-center justify-between bg-charcoal/5 dark:bg-white/5">
               <h3 className="font-bold text-lg text-charcoal dark:text-white">
                 Notifications
               </h3>

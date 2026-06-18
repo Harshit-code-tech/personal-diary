@@ -35,8 +35,8 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4 book-page">
-        <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
+      <main className="min-h-screen flex flex-col p-4 sm:p-8 book-page relative">
+        <div className="w-full flex items-center justify-between mb-8 z-10 pt-2 sm:pt-0">
           <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
             <Book className="w-6 h-6" />
             <span>Noted.</span>
@@ -44,7 +44,8 @@ export default function ForgotPasswordPage() {
           <ThemeSwitcher />
         </div>
 
-        <div className="w-full max-w-md">
+        <div className="flex-1 flex items-center justify-center w-full">
+          <div className="w-full max-w-md">
           <div className="vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gold/10 dark:bg-teal/10 rounded-full mb-4">
               <Mail className="w-8 h-8 text-gold dark:text-teal" />
@@ -67,6 +68,7 @@ export default function ForgotPasswordPage() {
               <ArrowLeft className="w-4 h-4" />
               Back to login
             </Link>
+            </Link>
           </div>
         </div>
       </main>
@@ -74,8 +76,8 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 book-page">
-      <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
+    <main className="min-h-screen flex flex-col p-4 sm:p-8 book-page relative">
+      <div className="w-full flex items-center justify-between mb-8 z-10 pt-2 sm:pt-0">
         <Link href="/" className="flex items-center gap-2 font-serif text-2xl font-bold text-charcoal dark:text-teal">
           <Book className="w-6 h-6" />
           <span>Noted</span>
@@ -83,7 +85,8 @@ export default function ForgotPasswordPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
+      <div className="flex-1 flex items-center justify-center w-full">
+        <div className="w-full max-w-md vintage-card rounded-2xl shadow-xl border border-charcoal/10 dark:border-white/10 p-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl font-bold text-charcoal dark:text-white mb-2">
             Reset Password
@@ -125,6 +128,7 @@ export default function ForgotPasswordPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to login
           </Link>
+        </div>
         </div>
       </div>
     </main>

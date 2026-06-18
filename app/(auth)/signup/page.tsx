@@ -136,9 +136,9 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 book-page">
+    <div className="min-h-screen flex flex-col p-4 sm:p-8 book-page relative">
       {/* Logo/Brand with Theme Switcher */}
-      <div className="absolute top-8 left-8 right-8 flex items-center justify-between">
+      <div className="w-full flex items-center justify-between mb-4 sm:mb-8 pt-2 sm:pt-0">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full overflow-hidden shadow-md flex-shrink-0" style={{backgroundColor: '#6B2D3E'}}>
             <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
@@ -148,7 +148,8 @@ export default function SignupPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md mt-8">
+      <div className="flex-1 flex items-center justify-center w-full">
+        <div className="w-full max-w-md">
 
         {/* Card */}
         <div className="vintage-card rounded-2xl p-8">
@@ -380,6 +381,7 @@ export default function SignupPage() {
           <p className="text-xs text-charcoal/50 dark:text-white/50">
             By signing up, you&apos;ll receive a confirmation email to verify your account
           </p>
+        </div>
         </div>
       </div>
     </div>

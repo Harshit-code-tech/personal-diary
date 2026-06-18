@@ -36,8 +36,8 @@ export default function Home() {
       <nav className="sticky top-0 z-50 vintage-header">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="wax-seal w-9 h-9 sm:w-10 sm:h-10 text-sm font-bold">
-              <PenTool className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="wax-seal w-7 h-7 sm:w-8 sm:h-8 text-xs font-bold">
+              <PenTool className="w-3 h-3 sm:w-4 sm:h-4" />
             </div>
             <h1 className="font-script text-2xl sm:text-3xl font-bold text-charcoal dark:text-teal">
               Noted.
@@ -71,12 +71,12 @@ export default function Home() {
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <>
+          <div className="sm:hidden absolute top-full left-0 right-0">
             <div
-              className="sm:hidden fixed inset-0 bg-black/20 dark:bg-black/40 z-40 top-[56px]"
+              className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 top-[56px]"
               onClick={() => setMenuOpen(false)}
             />
-            <div className="sm:hidden relative z-50 bg-paper dark:bg-midnight border-b border-charcoal/10 dark:border-white/10 py-4 px-4 space-y-3">
+            <div className="relative z-50 bg-paper dark:bg-midnight border-b border-charcoal/10 dark:border-white/10 py-4 px-4 space-y-3 shadow-xl">
               <div className="flex justify-center">
                 <ThemeSwitcher />
               </div>
@@ -88,7 +88,7 @@ export default function Home() {
                 Sign In
               </Link>
             </div>
-          </>
+          </div>
         )}
       </nav>
 

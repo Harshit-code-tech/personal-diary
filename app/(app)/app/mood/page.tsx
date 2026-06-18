@@ -161,20 +161,20 @@ export default function MoodAnalysisPage() {
     <div className="min-h-screen book-page">
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10 shadow-sm">
-        <div className="px-4 sm:px-6 py-4 flex items-center justify-between max-w-7xl mx-auto relative">
-          <div className="flex-1 flex justify-start">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2 max-w-7xl mx-auto w-full relative">
+          <div className="flex items-center gap-2 min-w-0">
             <Link
               href="/app"
               className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <Smile className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
+              <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Mood Analysis</h1>
+            </div>
           </div>
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <Smile className="w-5 h-5 sm:w-6 sm:h-6 text-gold dark:text-teal shrink-0" />
-            <h1 className="text-xl sm:text-2xl font-bold text-charcoal dark:text-white truncate">Mood Analysis</h1>
-          </div>
-          <div className="flex-1 flex justify-end items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             <ThemeSwitcher />
           </div>
         </div>

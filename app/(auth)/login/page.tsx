@@ -100,9 +100,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 pt-20 sm:pt-0 book-page">
+    <main className="min-h-screen flex flex-col px-4 py-8 book-page relative">
       {/* Logo/Brand with Theme Switcher */}
-      <div className="absolute top-4 sm:top-8 left-4 sm:left-8 right-4 sm:right-8 flex items-center justify-between z-10">
+      <div className="w-full flex items-center justify-between mb-8 z-10">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 rounded-full overflow-hidden shadow-md flex-shrink-0" style={{backgroundColor: '#6B2D3E'}}>
             <img src="/textures/wax-seal.png" alt="" className="w-full h-full object-cover scale-[1.5]" />
@@ -112,7 +112,8 @@ export default function LoginPage() {
         <ThemeSwitcher />
       </div>
 
-      <div className="w-full max-w-md vintage-card rounded-2xl p-8">
+      <div className="flex-1 flex items-center justify-center w-full">
+        <div className="w-full max-w-md vintage-card rounded-2xl p-8">
         {/* Welcome Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -250,6 +251,7 @@ export default function LoginPage() {
           <Link href="/" className="text-sm text-charcoal/50 dark:text-white/50 hover:text-charcoal dark:hover:text-white transition-colors">
             ← Back to home
           </Link>
+          </div>
         </div>
       </div>
     </main>
