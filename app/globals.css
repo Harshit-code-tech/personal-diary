@@ -479,12 +479,16 @@ body.dark {
 
 .vintage-header {
   background-color: rgba(244, 232, 209, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(139, 94, 60, 0.1);
   box-shadow: 0 1px 3px rgba(100, 60, 30, 0.04);
 }
 
 .dark .vintage-header {
   background-color: rgba(26, 17, 10, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom-color: rgba(212, 164, 79, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
@@ -614,8 +618,15 @@ h4 {
 img,
 picture,
 video,
-canvas,
-svg {
+canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* SVG icons (lucide-react etc.) must NOT be forced to display:block / height:auto
+   — they manage their own sizing via className. Only apply to content images. */
+svg:not([class]) {
   display: block;
   max-width: 100%;
   height: auto;

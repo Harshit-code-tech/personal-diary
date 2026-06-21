@@ -6,8 +6,9 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { stripHtmlTags } from '@/lib/sanitize'
 import { useSavedSearches } from '@/lib/hooks/useSavedSearches'
 import Link from 'next/link'
-import { Search, Filter, Calendar, User, BookMarked, X, ArrowLeft, Smile, Save, Star, Trash2, FolderOpen } from 'lucide-react'
+import { Search, Filter, Calendar, User, BookMarked, ArrowLeft, Smile, Save, Star, Trash2, FolderOpen } from 'lucide-react'
 import { ListSkeleton } from '@/components/ui/LoadingSkeleton'
+import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import { useSearchParams } from 'next/navigation'
 import confetti from 'canvas-confetti'
 
@@ -49,7 +50,7 @@ export default function SearchPage() {
   const [saveSearchName, setSaveSearchName] = useState('')
   const [currentFolderName, setCurrentFolderName] = useState<string | null>(null)
   const { user } = useAuth()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const searchInputRef = useRef<HTMLInputElement>(null)
   const searchParams = useSearchParams()
   const { savedSearches, saveSearch, deleteSearch } = useSavedSearches()
@@ -89,7 +90,8 @@ export default function SearchPage() {
     setPeople(peopleRes.data || [])
     setStories(storiesRes.data || [])
     setFolders(foldersRes.data || [])
-  }, [supabase, user?.id])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   useEffect(() => {
     if (user) {
@@ -182,17 +184,6 @@ export default function SearchPage() {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 
-  const highlightText = (text: string, query: string) => {
-    if (!query) return text
-    // Split query into words and escape special regex characters
-    const words = query.split(/\s+/).filter(w => w.length > 0)
-      .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    if (words.length === 0) return text
-    // Create regex with word boundaries for better matching
-    const regex = new RegExp(`(${words.join('|')})`, 'gi')
-    return text.replace(regex, '<mark class="bg-gold/30 dark:bg-teal/30 px-0.5 rounded">$1</mark>')
-  }
-
   const clearFilters = () => {
     setFilters({
       dateFrom: '',
@@ -233,21 +224,28 @@ export default function SearchPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 vintage-header border-b border-charcoal/10 dark:border-white/10">
         <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4 mb-4">
-            <Link
-              href="/app"
-              className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <h1 className="text-2xl font-bold text-charcoal dark:text-white">
-              Search Your Diary
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/app"
+                className="p-2 rounded-lg hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+              <h1 className="text-2xl font-bold text-charcoal dark:text-white">
+                Search Your Diary
+              </h1>
+            </div>
+            <ThemeSwitcher />
           </div>
+        </div>
+      </header>
 
+      {/* Search Controls */}
+      <div className="max-w-6xl mx-auto px-6 pt-6 pb-2">
           {/* Search Bar */}
-          <div className="flex gap-3">
-            <div className="flex-1 relative">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex-1 relative min-w-0">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-charcoal/40 dark:text-white/40" aria-hidden="true" />
               <input
                 ref={searchInputRef}
@@ -257,16 +255,17 @@ export default function SearchPage() {
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                placeholder="Search titles, content, moods... (Ctrl+K)"
-                aria-label="Search your diary entries - Press Ctrl+K from anywhere"
+                placeholder="Search memories, moods, or people..."
+                aria-label="Search your journal entries by keyword, mood, or person"
                 className="w-full pl-12 pr-4 py-3 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl text-charcoal dark:text-white placeholder:text-charcoal/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-gold dark:focus:ring-teal"
               />
               
               {/* Search Suggestions Dropdown */}
               {showSuggestions && (suggestions.length > 0 || searchHistory.length > 0) && (
-                <div className="absolute top-full left-0 right-0 mt-2 vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl shadow-xl z-50 overflow-hidden">
-                  <div className="p-2">
-                    <div className="text-xs font-bold text-charcoal/60 dark:text-white/60 px-3 py-2">
+                <div className="absolute top-full left-0 right-0 mt-2 z-50">
+                  <div className="vintage-card border border-charcoal/20 dark:border-white/20 rounded-xl shadow-xl overflow-hidden">
+                    <div className="p-2">
+                      <div className="text-xs font-bold text-charcoal/60 dark:text-white/60 px-3 py-2">
                       {query ? 'Suggestions' : 'Recent Searches'}
                     </div>
                     {(suggestions.length > 0 ? suggestions : searchHistory.slice(0, 5)).map((suggestion, index) => (
@@ -283,24 +282,28 @@ export default function SearchPage() {
                       </button>
                     ))}
                   </div>
+                  </div>
                 </div>
               )}
             </div>
-            <button
-              onClick={() => handleSearch()}
-              disabled={loading}
-              aria-label="Execute search"
-              className="px-6 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {loading ? 'Searching...' : 'Search'}
-            </button>
+            
+            {/* Buttons Group */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleSearch()}
+                disabled={loading}
+                aria-label="Execute search"
+                className="flex-1 sm:flex-none px-6 py-3 bg-gold dark:bg-teal text-white rounded-xl font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex-shrink-0"
+              >
+                {loading ? 'Searching...' : 'Search'}
+              </button>
             
             {/* Save Search Button */}
             {query && (
               <button
                 onClick={() => setShowSavedSearches(!showSavedSearches)}
                 aria-label="Save this search"
-                className="p-3 rounded-xl border-2 border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors"
+                className="p-3 rounded-xl border-2 border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors flex-shrink-0"
                 title="Save this search"
               >
                 <Save className="w-5 h-5" />
@@ -311,7 +314,7 @@ export default function SearchPage() {
             <button
               onClick={() => setShowSavedSearches(!showSavedSearches)}
               aria-label="View saved searches"
-              className={`p-3 rounded-xl border-2 transition-colors ${
+              className={`p-3 rounded-xl border-2 transition-colors flex-shrink-0 ${
                 savedSearches.length > 0
                   ? 'border-gold dark:border-teal text-gold dark:text-teal'
                   : 'border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white'
@@ -326,7 +329,7 @@ export default function SearchPage() {
               aria-label={showFilters ? 'Hide search filters' : 'Show search filters'}
               aria-expanded={showFilters}
               aria-controls="search-filters"
-              className={`p-3 rounded-xl border-2 transition-colors ${
+              className={`p-3 rounded-xl border-2 transition-colors flex-shrink-0 ${
                 showFilters || hasActiveFilters
                   ? 'bg-gold/10 dark:bg-teal/10 border-gold dark:border-teal text-gold dark:text-teal'
                   : 'border-charcoal/20 dark:border-white/20 text-charcoal dark:text-white hover:bg-charcoal/5 dark:hover:bg-white/5'
@@ -334,6 +337,7 @@ export default function SearchPage() {
             >
               <Filter className="w-5 h-5" aria-hidden="true" />
             </button>
+          </div>
           </div>
           
           {/* Save Search Modal */}
@@ -544,8 +548,7 @@ export default function SearchPage() {
               </div>
             </div>
           )}
-        </div>
-      </header>
+      </div>
 
       {/* Results */}
       <main className="max-w-6xl mx-auto px-6 py-8">
