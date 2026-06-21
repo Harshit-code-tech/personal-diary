@@ -181,7 +181,7 @@ export default function Home() {
           <div className="vintage-flourish mt-16 sm:mt-20 mb-16 sm:mb-20">✦ ❋ ✦</div>
 
           {/* Call to Action Section — Vintage framed card */}
-          <div className="vintage-card vintage-frame rounded-xl sm:rounded-2xl p-8 sm:p-10 lg:p-12 max-w-2xl mx-auto candlelight-glow">
+          <div className="vintage-frame rounded-xl sm:rounded-2xl p-8 sm:p-10 lg:p-12 max-w-2xl mx-auto candlelight-glow">
             <div className="relative z-10">
               <div className="flex justify-center mb-6">
                 <div className="wax-seal w-14 h-14">
