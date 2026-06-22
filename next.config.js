@@ -85,12 +85,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   reactStrictMode: true,
-  // Reduce compilation time
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{member}}',
-    },
-  },
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
@@ -99,7 +93,11 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-hot-toast'],
   },
-  // Exclude server-only packages from client bundle
+  // Next.js 16 uses Turbopack by default; empty config acknowledges this
+  turbopack: {},
+  // Exclude server-only packages from client bundle (works with both bundlers)
+  serverExternalPackages: ['onnxruntime-node', '@xenova/transformers'],
+  // Webpack fallback config (used when explicitly running with --webpack)
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.alias = {
