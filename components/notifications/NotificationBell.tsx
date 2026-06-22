@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { Bell, X, Check } from 'lucide-react'
+import { Bell, X, Check, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 type Notification = {
@@ -18,7 +18,7 @@ type Notification = {
 
 export default function NotificationBell() {
   const { user } = useAuth()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [showPanel, setShowPanel] = useState(false)
@@ -43,12 +43,13 @@ export default function NotificationBell() {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   useEffect(() => {
     if (user) {
       fetchNotifications()
-      
+
       // Subscribe to new notifications
       const channel = supabase
         .channel('notifications')
@@ -71,7 +72,8 @@ export default function NotificationBell() {
         supabase.removeChannel(channel)
       }
     }
-  }, [user, fetchNotifications, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, fetchNotifications])
 
   const markAsRead = async (id: string) => {
     try {
@@ -127,6 +129,22 @@ export default function NotificationBell() {
     }
   }
 
+  const clearAllNotifications = async () => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', user?.id)
+
+      if (error) throw error
+
+      setNotifications([])
+      setUnreadCount(0)
+    } catch (err) {
+      console.error('Error clearing all notifications:', err)
+    }
+  }
+
   const getNotificationLink = (notification: Notification) => {
     if (notification.type === 'reminder') {
       return '/app/reminders'
@@ -171,117 +189,131 @@ export default function NotificationBell() {
       {/* Notifications Panel */}
       {showPanel && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — above everything including mobile nav */}
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[55] bg-black/10"
             onClick={() => setShowPanel(false)}
           />
+          {/* Panel Wrapper — absolute/fixed positioning separated from vintage-card to prevent relative override */}
+          <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[60px] sm:top-full sm:mt-2 w-auto sm:w-96 z-[60]">
+            {/* Panel Background */}
+            <div className="vintage-card w-full max-h-[calc(100vh-80px)] sm:max-h-[600px] rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 overflow-hidden flex flex-col">
 
-          {/* Panel — sized correctly for mobile and desktop */}
-          <div className="absolute right-[-10px] sm:right-0 top-[calc(100%+10px)] w-[320px] max-w-[calc(100vw-2rem)] sm:w-96 max-h-[70vh] sm:max-h-[600px] vintage-card rounded-xl shadow-2xl border border-charcoal/10 dark:border-white/10 z-50 overflow-hidden transform origin-top-right">
-            {/* Header */}
-            <div className="p-4 border-b border-charcoal/10 dark:border-white/10 flex items-center justify-between bg-charcoal/5 dark:bg-white/5">
-              <h3 className="font-bold text-lg text-charcoal dark:text-white">
-                Notifications
-              </h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-sm text-gold dark:text-teal hover:underline flex items-center gap-1"
-                >
-                  <Check className="w-4 h-4" />
-                  Mark all read
-                </button>
-              )}
-            </div>
+              {/* Header */}
+              <div className="p-4 border-b border-charcoal/10 dark:border-white/10 flex items-center justify-between bg-charcoal/5 dark:bg-white/5">
+                <h3 className="font-bold text-lg text-charcoal dark:text-white">
+                  Notifications
+                </h3>
+                <div className="flex items-center gap-3">
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={markAllAsRead}
+                      className="text-sm text-gold dark:text-teal hover:underline flex items-center gap-1"
+                    >
+                      <Check className="w-4 h-4" />
+                      Mark all read
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={clearAllNotifications}
+                      className="text-sm text-red-500 dark:text-red-400 hover:underline flex items-center gap-1"
+                      title="Clear all notifications"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              </div>
 
-            {/* Notifications List */}
-            <div className="overflow-y-auto max-h-[500px]">
-              {loading ? (
-                <div className="p-8 text-center text-charcoal/60 dark:text-white/60">
-                  Loading...
-                </div>
-              ) : notifications.length === 0 ? (
-                <div className="p-8 text-center">
-                  <Bell className="w-12 h-12 mx-auto text-charcoal/20 dark:text-white/20 mb-3" />
-                  <p className="text-charcoal/60 dark:text-white/60">
-                    No notifications yet
-                  </p>
-                </div>
-              ) : (
-                <div className="divide-y divide-charcoal/10 dark:divide-white/10">
-                  {notifications.map((notification) => {
-                    const link = getNotificationLink(notification)
-                    const NotificationContent = (
-                      <div
-                        className={`p-4 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors ${
-                          !notification.is_read ? 'bg-gold/5 dark:bg-teal/5' : ''
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <h4 className="font-medium text-charcoal dark:text-white text-sm">
-                                {notification.title}
-                              </h4>
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  deleteNotification(notification.id)
-                                }}
-                                className="flex-shrink-0 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                              >
-                                <X className="w-4 h-4 text-red-500 dark:text-red-400" />
-                              </button>
-                            </div>
-                            {notification.message && (
-                              <p className="text-sm text-charcoal/70 dark:text-white/70 mt-1">
-                                {notification.message}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-3 mt-2">
-                              <span className="text-xs text-charcoal/50 dark:text-white/50">
-                                {formatTimestamp(notification.created_at)}
-                              </span>
-                              {!notification.is_read && (
+              {/* Notifications List */}
+              <div className="overflow-y-auto max-h-[500px]">
+                {loading ? (
+                  <div className="p-8 text-center text-charcoal/60 dark:text-white/60">
+                    Loading...
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Bell className="w-12 h-12 mx-auto text-charcoal/20 dark:text-white/20 mb-3" />
+                    <p className="text-charcoal/60 dark:text-white/60">
+                      No notifications yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-charcoal/10 dark:divide-white/10">
+                    {notifications.map((notification) => {
+                      const link = getNotificationLink(notification)
+                      const NotificationContent = (
+                        <div
+                          className={`p-4 hover:bg-charcoal/5 dark:hover:bg-white/5 transition-colors ${!notification.is_read ? 'bg-gold/5 dark:bg-teal/5' : ''
+                            }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h4 className="font-medium text-charcoal dark:text-white text-sm">
+                                  {notification.title}
+                                </h4>
                                 <button
                                   onClick={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()
-                                    markAsRead(notification.id)
+                                    deleteNotification(notification.id)
                                   }}
-                                  className="text-xs text-gold dark:text-teal hover:underline"
+                                  className="flex-shrink-0 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                 >
-                                  Mark read
+                                  <X className="w-4 h-4 text-red-500 dark:text-red-400" />
                                 </button>
+                              </div>
+                              {notification.message && (
+                                <p className="text-sm text-charcoal/70 dark:text-white/70 mt-1">
+                                  {notification.message}
+                                </p>
                               )}
+                              <div className="flex items-center gap-3 mt-2">
+                                <span className="text-xs text-charcoal/50 dark:text-white/50">
+                                  {formatTimestamp(notification.created_at)}
+                                </span>
+                                {!notification.is_read && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      markAsRead(notification.id)
+                                    }}
+                                    className="text-xs text-gold dark:text-teal hover:underline"
+                                  >
+                                    Mark read
+                                  </button>
+                                )}
+                              </div>
                             </div>
+                            {!notification.is_read && (
+                              <div className="w-2 h-2 bg-gold dark:bg-teal rounded-full flex-shrink-0 mt-1" />
+                            )}
                           </div>
-                          {!notification.is_read && (
-                            <div className="w-2 h-2 bg-gold dark:bg-teal rounded-full flex-shrink-0 mt-1" />
-                          )}
                         </div>
-                      </div>
-                    )
+                      )
 
-                    return link ? (
-                      <Link
-                        key={notification.id}
-                        href={link}
-                        onClick={() => {
-                          markAsRead(notification.id)
-                          setShowPanel(false)
-                        }}
-                      >
-                        {NotificationContent}
-                      </Link>
-                    ) : (
-                      <div key={notification.id}>{NotificationContent}</div>
-                    )
-                  })}
-                </div>
-              )}
+                      return link ? (
+                        <Link
+                          key={notification.id}
+                          href={link}
+                          onClick={() => {
+                            markAsRead(notification.id)
+                            setShowPanel(false)
+                          }}
+                        >
+                          {NotificationContent}
+                        </Link>
+                      ) : (
+                        <div key={notification.id}>{NotificationContent}</div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>
