@@ -303,13 +303,13 @@ export default function StoriesPage() {
               >
                 {/* Cover Image or Color */}
                 {story.cover_image_url ? (
-                  <div className="h-48 overflow-hidden">
+                  <div className="h-48 overflow-hidden relative">
                     <Image
                       src={story.cover_image_url}
                       alt={story.title}
-                      width={400}
-                      height={192}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 ) : (

@@ -288,9 +288,11 @@ export default function StoryDetailPage({ params }: { params: Promise<{ id: stri
               <Image
                 src={story.cover_image_url}
                 alt={story.title}
-                width={1200}
-                height={320}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-cover"
+                loading="eager"
+                priority
               />
             </div>
           ) : (

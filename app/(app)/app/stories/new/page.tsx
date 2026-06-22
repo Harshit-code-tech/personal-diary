@@ -188,9 +188,9 @@ export default function NewStoryPage() {
                 <Image
                   src={coverPreview}
                   alt="Cover preview"
-                  width={800}
-                  height={256}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 896px) 100vw, 896px"
+                  className="object-cover"
                 />
                 <button
                   onClick={() => {
