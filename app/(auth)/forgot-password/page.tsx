@@ -27,7 +27,16 @@ export default function ForgotPasswordPage() {
       setSent(true)
       toast.success('Password reset link sent to your email!')
     } catch (error: any) {
-      toast.error('Failed to send reset link')
+      console.error('Password reset error:', { status: error?.status, message: error?.message, error })
+      const msg = error?.message || ''
+      const status = error?.status
+      if (status === 429 || String(msg).includes('rate limit')) {
+        toast.error('Too many attempts. Please wait a few minutes before trying again.')
+      } else if (status === 500) {
+        toast.error('Email service error. Please try again later or contact support.')
+      } else {
+        toast.error(msg || 'Failed to send reset link. Please try again.')
+      }
     } finally {
       setLoading(false)
     }

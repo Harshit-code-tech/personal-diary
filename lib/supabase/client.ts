@@ -1,11 +1,14 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 
-let clientInstance: ReturnType<typeof createClientComponentClient> | null = null
+let clientInstance: ReturnType<typeof createBrowserClient> | null = null
 let cleanupScheduled = false
 
 export const createClient = () => {
   if (!clientInstance) {
-    clientInstance = createClientComponentClient()
+    clientInstance = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
     // One-time check: if the stored token is stale, sign out immediately
     // to stop the SDK from retrying /token endlessly

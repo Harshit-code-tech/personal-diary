@@ -6,13 +6,15 @@ const cspDirectives = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' blob: data: https:",
   "font-src 'self' https://fonts.gstatic.com data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com",
+  // Pin to specific Supabase project — no wildcard
+  "connect-src 'self' https://blmmcdqlipcrpsfodrww.supabase.co wss://blmmcdqlipcrpsfodrww.supabase.co https://va.vercel-scripts.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
   ...(isProd ? ['upgrade-insecure-requests'] : []),
 ].join('; ')
+
 
 const securityHeaders = [
   {
@@ -34,6 +36,18 @@ const securityHeaders = [
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=()'
+  },
+  {
+    key: 'Cross-Origin-Opener-Policy',
+    value: 'same-origin'
+  },
+  {
+    key: 'Cross-Origin-Resource-Policy',
+    value: 'same-origin'
+  },
+  {
+    key: 'X-Permitted-Cross-Domain-Policies',
+    value: 'none'
   }
 ]
 

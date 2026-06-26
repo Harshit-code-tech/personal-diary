@@ -1,53 +1,67 @@
 /**
  * Secure HTML sanitization utilities
+ *
+ * Strategy:
+ * - Client-side: DOMPurify (already installed, uses real browser DOM)
+ * - Server-side: Aggressive strip — removes ALL HTML and returns plain text.
+ *   This is intentionally conservative. The entry content is stored as HTML
+ *   and rendered client-side where DOMPurify sanitizes it properly.
+ *   Server-side rendering only needs plain text for previews/word count.
  */
 
-// Lazily create a DOMPurify instance only in the browser to avoid jsdom/parse5 in serverless
+// Lazily create a DOMPurify instance only in the browser
 let clientPurifier: any = null
 
 function getClientPurifier() {
   if (typeof window === 'undefined') return null
   if (clientPurifier) return clientPurifier
 
-  // dompurify exports a factory that expects a Window instance
   const createDOMPurify = require('dompurify')
   clientPurifier = (createDOMPurify.default || createDOMPurify)(window)
   return clientPurifier
 }
 
 /**
- * Safely strip all HTML tags from content
- * Returns plain text only - safe for word counting, previews, etc.
- * 
- * @param html - HTML string to sanitize
- * @returns Plain text with all HTML removed
+ * Strip ALL HTML tags from content — returns plain text only.
+ * Safe for word counting, search indexing, previews.
+ *
+ * Uses the browser DOM when available, falls back to a state-machine
+ * parser on the server. The server parser is intentionally aggressive —
+ * when in doubt, it strips rather than preserves.
  */
 export function stripHtmlTags(html: string): string {
   if (!html) return ''
 
-  // On the client side, use the DOM for reliable HTML stripping
+  // Client-side: use the real DOM for reliable stripping
   if (typeof document !== 'undefined') {
     const doc = new DOMParser().parseFromString(html, 'text/html')
-    // Remove script and style elements entirely
-    doc.querySelectorAll('script, style').forEach(el => el.remove())
+    doc.querySelectorAll('script, style, svg, math, template').forEach((el) => el.remove())
     const text = doc.body.textContent || ''
     return text.replace(/\s+/g, ' ').trim()
   }
 
-  // Server-side fallback: state-machine parser (no regex for HTML = no CodeQL flags)
-  // Walks character-by-character, tracking tag/comment/script/style context
+  // Server-side: state-machine parser. Strips ALL tags (no allowlist).
+  // This is safe because server-side only needs plain text.
   let result = ''
   let inTag = false
   let inComment = false
   let inScript = false
   let inStyle = false
+  let tagBuffer = '' // Buffer to detect tag names
   const len = html.length
   let i = 0
 
   while (i < len) {
     // Detect HTML comment start: <!--
-    if (!inTag && !inComment && i + 3 < len &&
-        html[i] === '<' && html[i + 1] === '!' && html[i + 2] === '-' && html[i + 3] === '-') {
+    if (
+      !inTag &&
+      !inComment &&
+      i + 3 < len &&
+      html[i] === '<' &&
+      html[i + 1] === '!' &&
+      html[i + 2] === '-' &&
+      html[i + 3] === '-'
+    ) {
       inComment = true
       i += 4
       continue
@@ -66,7 +80,6 @@ export function stripHtmlTags(html: string): string {
 
     // Detect tag open
     if (html[i] === '<' && !inTag) {
-      // Check for script/style open/close by reading until > or space
       const rest = html.slice(i).toLowerCase()
       if (rest.startsWith('<script') && (rest.length < 8 || /[\s>\/]/.test(rest[7]))) {
         inScript = true
@@ -78,19 +91,26 @@ export function stripHtmlTags(html: string): string {
         inStyle = false
       }
       inTag = true
+      tagBuffer = ''
       i++
       continue
     }
 
-    // Detect tag close
-    if (html[i] === '>' && inTag) {
-      inTag = false
+    // Inside a tag — buffer the tag name for detection
+    if (inTag) {
+      if (html[i] === '>') {
+        inTag = false
+        tagBuffer = ''
+        i++
+        continue
+      }
+      tagBuffer += html[i]
       i++
       continue
     }
 
     // Only collect text outside of tags, scripts, and styles
-    if (!inTag && !inScript && !inStyle) {
+    if (!inScript && !inStyle) {
       result += html[i]
     }
     i++
@@ -105,7 +125,7 @@ export function stripHtmlTags(html: string): string {
     '&quot;': '"',
     '&#039;': "'",
     '&#x27;': "'",
-    '&apos;': "'"
+    '&apos;': "'",
   }
 
   let text = result
@@ -113,21 +133,31 @@ export function stripHtmlTags(html: string): string {
     text = text.split(entity).join(char)
   }
 
-  // Normalize whitespace
+  // Decode numeric HTML entities (&#NNN; and &#xHHH;)
+  text = text.replace(/&#(\d+);/g, (_, code) => {
+    const num = parseInt(code, 10)
+    return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : ''
+  })
+  text = text.replace(/&#x([0-9a-fA-F]+);/g, (_, code) => {
+    const num = parseInt(code, 16)
+    return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : ''
+  })
+
   return text.replace(/\s+/g, ' ').trim()
 }
 
 /**
- * Sanitize HTML for safe display
- * Allows safe HTML tags, removes dangerous ones
- * 
- * @param html - HTML string to sanitize
- * @returns Sanitized HTML safe for rendering
+ * Sanitize HTML for safe display in the browser.
+ * Uses DOMPurify with an explicit allowlist of safe tags/attributes.
+ *
+ * On the server, falls back to stripping ALL HTML (plain text).
+ * This is safe because dangerouslySetInnerHTML only runs client-side
+ * in React client components, where DOMPurify will sanitize properly.
  */
 export function sanitizeHtml(html: string): string {
   if (!html) return ''
 
-  // Server-side render: strip tags to avoid pulling in jsdom/parse5
+  // Server-side: return plain text (no HTML rendering on server)
   if (typeof window === 'undefined') {
     return stripHtmlTags(html)
   }
@@ -136,21 +166,27 @@ export function sanitizeHtml(html: string): string {
   if (!purifier) return stripHtmlTags(html)
 
   return purifier.sanitize(html, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'a', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img'],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel'],
+    ALLOWED_TAGS: [
+      'p', 'br', 'strong', 'em', 'u', 's', 'a',
+      'ul', 'ol', 'li', 'blockquote', 'code', 'pre',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'table', 'thead', 'tbody', 'tr', 'th', 'td',
+      'img', 'span', 'div', 'sub', 'sup', 'hr',
+    ],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel', 'class'],
     ALLOW_DATA_ATTR: false,
+    // Extra hardening
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'textarea', 'select', 'button'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onsubmit', 'onchange'],
   })
 }
 
 /**
  * Count words in HTML content (strips HTML first)
- * 
- * @param html - HTML string
- * @returns Number of words
  */
 export function countWords(html: string): number {
   const text = stripHtmlTags(html)
   if (!text) return 0
-  
-  return text.split(/\s+/).filter(word => word.length > 0).length
+
+  return text.split(/\s+/).filter((word) => word.length > 0).length
 }

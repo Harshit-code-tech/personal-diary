@@ -143,7 +143,9 @@ export function validateCSRFTokenClient(token: string | null): boolean {
     return false;
   }
 
-  if (token.length !== 64) {
+  // Signed CSRF token format: nonce.signature (64 hex + '.' + 64 hex = 129 chars)
+  // Also accept legacy unsigned tokens (64 hex chars) for backward compat
+  if (token.length !== 129 && token.length !== 64) {
     console.warn('CSRF token format invalid. Request may be rejected by server.');
     return false;
   }

@@ -1,18 +1,29 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-
-type CookieStore = Awaited<ReturnType<typeof cookies>>
 
 export const createClient = async () => {
   const cookieStore = await cookies()
-  const cookieStorePromise = Promise.resolve(cookieStore) as Promise<CookieStore> & CookieStore
 
-  // Provide a promise-like cookie store while keeping sync accessors available.
-  cookieStorePromise.get = cookieStore.get.bind(cookieStore)
-  cookieStorePromise.getAll = cookieStore.getAll.bind(cookieStore)
-  cookieStorePromise.has = cookieStore.has.bind(cookieStore)
-
-  return createServerComponentClient({
-    cookies: () => cookieStorePromise,
-  })
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // setAll may be called from a Server Component where
+            // cookies are read-only. This is fine — the middleware
+            // handles session refresh and cookie updates.
+          }
+        },
+      },
+    }
+  )
 }
