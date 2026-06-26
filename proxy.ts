@@ -168,7 +168,14 @@ export async function proxy(req: NextRequest) {
   
   const isProtectedRoute = pathname.startsWith('/app')
   const isAuthRoute = pathname === '/login' || pathname === '/signup'
+  const isAuthFlowRoute = pathname.startsWith('/auth/') // callback, reset-password etc.
   const hasSupabaseCookies = req.cookies.getAll().some((cookie) => cookie.name.startsWith('sb-'))
+
+  // Auth flow routes (callback, reset-password) handle their own token exchange.
+  // Do NOT run auth checks or clear cookies — they need code_verifier cookies intact.
+  if (isAuthFlowRoute) {
+    return await finalizeResponse(supabaseResponse)
+  }
 
   // No cookies + protected route → redirect to login (no API call needed)
   if (isProtectedRoute && !hasSupabaseCookies) {
@@ -186,7 +193,9 @@ export async function proxy(req: NextRequest) {
 
   const clearSupabaseCookies = (response: NextResponse) => {
     req.cookies.getAll().forEach((cookie) => {
-      if (cookie.name.startsWith('sb-')) {
+      // Preserve PKCE code_verifier cookies — they are needed for
+      // password reset and email verification token exchange
+      if (cookie.name.startsWith('sb-') && !cookie.name.includes('code-verifier')) {
         response.cookies.delete(cookie.name)
       }
     })

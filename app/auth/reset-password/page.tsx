@@ -19,13 +19,64 @@ export default function ResetPasswordPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Check if user has a valid session (from reset link)
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const handleAuth = async () => {
+      const url = new URL(window.location.href)
+      const errorParam = url.searchParams.get('error')
+      const errorDesc = url.searchParams.get('error_description')
+
+      // If Supabase redirected with an error (e.g., otp_expired)
+      if (errorParam) {
+        toast.error(errorDesc || 'Reset link is invalid or has expired')
+        router.push('/forgot-password')
+        return
+      }
+
+      // Method 1: Token hash verification (cross-device compatible)
+      // This works when the email template sends token_hash directly to our app
+      const tokenHash = url.searchParams.get('token_hash')
+      const type = url.searchParams.get('type')
+      if (tokenHash && type === 'recovery') {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
+        if (error) {
+          console.error('Token verification failed:', error.message)
+          toast.error('Reset link is invalid or has expired. Please request a new one.')
+          router.push('/forgot-password')
+        }
+        return
+      }
+
+      // Method 2: PKCE code exchange (same-device only fallback)
+      // Works when Supabase's default ConfirmationURL redirects through their server
+      const code = url.searchParams.get('code')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          console.error('Code exchange failed:', error.message)
+          toast.error('Please open the reset link on the same device where you requested it, or request a new link.')
+          router.push('/forgot-password')
+        }
+        return
+      }
+
+      // Method 3: Implicit flow fallback (hash-based tokens)
+      const hash = window.location.hash
+      if (hash && hash.includes('type=recovery')) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) return
+      }
+
+      // No token, no code, no hash — check for existing session
+      const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         toast.error('Invalid or expired reset link')
         router.push('/forgot-password')
       }
-    })
+    }
+
+    handleAuth()
   }, [router, supabase])
 
   const checkPasswordStrength = (pwd: string) => {
