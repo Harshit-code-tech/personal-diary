@@ -124,7 +124,7 @@ export async function proxy(req: NextRequest) {
       ?? req.headers.get('x-forwarded-for')?.split(',').pop()?.trim()
       ?? 'anonymous'
     const { success, limit, remaining, reset } = await apiLimiter.check(identifier)
-    
+
     if (!success) {
       return new NextResponse(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
@@ -140,7 +140,7 @@ export async function proxy(req: NextRequest) {
         }
       )
     }
-    
+
     // Add rate limit headers to response
     supabaseResponse.headers.set('X-RateLimit-Limit', limit.toString())
     supabaseResponse.headers.set('X-RateLimit-Remaining', remaining.toString())
@@ -150,27 +150,23 @@ export async function proxy(req: NextRequest) {
     // Returning early avoids refresh_token_not_found noise from server-to-server calls.
     return await finalizeResponse(supabaseResponse)
   }
-  
+
   // ── Strict rate limiting for auth routes ──────────────────────────────
-  if (pathname.startsWith('/login') || pathname.startsWith('/signup')) {
-    // Exclude Next.js prefetch requests from rate limiting
-    const isPrefetch = req.headers.get('next-router-prefetch') === '1' || req.headers.get('purpose') === 'prefetch'
-    
-    if (!isPrefetch) {
-      const identifier = req.headers.get('x-real-ip')
-        ?? req.headers.get('x-forwarded-for')?.split(',').pop()?.trim()
-        ?? 'anonymous'
-      const { success } = await authLimiter.check(identifier)
-      
-      if (!success) {
-        return new NextResponse(
-          'Too many authentication attempts. Please try again later.',
-          { status: 429 }
-        )
-      }
+  // ── Strict rate limiting for auth routes ──────────────────────────────
+  if ((pathname.startsWith('/login') || pathname.startsWith('/signup')) && req.method !== 'GET') {
+    const identifier = req.headers.get('x-real-ip')
+      ?? req.headers.get('x-forwarded-for')?.split(',').pop()?.trim()
+      ?? 'anonymous'
+    const { success } = await authLimiter.check(identifier)
+
+    if (!success) {
+      return new NextResponse(
+        'Too many authentication attempts. Please try again later.',
+        { status: 429 }
+      )
     }
   }
-  
+
   const isProtectedRoute = pathname.startsWith('/app')
   const isAuthRoute = pathname === '/login' || pathname === '/signup'
   const isAuthFlowRoute = pathname.startsWith('/auth/') // callback, reset-password etc.
@@ -258,9 +254,9 @@ export async function proxy(req: NextRequest) {
         const response = isProtectedRoute
           ? NextResponse.redirect(new URL('/login', req.url))
           : NextResponse.next({ request: req })
-        
+
         clearSupabaseCookies(response)
-        
+
         return await finalizeResponse(response)
       }
     } else {
@@ -269,7 +265,7 @@ export async function proxy(req: NextRequest) {
   } catch (error: any) {
     const msg = error?.message || ''
     const isNetwork = msg.includes('fetch failed') || msg.includes('Failed to fetch') || msg.includes('timeout') || msg.includes('ECONNREFUSED')
-    
+
     if (!isNetwork && msg !== 'Request rate limit reached') {
       console.error('Unexpected error in proxy:', error)
     }
