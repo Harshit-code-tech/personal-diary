@@ -153,16 +153,21 @@ export async function proxy(req: NextRequest) {
   
   // ── Strict rate limiting for auth routes ──────────────────────────────
   if (pathname.startsWith('/login') || pathname.startsWith('/signup')) {
-    const identifier = req.headers.get('x-real-ip')
-      ?? req.headers.get('x-forwarded-for')?.split(',').pop()?.trim()
-      ?? 'anonymous'
-    const { success } = await authLimiter.check(identifier)
+    // Exclude Next.js prefetch requests from rate limiting
+    const isPrefetch = req.headers.get('next-router-prefetch') === '1' || req.headers.get('purpose') === 'prefetch'
     
-    if (!success) {
-      return new NextResponse(
-        'Too many authentication attempts. Please try again later.',
-        { status: 429 }
-      )
+    if (!isPrefetch) {
+      const identifier = req.headers.get('x-real-ip')
+        ?? req.headers.get('x-forwarded-for')?.split(',').pop()?.trim()
+        ?? 'anonymous'
+      const { success } = await authLimiter.check(identifier)
+      
+      if (!success) {
+        return new NextResponse(
+          'Too many authentication attempts. Please try again later.',
+          { status: 429 }
+        )
+      }
     }
   }
   

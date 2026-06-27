@@ -41,6 +41,12 @@ export default function ResetPasswordPage() {
           type: 'recovery',
         })
         if (error) {
+          // React Strict Mode workaround: useEffect runs twice in dev.
+          // The first run consumes the OTP. The second run fails because it's already used.
+          // If we actually have a session, ignore the error and stay on the page.
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) return
+
           console.error('Token verification failed:', error.message)
           toast.error('Reset link is invalid or has expired. Please request a new one.')
           router.push('/forgot-password')
@@ -54,6 +60,10 @@ export default function ResetPasswordPage() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (error) {
+          // React Strict Mode workaround for PKCE
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) return
+
           console.error('Code exchange failed:', error.message)
           toast.error('Please open the reset link on the same device where you requested it, or request a new link.')
           router.push('/forgot-password')
